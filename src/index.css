@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: oklch(0.1 0.012 264);
+  --color-surface: oklch(0.15 0.014 264);
+  --color-foreground: oklch(0.96 0.01 90);
+  --color-muted: oklch(0.68 0.015 264);
+  --color-gold: oklch(0.78 0.13 82);
+  --color-gold-dim: oklch(0.55 0.1 82);
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  background: color-mix(in oklch, var(--color-surface), transparent 0%);
+  border: 1px solid oklch(1 0 0 / 8%);
+  border-radius: 1.5rem;
+}
+
+.gold-glow {
+  box-shadow: 0 0 40px -12px oklch(0.78 0.13 82 / 45%);
+}
