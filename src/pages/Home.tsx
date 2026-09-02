@@ -19,12 +19,15 @@ export function Home() {
 
   return (
     <>
-      {/* Search bar, then the three-stop story (buyers, sellers, marketplace)
-          delivered inline via scroll-snap, followed by the game itself given
-          room to breathe, then social proof, partner services, and FAQs
-          before the footer. */}
-      <SearchHero />
-      <ScrollStory />
+      {/* Search bar plus the three-stop story (buyers, sellers, marketplace)
+          together fill exactly one screen below the sticky nav — nothing of
+          "Why Rarezy" is visible until the story's finished — followed by
+          the game itself given room to breathe, then social proof, partner
+          services, and FAQs before the footer. */}
+      <div className="flex min-h-[calc(100vh-4rem)] flex-col">
+        <SearchHero />
+        <ScrollStory />
+      </div>
       <WhyRarezySection />
       <GameSection
         score={heroScore}

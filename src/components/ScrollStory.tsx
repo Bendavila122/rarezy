@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { STOPS, type Line } from "@/components/tourStops";
 
-const PANEL_HEIGHT = "h-[56vh] sm:h-[62vh]";
 const STEP_COOLDOWN_MS = 700;
 const MIN_TOUCH_DELTA = 24;
 const SCREEN_CYCLE_MS = 4200;
@@ -159,9 +158,12 @@ export function ScrollStory() {
   const CurrentScreen = current.Screens[screenIndex % current.Screens.length]!;
 
   return (
-    <section ref={sectionRef} className="relative z-10 mx-auto max-w-6xl px-6 pb-10 pt-4 sm:pb-14 sm:pt-6">
-      <div className="grid grid-cols-1 items-center gap-10 sm:grid-cols-2">
-        <div className={`order-1 relative overflow-hidden ${PANEL_HEIGHT} pl-4`}>
+    <section
+      ref={sectionRef}
+      className="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden px-6"
+    >
+      <div className="mx-auto grid h-full w-full max-w-6xl grid-cols-1 items-center gap-10 sm:grid-cols-2">
+        <div className="order-1 relative h-full overflow-hidden pl-4">
           <AnimatePresence initial={false}>
             <motion.div
               key={active}
@@ -187,7 +189,7 @@ export function ScrollStory() {
           </AnimatePresence>
         </div>
 
-        <div className="order-2 flex justify-center">
+        <div className="order-2 flex h-full items-center justify-center">
           <PhoneMockup glow={current.glow} glow2={current.glow2}>
             <AnimatePresence mode="wait">
               <motion.div
