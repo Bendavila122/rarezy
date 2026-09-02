@@ -193,6 +193,21 @@ body {
     0 10px 26px -8px oklch(0 0 0 / 55%);
 }
 
+/* A slow, organic wobble between four asymmetric border-radius states —
+   gives a floating glass shape a "liquid" feel instead of a static blob. */
+@keyframes liquid-wobble {
+  0%,
+  100% {
+    border-radius: 42% 58% 55% 45% / 45% 40% 60% 55%;
+  }
+  33% {
+    border-radius: 58% 42% 48% 52% / 55% 58% 42% 45%;
+  }
+  66% {
+    border-radius: 48% 52% 60% 40% / 40% 50% 50% 60%;
+  }
+}
+
 /* Cursor-tracking radial glow — position set via --spot-x/--spot-y from JS.
    Sits above the surface (z-index 1) but below content (z-index 2 on children). */
 .spotlight {
