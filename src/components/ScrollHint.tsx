@@ -2,14 +2,22 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 
-/** Fades out once the visitor actually starts scrolling, so it only nudges them at the very top of the page. */
+/** A running "keep scrolling" cue that stays up through every section — fades out only once the visitor reaches the true bottom of the page. */
 export function ScrollHint() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY < 80);
+    const onScroll = () => {
+      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 40;
+      setVisible(!atBottom);
+    };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   return (

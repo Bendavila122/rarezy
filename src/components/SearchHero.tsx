@@ -37,7 +37,7 @@ function useTypewriterCycle(phrases: readonly string[]) {
   return display;
 }
 
-/** Straight-to-results search — no filters or sort here, just type and go. Those live on the Browse page itself, seeded with whatever's typed here via `browseState`. The placeholder types out a loop of what's actually available, one category at a time. */
+/** Compact header search — lives in the nav banner next to the logo. Straight-to-results: no filters or sort here, just type and go. Those live on the Browse page itself, seeded with whatever's typed here via `browseState`. The placeholder types out a loop of what's actually available, one category at a time. Hidden below `sm` — the header's already tight with the full nav on small screens. */
 export function SearchHero() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
@@ -63,23 +63,24 @@ export function SearchHero() {
   };
 
   return (
-    <div className="relative z-10 flex w-full justify-center pb-12 sm:justify-start sm:pb-16">
-      <form onSubmit={submit} className="glass-dark relative w-72 sm:w-[24rem]">
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" strokeWidth={2} />
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Search watches"
-          className="w-full rounded-none border-none bg-transparent py-3.5 pl-11 pr-12 text-[0.92rem] tracking-tight text-white outline-none"
-        />
-        {query.length === 0 && (
-          <span className="pointer-events-none absolute left-11 top-1/2 flex -translate-y-1/2 items-center text-[0.92rem] tracking-tight text-white/40">
-            {typed}
-            <span className="ml-0.5 animate-pulse">▌</span>
-          </span>
-        )}
-        <SearchLogoBadge />
-      </form>
-    </div>
+    <form
+      onSubmit={submit}
+      className="glass-dark relative hidden h-9 w-56 shrink-0 items-center sm:flex lg:w-64"
+    >
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" strokeWidth={2} />
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        aria-label="Search watches"
+        className="w-full rounded-none border-none bg-transparent py-2 pl-9 pr-9 text-[0.8rem] tracking-tight text-white outline-none"
+      />
+      {query.length === 0 && (
+        <span className="pointer-events-none absolute left-9 top-1/2 flex -translate-y-1/2 items-center overflow-hidden text-[0.8rem] tracking-tight text-white/40">
+          {typed}
+          <span className="ml-0.5 animate-pulse">▌</span>
+        </span>
+      )}
+      <SearchLogoBadge />
+    </form>
   );
 }

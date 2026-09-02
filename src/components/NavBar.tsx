@@ -4,6 +4,7 @@ import { Compass, Plus, ShoppingBag, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
+import { SearchHero } from "@/components/SearchHero";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
@@ -72,10 +73,13 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-30">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <NavLink to="/" className="flex h-9 items-center">
-          <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
-          <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
-        </NavLink>
+        <div className="flex items-center gap-5">
+          <NavLink to="/" className="flex h-9 items-center">
+            <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
+            <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
+          </NavLink>
+          <SearchHero />
+        </div>
 
         <nav className="flex h-9 items-center gap-1" onMouseLeave={() => setHovered(null)}>
           {PRIMARY_LINKS.map((item) => {

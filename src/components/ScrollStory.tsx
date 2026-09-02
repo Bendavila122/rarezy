@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { PhoneMockup } from "@/components/PhoneMockup";
-import { SearchHero } from "@/components/SearchHero";
 import { STOPS, type Line } from "@/components/tourStops";
 
 const SCREEN_CYCLE_MS = 4200;
@@ -29,20 +28,18 @@ function StopLines({ lines }: { lines: Line[] }) {
 
 /**
  * Three narrative stops (buyers, sellers, marketplace), each a real,
- * full-height block in normal page flow right after the search bar — no
- * scroll-jacking, no JS gating. Scrolling down moves through the search
- * bar, then each stop in turn, exactly like scrolling down any ordinary
- * page (each stop is a `snap-start` point in the home page's shared
- * scroll-snap set); scrolling up reverses through the exact same stops.
- * You can only continue on into "Why Rarezy" once you've scrolled past
- * the last stop (marketplace).
+ * full-height block in normal page flow — no scroll-jacking, no JS
+ * gating. Scrolling down moves through each stop in turn, exactly like
+ * scrolling down any ordinary page (each stop is a `snap-start` point in
+ * the home page's shared scroll-snap set); scrolling up reverses through
+ * the exact same stops. You can only continue on into "Why Rarezy" once
+ * you've scrolled past the last stop (marketplace).
  *
  * The one deliberately special thing: on larger screens the phone is
  * `position: sticky` within this whole block, so it stays visually still
- * on screen — everything else, search bar included, scrolls normally
- * past/around it. Each stop also cycles through a couple of its own
- * phone screens on a timer while it's the one in view (e.g. buyers:
- * play → win).
+ * on screen while the text scrolls normally past it. Each stop also
+ * cycles through a couple of its own phone screens on a timer while it's
+ * the one in view (e.g. buyers: play → win).
  */
 export function ScrollStory() {
   const [active, setActive] = useState(0);
@@ -89,11 +86,8 @@ export function ScrollStory() {
               ref={(el) => {
                 panelRefs.current[i] = el;
               }}
-              className={`flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col pl-4 sm:pl-12 ${
-                i === 0 ? "justify-start pt-16 sm:pt-20" : "justify-center"
-              }`}
+              className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
             >
-              {i === 0 && <SearchHero />}
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{stop.eyebrow}</p>
               <div className="mt-5">
                 <StopLines lines={stop.lines} />
