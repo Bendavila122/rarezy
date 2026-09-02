@@ -1,6 +1,6 @@
 import { BrowseScreen, PaidScreen, PlayScreen } from "@/components/WalkthroughScreens";
 
-/** "Instagram lyric" text styles — short fragments at wildly different sizes/weights/fonts so the copy reads like it's being spoken aloud rather than sitting as one flat paragraph. Shared by the About tour modal and the homepage scroll story so the two never drift apart. */
+/** "Instagram lyric" text styles — short fragments at wildly different sizes/weights/fonts so the copy reads like it's being spoken aloud rather than sitting as one flat paragraph. Content for the homepage's three-stop scroll story (buyers, sellers, marketplace), kept in its own module so ScrollStory.tsx stays focused on layout/scroll mechanics. */
 export const BASE = "text-[1.05rem] sm:text-[1.15rem] font-medium text-white/60";
 export const MID = "text-[1.35rem] sm:text-[1.55rem] font-bold text-white";
 export const HUGE =

@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, Info, Plus, ShoppingBag, Ticket, User } from "lucide-react";
+import { Compass, Plus, ShoppingBag, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
-import { tourState } from "@/lib/tourState";
-import { TourHintBubble } from "@/components/TourHintBubble";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
@@ -80,20 +78,6 @@ export function NavBar() {
         </NavLink>
 
         <nav className="flex h-9 items-center gap-1" onMouseLeave={() => setHovered(null)}>
-          <div className="relative" onMouseEnter={() => setHovered("about")}>
-            {highlightKey === "about" && <TabGlass />}
-            <button
-              type="button"
-              onClick={() => tourState.open()}
-              className="group relative z-10 flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight text-white/65 transition-colors duration-200 ease-out hover:text-mint"
-            >
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500" />
-              <Info className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
-              About
-            </button>
-            <TourHintBubble />
-          </div>
-
           {PRIMARY_LINKS.map((item) => {
             const badge = badgeFor(item.to);
             return (

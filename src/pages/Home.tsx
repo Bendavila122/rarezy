@@ -12,7 +12,6 @@ import { ReviewsSection } from "@/components/ReviewsSection";
 import { AffiliateStrip } from "@/components/AffiliateStrip";
 import { SkillGame } from "@/components/SkillGame";
 import { ScrollHint } from "@/components/ScrollHint";
-import { WhatWeDoTour } from "@/components/WhatWeDoTour";
 
 export function Home() {
   const [heroPlaying, setHeroPlaying] = useState(false);
@@ -20,10 +19,10 @@ export function Home() {
 
   return (
     <>
-      {/* Search bar, then the same three-stop story as the About tour (buyers,
-          sellers, marketplace) delivered inline via scroll-snap instead of a
-          modal, followed by the game itself given room to breathe, then
-          social proof, partner services, and FAQs before the footer. */}
+      {/* Search bar, then the three-stop story (buyers, sellers, marketplace)
+          delivered inline via scroll-snap, followed by the game itself given
+          room to breathe, then social proof, partner services, and FAQs
+          before the footer. */}
       <SearchHero />
       <ScrollStory />
       <WhyRarezySection />
@@ -40,7 +39,6 @@ export function Home() {
       <FaqSection />
       <AffiliateStrip />
       <ScrollHint />
-      <WhatWeDoTour />
 
       {heroPlaying &&
         createPortal(

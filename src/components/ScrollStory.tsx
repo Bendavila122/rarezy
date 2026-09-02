@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { STOPS, type Line } from "@/components/tourStops";
 
-const PANEL_HEIGHT = "h-[62vh] sm:h-[72vh]";
+const PANEL_HEIGHT = "h-[56vh] sm:h-[62vh]";
 
-/** Same "Instagram lyric" copy and styles as the About tour, but replayed via whileInView (once: false) each time a stop snaps into view, instead of the tour's mount/unmount stagger — this panel never unmounts, it stays in the DOM for the native scroll-snap to work. */
+/** Renders the shared "Instagram lyric" lines via whileInView (once: false) so the stagger replays every time a stop snaps into view — this panel never unmounts, it stays in the DOM for the native scroll-snap to work. */
 function StopLines({ lines }: { lines: Line[] }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -27,13 +27,11 @@ function StopLines({ lines }: { lines: Line[] }) {
 }
 
 /**
- * The homepage version of the About tour — same three stops (buyers,
- * sellers, marketplace), same lyric-style copy and phone screens, same
- * "Browse now" CTA on the final stop — but delivered inline on the scroll
- * instead of a modal. The phone is a single static element (a normal
- * sibling of the text panel, not inside it, right-hand side) so it never
- * itself scrolls; only its inner screen crossfades. The text (left-hand
- * side) lives in its own nested `overflow-y-scroll` + `snap-y
+ * Three narrative stops (buyers, sellers, marketplace) delivered inline as
+ * part of the homepage scroll. The phone is a single static element (a
+ * normal sibling of the text panel, not inside it, right-hand side) so it
+ * never itself scrolls; only its inner screen crossfades. The text
+ * (left-hand side) lives in its own nested `overflow-y-scroll` + `snap-y
  * snap-mandatory` column with no visible controls of its own — no arrows,
  * no dots — it's meant to read as pure scroll, not a slideshow: scrolling
  * over it snaps discretely between the three stops, and once you're
@@ -54,12 +52,12 @@ export function ScrollStory() {
   const current = STOPS[active]!;
 
   return (
-    <section className="relative z-10 mx-auto max-w-6xl px-6 py-16 sm:py-20">
+    <section className="relative z-10 mx-auto max-w-6xl px-6 pb-10 pt-4 sm:pb-14 sm:pt-6">
       <div className="grid grid-cols-1 items-center gap-10 sm:grid-cols-2">
         <div
           ref={scrollerRef}
           onScroll={handleScroll}
-          className={`no-scrollbar order-1 snap-y snap-mandatory overflow-y-scroll ${PANEL_HEIGHT}`}
+          className={`no-scrollbar order-1 snap-y snap-mandatory overflow-y-scroll pl-4 ${PANEL_HEIGHT}`}
         >
           {STOPS.map((stop, i) => (
             <div key={stop.eyebrow} className={`flex ${PANEL_HEIGHT} snap-start flex-col justify-center`}>
