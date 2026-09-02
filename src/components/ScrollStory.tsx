@@ -161,14 +161,15 @@ export function ScrollStory() {
   return (
     <section ref={sectionRef} className="relative z-10 mx-auto max-w-6xl px-6 pb-10 pt-4 sm:pb-14 sm:pt-6">
       <div className="grid grid-cols-1 items-center gap-10 sm:grid-cols-2">
-        <div className={`order-1 flex ${PANEL_HEIGHT} flex-col justify-center pl-4`}>
-          <AnimatePresence mode="wait">
+        <div className={`order-1 relative overflow-hidden ${PANEL_HEIGHT} pl-4`}>
+          <AnimatePresence initial={false}>
             <motion.div
               key={active}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 flex flex-col justify-center"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-100%" }}
+              transition={{ duration: 0.55, ease: [0.65, 0, 0.35, 1] }}
             >
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{current.eyebrow}</p>
               <div className="mt-5">
