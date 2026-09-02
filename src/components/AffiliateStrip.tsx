@@ -16,7 +16,7 @@ const MEDIA: Record<string, { video: string; poster: string }> = {
  */
 export function AffiliateStrip() {
   return (
-    <div className="relative z-10 mx-auto max-w-6xl px-6 py-16">
+    <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center px-6 py-16">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {FEATURED_AFFILIATES.map((a) => {
           const media = MEDIA[a.id];

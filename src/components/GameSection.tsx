@@ -18,7 +18,7 @@ export function GameSection({
   onPlayAgain: () => void;
 }) {
   return (
-    <div className="relative z-10 flex min-h-[70vh] items-center overflow-hidden">
+    <div className="relative z-10 flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
       <div className="floating-orb left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 bg-mint/10" />
 
       <div className="relative z-[2] mx-auto flex w-full max-w-xl flex-col items-center px-6 py-20 text-center">

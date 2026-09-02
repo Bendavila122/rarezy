@@ -42,7 +42,7 @@ const POINTS = [
  */
 export function WhyRarezySection() {
   return (
-    <div className="relative z-10 mx-auto max-w-6xl px-6 py-20">
+    <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center px-6 py-20">
       <Reveal className="mx-auto max-w-xl text-center">
         <p className="flex items-center justify-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">
           <Gem className="h-3.5 w-3.5" strokeWidth={2.4} />

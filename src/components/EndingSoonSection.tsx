@@ -15,7 +15,7 @@ export function EndingSoonSection() {
   if (soonest.length === 0) return null;
 
   return (
-    <div className="relative z-10 py-16">
+    <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col justify-center py-16">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal>
           <p className="flex items-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.32em] text-red-400">
