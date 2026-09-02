@@ -21,6 +21,13 @@ body,
   height: 100%;
 }
 
+/* Page-wide section snap-scrolling, scoped to whichever page opts in (the
+   home page toggles this class on <html> for as long as it's mounted) so
+   other pages keep normal free scrolling. */
+html.snap-page {
+  scroll-snap-type: y mandatory;
+}
+
 body {
   margin: 0;
   background: var(--color-background);

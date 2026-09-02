@@ -30,25 +30,21 @@ function StopLines({ lines }: { lines: Line[] }) {
 /**
  * Three narrative stops (buyers, sellers, marketplace) delivered inline as
  * part of the homepage scroll — the phone sits static on the right, only
- * its inner screen crossfades; the text sits on the left and crossfades
- * with it. Each stop cycles through its own couple of phone screens on a
- * timer while it's active (e.g. buyers: play → win) — that cycling is
+ * its inner screen crossfades; the text sits on the left and slides with
+ * it. Each stop cycles through its own couple of phone screens on a timer
+ * while it's active (e.g. buyers: play → win) — that cycling is
  * independent of the scroll gate, which only ever moves between stops.
  *
- * This isn't CSS scroll-snap (which treats up and down the same way) —
- * it's a deliberately asymmetric scroll gate:
- *   - Scrolling DOWN while the story isn't finished is intercepted and
- *     always advances exactly one stop at a time, however hard or fast you
- *     scroll — you can't skip a stop. Once you're on the last stop, the
- *     next down-scroll is let through untouched and the page continues
- *     normally into the next section.
- *   - Scrolling UP is never intercepted — it's always plain, free page
- *     scroll.
- *   - Whenever the section fully leaves the viewport in either direction,
- *     its stop resets to the first one, so scrolling back up into it later
- *     never replays the step-through — it just reappears exactly as it
- *     looked the first time the page loaded, and you scroll straight past
- *     it.
+ * This isn't CSS scroll-snap (which can't keep a single element static
+ * across "pages") — it's a symmetric scroll gate: scrolling either
+ * direction is intercepted and always moves exactly one stop at a time,
+ * however hard or fast you scroll, in either direction. Once you're past
+ * either end (scrolling down from the last stop, or up from the first),
+ * the next matching scroll is let through untouched and the page
+ * continues normally — down into the next section, or up toward the
+ * search bar. This block itself is one snap-aligned "page" in the
+ * page-wide scroll-snap set up in Home.tsx, so its stepping is a purely
+ * internal, JS-driven affair that never itself moves window.scrollY.
  */
 export function ScrollStory() {
   const [active, setActive] = useState(0);
@@ -64,7 +60,7 @@ export function ScrollStory() {
   }, [active]);
 
   // Each stop cycles its own screens on a timer, restarting fresh at
-  // screen 0 whenever the story advances to a new stop.
+  // screen 0 whenever the story moves to a new stop.
   useEffect(() => {
     setScreenIndex(0);
     const screens = STOPS[active]!.Screens;
@@ -80,13 +76,7 @@ export function ScrollStory() {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const ratio = entry!.intersectionRatio;
-        inViewRef.current = ratio >= 0.5;
-        if (ratio === 0) {
-          activeRef.current = 0;
-          holdScrollYRef.current = null;
-          setActive(0);
-        }
+        inViewRef.current = entry!.intersectionRatio >= 0.5;
       },
       { threshold: [0, 0.5] },
     );
@@ -95,18 +85,18 @@ export function ScrollStory() {
   }, []);
 
   useEffect(() => {
-    const advance = () => {
+    const step = (dir: 1 | -1) => {
       if (lockedRef.current) return;
       lockedRef.current = true;
-      setActive((a) => Math.min(STOPS.length - 1, a + 1));
+      setActive((a) => Math.min(STOPS.length - 1, Math.max(0, a + dir)));
       window.setTimeout(() => {
         lockedRef.current = false;
       }, STEP_COOLDOWN_MS);
     };
 
-    // Belt-and-suspenders on top of preventDefault(): while the story isn't
-    // finished, pin window.scrollY to wherever it was when gating engaged,
-    // undoing any scroll that leaks through despite preventDefault.
+    // Belt-and-suspenders on top of preventDefault(): while gating, pin
+    // window.scrollY to wherever it was when gating engaged, undoing any
+    // scroll that leaks through despite preventDefault.
     const holdScroll = () => {
       if (holdScrollYRef.current === null) holdScrollYRef.current = window.scrollY;
       if (window.scrollY !== holdScrollYRef.current) {
@@ -115,14 +105,16 @@ export function ScrollStory() {
     };
 
     const onWheel = (e: WheelEvent) => {
-      if (!inViewRef.current || e.deltaY < 5) return; // never gate upward or noise-level movement
-      if (activeRef.current >= STOPS.length - 1) {
+      if (!inViewRef.current || Math.abs(e.deltaY) < 5) return; // ignore noise-level movement
+      const dir: 1 | -1 = e.deltaY > 0 ? 1 : -1;
+      const atEdge = dir === 1 ? activeRef.current >= STOPS.length - 1 : activeRef.current <= 0;
+      if (atEdge) {
         holdScrollYRef.current = null;
-        return; // story finished — let the page scroll through
+        return; // at this end of the story — let the page scroll through
       }
       e.preventDefault();
       holdScroll();
-      advance();
+      step(dir);
     };
 
     let touchStartY = 0;
@@ -130,17 +122,20 @@ export function ScrollStory() {
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const onTouchMove = (e: TouchEvent) => {
-      if (!inViewRef.current || activeRef.current >= STOPS.length - 1) {
+      if (!inViewRef.current) return;
+      const y = e.touches[0]?.clientY ?? touchStartY;
+      const delta = touchStartY - y; // positive = finger moving up = content scrolling down
+      if (Math.abs(delta) <= MIN_TOUCH_DELTA) return;
+      const dir: 1 | -1 = delta > 0 ? 1 : -1;
+      const atEdge = dir === 1 ? activeRef.current >= STOPS.length - 1 : activeRef.current <= 0;
+      if (atEdge) {
         holdScrollYRef.current = null;
         return;
       }
-      const y = e.touches[0]?.clientY ?? touchStartY;
-      const delta = touchStartY - y; // positive = finger moving up = content scrolling down
-      if (delta <= MIN_TOUCH_DELTA) return;
       e.preventDefault();
       holdScroll();
       touchStartY = y;
-      advance();
+      step(dir);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
@@ -158,10 +153,7 @@ export function ScrollStory() {
   const CurrentScreen = current.Screens[screenIndex % current.Screens.length]!;
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative z-10 flex min-h-0 w-full flex-1 flex-col overflow-hidden px-6"
-    >
+    <section ref={sectionRef} className="relative z-10 flex min-h-0 w-full flex-1 flex-col px-6">
       <div className="mx-auto grid h-full w-full max-w-6xl grid-cols-1 items-center gap-10 sm:grid-cols-2">
         <div className="order-1 relative h-full overflow-hidden pl-4">
           <AnimatePresence initial={false}>
@@ -189,7 +181,7 @@ export function ScrollStory() {
           </AnimatePresence>
         </div>
 
-        <div className="order-2 flex h-full items-center justify-center">
+        <div className="order-2 flex h-full items-center justify-center pb-6">
           <PhoneMockup glow={current.glow} glow2={current.glow2}>
             <AnimatePresence mode="wait">
               <motion.div

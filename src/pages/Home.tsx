@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaqSection } from "@/components/FaqSection";
 import { SearchHero } from "@/components/SearchHero";
 import { ScrollStory } from "@/components/ScrollStory";
@@ -17,30 +17,51 @@ export function Home() {
   const [heroPlaying, setHeroPlaying] = useState(false);
   const [heroScore, setHeroScore] = useState<number | null>(null);
 
+  // Section-by-section snap scrolling is home-only — toggle it on <html>
+  // for exactly as long as this page is mounted so other routes keep
+  // normal free scrolling.
+  useEffect(() => {
+    document.documentElement.classList.add("snap-page");
+    return () => document.documentElement.classList.remove("snap-page");
+  }, []);
+
   return (
     <>
       {/* Search bar plus the three-stop story (buyers, sellers, marketplace)
           together fill exactly one screen below the sticky nav — nothing of
           "Why Rarezy" is visible until the story's finished — followed by
           the game itself given room to breathe, then social proof, partner
-          services, and FAQs before the footer. */}
-      <div className="flex min-h-[calc(100vh-4rem)] flex-col">
+          services, and FAQs before the footer. Every section below is its
+          own snap point. */}
+      <div className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col">
         <SearchHero />
         <ScrollStory />
       </div>
-      <WhyRarezySection />
-      <GameSection
-        score={heroScore}
-        onTry={() => setHeroPlaying(true)}
-        onPlayAgain={() => {
-          setHeroScore(null);
-          setHeroPlaying(true);
-        }}
-      />
-      <EndingSoonSection />
-      <ReviewsSection />
-      <FaqSection />
-      <AffiliateStrip />
+      <div className="snap-start scroll-mt-16">
+        <WhyRarezySection />
+      </div>
+      <div className="snap-start scroll-mt-16">
+        <GameSection
+          score={heroScore}
+          onTry={() => setHeroPlaying(true)}
+          onPlayAgain={() => {
+            setHeroScore(null);
+            setHeroPlaying(true);
+          }}
+        />
+      </div>
+      <div className="snap-start scroll-mt-16">
+        <EndingSoonSection />
+      </div>
+      <div className="snap-start scroll-mt-16">
+        <ReviewsSection />
+      </div>
+      <div className="snap-start scroll-mt-16">
+        <FaqSection />
+      </div>
+      <div className="snap-start scroll-mt-16">
+        <AffiliateStrip />
+      </div>
       <ScrollHint />
 
       {heroPlaying &&
