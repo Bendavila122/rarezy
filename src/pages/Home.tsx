@@ -6,6 +6,7 @@ import { FaqSection } from "@/components/FaqSection";
 import { BuyerSection } from "@/components/BuyerSection";
 import { GameSection } from "@/components/GameSection";
 import { SellerSection } from "@/components/SellerSection";
+import { WhyRarezySection } from "@/components/WhyRarezySection";
 import { EndingSoonSection } from "@/components/EndingSoonSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { AffiliateStrip } from "@/components/AffiliateStrip";
@@ -24,6 +25,7 @@ export function Home() {
           footer. */}
       <BuyerSection />
       <SellerSection />
+      <WhyRarezySection />
       <GameSection
         score={heroScore}
         onTry={() => setHeroPlaying(true)}
