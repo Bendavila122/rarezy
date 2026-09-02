@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Compass, Info, Plus, ShoppingBag, Ticket, User } from "lucide-react";
+import { Compass, Info, Plus, ShoppingBag, Ticket } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
@@ -29,12 +29,17 @@ const SELL_LINK = {
 
 const ACCOUNT_GATE_REASON = "Create a free account to continue.";
 
-/** Glass pill that slides between whichever tab is currently hovered — shared layoutId means Motion animates its position/size across sibling wrappers automatically. */
+const linkCls = (isActive: boolean) =>
+  `group relative z-10 flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight transition-colors duration-200 ease-out hover:text-mint ${
+    isActive ? "text-mint" : "text-white/65"
+  }`;
+
+/** Glass pill that slides between whichever tab is currently hovered — shared layoutId means Motion animates its position/size across sibling wrappers automatically. A real `.glass-dark` pane (blur + saturation + inner highlight), not a flat tint, so it reads as an obvious floating piece of glass. */
 function TabGlass() {
   return (
     <motion.span
       layoutId="navTabGlass"
-      className="absolute inset-0 bg-white/10"
+      className="glass-dark absolute inset-0"
       transition={{ type: "spring", bounce: 0.25, duration: 0.45 }}
     />
   );
@@ -69,18 +74,15 @@ export function NavBar() {
           <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
         </NavLink>
 
-        <nav
-          className="glass-dark relative flex h-11 items-center gap-1 px-1.5"
-          onMouseLeave={() => setHovered(null)}
-        >
+        <nav className="flex h-9 items-center gap-1" onMouseLeave={() => setHovered(null)}>
           <div className="relative" onMouseEnter={() => setHovered("about")}>
             {hovered === "about" && <TabGlass />}
             <button
               type="button"
               onClick={() => tourState.open()}
-              className="group press relative z-10 flex h-9 items-center gap-1.5 border border-white/15 bg-white px-3 text-[0.92rem] font-semibold tracking-tight text-black transition-all duration-200 ease-out hover:-translate-y-[1px] hover:bg-white/90"
+              className="group relative z-10 flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight text-white/65 transition-colors duration-200 ease-out hover:text-mint"
             >
-              <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full bg-red-500" />
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500" />
               <Info className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
               About
             </button>
@@ -92,16 +94,7 @@ export function NavBar() {
             return (
               <div key={item.to} className="relative" onMouseEnter={() => setHovered(item.to)}>
                 {hovered === item.to && <TabGlass />}
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  onClick={handleGatedClick(item)}
-                  className={({ isActive }) =>
-                    `group relative z-10 flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight transition-all duration-200 ease-out hover:text-mint ${
-                      isActive ? "text-mint" : "text-white/65"
-                    }`
-                  }
-                >
+                <NavLink to={item.to} end={item.end} onClick={handleGatedClick(item)} className={({ isActive }) => linkCls(isActive)}>
                   {({ isActive }) => (
                     <>
                       <item.Icon
@@ -124,18 +117,14 @@ export function NavBar() {
 
           <div className="relative" onMouseEnter={() => setHovered("sell")}>
             {hovered === "sell" && <TabGlass />}
-            <NavLink
-              to={SELL_LINK.to}
-              end={SELL_LINK.end}
-              onClick={handleGatedClick(SELL_LINK)}
-              className={({ isActive }) =>
-                `press relative z-10 flex h-9 items-center gap-1.5 bg-mint px-4 text-[0.88rem] font-bold tracking-tight text-brand-deep transition-all duration-200 ease-out hover:bg-mint/90 ${
-                  isActive ? "ring-2 ring-white/50" : ""
-                }`
-              }
-            >
-              <SELL_LINK.Icon className="h-4 w-4" strokeWidth={2.2} />
-              {SELL_LINK.label}
+            <NavLink to={SELL_LINK.to} end={SELL_LINK.end} onClick={handleGatedClick(SELL_LINK)} className={({ isActive }) => linkCls(isActive)}>
+              {({ isActive }) => (
+                <>
+                  <SELL_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
+                  {SELL_LINK.label}
+                  {isActive && <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-none bg-mint" />}
+                </>
+              )}
             </NavLink>
           </div>
 
@@ -145,13 +134,13 @@ export function NavBar() {
               to="/account"
               onClick={handleGatedClick({ to: "/account", gateReason: ACCOUNT_GATE_REASON })}
               aria-label="Account"
-              className="press relative z-10 flex h-9 w-9 shrink-0 items-center justify-center bg-mint text-[0.85rem] font-bold text-brand-deep"
+              className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/15"
             >
-              {currentUser ? (
-                currentUser.username.charAt(0).toUpperCase()
-              ) : (
-                <User className="h-4 w-4" strokeWidth={2} />
-              )}
+              <img
+                src={`https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(currentUser?.username ?? "guest")}&backgroundColor=0f1f16,17301f`}
+                alt={currentUser ? `${currentUser.username}'s profile picture` : "Profile"}
+                className="h-full w-full object-cover"
+              />
             </NavLink>
           </div>
         </nav>
