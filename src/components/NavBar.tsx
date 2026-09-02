@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import { Compass, HelpCircle, Info, Menu, Plus, ShoppingBag, Ticket, User, X } from "lucide-react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
-import { HeaderSearch } from "@/components/HeaderSearch";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
@@ -57,13 +56,10 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-30">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <div className="flex items-center gap-4">
-          <NavLink to="/" className="flex h-9 items-center">
-            <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
-            <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
-          </NavLink>
-          <HeaderSearch />
-        </div>
+        <NavLink to="/" className="flex h-9 items-center">
+          <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
+          <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
+        </NavLink>
 
         <div className="flex h-9 items-center gap-3">
           <nav className="flex h-9 items-center gap-5">
