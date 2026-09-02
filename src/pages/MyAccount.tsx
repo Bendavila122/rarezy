@@ -56,6 +56,9 @@ export function MyAccount() {
         <Link to="/payments" className={quickLinkCls}>
           Payments &amp; payouts
         </Link>
+        <Link to="/help" className={quickLinkCls}>
+          Help centre
+        </Link>
       </div>
 
       <h2 className="mt-12 text-[1.3rem] font-semibold tracking-[-0.02em]">My listings</h2>
