@@ -169,18 +169,28 @@ body {
   color: oklch(1 0 0);
 }
 
-/* Higher-contrast frosted pill — brighter and more opaque than .glass-dark
-   so it reads as an obvious blurred box rather than a barely-there tint,
-   for UI (like the header's sliding tab indicator) that sits on an
-   already-dark surface where .glass-dark would nearly disappear. */
+/* A real glass slab, not a flat tint — rounded like a physical pane, a
+   bright top inner edge where light catches the rim, a soft diagonal
+   sheen, a darker inner bevel along the bottom, and a real drop shadow
+   lifting it off the surface. Brighter and more opaque than .glass-dark
+   so it reads as an obvious blurred box, for UI (like the header's
+   sliding tab indicator) that sits on an already-dark surface where
+   .glass-dark would nearly disappear. */
 .glass-block {
-  background: oklch(1 0 0 / 14%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid oklch(1 0 0 / 24%);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    oklch(1 0 0 / 34%) 0%,
+    oklch(1 0 0 / 10%) 45%,
+    oklch(1 0 0 / 18%) 100%
+  );
+  backdrop-filter: blur(18px) saturate(200%);
+  -webkit-backdrop-filter: blur(18px) saturate(200%);
+  border: 1px solid oklch(1 0 0 / 34%);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 25%),
-    0 8px 24px -6px oklch(0 0 0 / 45%);
+    inset 0 1px 0 oklch(1 0 0 / 55%),
+    inset 0 -8px 14px -8px oklch(0 0 0 / 30%),
+    0 10px 26px -8px oklch(0 0 0 / 55%);
 }
 
 /* Cursor-tracking radial glow — position set via --spot-x/--spot-y from JS.
