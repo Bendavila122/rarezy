@@ -12,6 +12,7 @@ import { ReviewsSection } from "@/components/ReviewsSection";
 import { AffiliateStrip } from "@/components/AffiliateStrip";
 import { SkillGame } from "@/components/SkillGame";
 import { ScrollHint } from "@/components/ScrollHint";
+import { WhatWeDoTour } from "@/components/WhatWeDoTour";
 
 export function Home() {
   const [heroPlaying, setHeroPlaying] = useState(false);
@@ -39,6 +40,7 @@ export function Home() {
       <FaqSection />
       <AffiliateStrip />
       <ScrollHint />
+      <WhatWeDoTour />
 
       {heroPlaying &&
         createPortal(

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Gamepad2, Search, Sparkles, Ticket, Trophy } from "lucide-react";
+import { ArrowRight, Gamepad2, HelpCircle, Search, Sparkles, Ticket, Trophy } from "lucide-react";
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
 import { browseState } from "@/lib/browseState";
+import { tourState } from "@/lib/tourState";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
 const STEPS = [
@@ -36,6 +37,20 @@ function HeroSearch() {
         className="w-full rounded-none border-none bg-transparent py-2.5 pl-9 pr-3 text-[0.82rem] tracking-tight text-white outline-none placeholder:text-white/40"
       />
     </form>
+  );
+}
+
+/** Opens the "what do we actually do" explainer tour — a big, hard-to-miss button right under the search bar. */
+function WhatWeDoButton() {
+  return (
+    <button
+      type="button"
+      onClick={() => tourState.open()}
+      className="glass-dark press flex w-56 items-center justify-center gap-2 border border-mint/30 py-3 text-[0.82rem] font-bold tracking-tight text-white sm:w-64"
+    >
+      <HelpCircle className="h-4 w-4 text-mint" strokeWidth={2.2} />
+      What do we actually do?
+    </button>
   );
 }
 
@@ -74,7 +89,12 @@ export function BuyerSection() {
       subtext="Every listing is real stock, independently authenticated and ready to ship. Enter for a few pounds, play one quick round below, and the best score takes the watch home."
       ctaLabel="Browse all watches"
       ctaTo="/browse"
-      corner={<HeroSearch />}
+      corner={
+        <div className="flex flex-col items-start gap-2.5">
+          <HeroSearch />
+          <WhatWeDoButton />
+        </div>
+      }
       stepStrip={<HowItWorksStrip />}
     />
   );
