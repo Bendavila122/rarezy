@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { BrowseScreen, PaidScreen, PlayScreen } from "@/components/WalkthroughScreens";
-import { tourState, useTourState } from "@/lib/tourState";
+import { tourState, TOUR_PHONE_LAYOUT_ID, useTourState } from "@/lib/tourState";
 
 /** "Instagram lyric" text styles — short fragments at wildly different sizes/weights/fonts so the copy reads like it's being spoken aloud rather than sitting as one flat paragraph. */
 const BASE = "text-[1.05rem] sm:text-[1.15rem] font-medium text-white/60";
@@ -150,16 +150,15 @@ export function WhatWeDoTour() {
             className="relative mx-auto flex h-full max-w-5xl flex-col items-center justify-center px-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={stop}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-                className="grid w-full grid-cols-1 items-center gap-10 sm:grid-cols-2 sm:gap-10"
-              >
-                <div>
+            <div className="grid w-full grid-cols-1 items-center gap-10 sm:grid-cols-2 sm:gap-10">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={stop}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.35, ease: "easeOut" }}
+                >
                   <p className="text-[0.68rem] font-bold uppercase tracking-[0.32em] text-mint">
                     {current.eyebrow}
                   </p>
@@ -178,15 +177,32 @@ export function WhatWeDoTour() {
                       Browse now
                     </button>
                   )}
-                </div>
+                </motion.div>
+              </AnimatePresence>
 
-                <div className="order-first flex justify-center sm:order-last">
+              {/* Same layoutId as the hero's phone (hidden while the tour is open) — Framer
+                  animates the handoff between the two, so it reads as one phone popping out
+                  of the hero rather than a second one appearing. Stays mounted across stops;
+                  only the screen content inside crossfades. */}
+              <div className="order-first flex justify-center sm:order-last">
+                <motion.div layoutId={TOUR_PHONE_LAYOUT_ID}>
                   <PhoneMockup glow={current.glow} glow2={current.glow2}>
-                    <current.Screen />
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={stop}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="h-full"
+                      >
+                        <current.Screen />
+                      </motion.div>
+                    </AnimatePresence>
                   </PhoneMockup>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                </motion.div>
+              </div>
+            </div>
 
             <div className="mt-10 flex items-center gap-6">
               <button

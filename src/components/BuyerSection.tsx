@@ -5,7 +5,7 @@ import { ArrowRight, Gamepad2, HelpCircle, Search, Sparkles, Ticket, Trophy } fr
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
 import { browseState } from "@/lib/browseState";
-import { tourState } from "@/lib/tourState";
+import { tourState, TOUR_PHONE_LAYOUT_ID, useTourState } from "@/lib/tourState";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
 const STEPS = [
@@ -90,6 +90,8 @@ function HowItWorksStrip() {
 }
 
 export function BuyerSection() {
+  const { open: tourOpen } = useTourState();
+
   return (
     <PersonaSection
       eyebrow="For buyers"
@@ -101,6 +103,8 @@ export function BuyerSection() {
       subtext="Every listing is real stock, independently authenticated and ready to ship. Enter for a few pounds, play one quick round below, and the best score takes the watch home."
       ctaLabel="Browse all watches"
       ctaTo="/browse"
+      phoneLayoutId={TOUR_PHONE_LAYOUT_ID}
+      hidePhone={tourOpen}
       corner={
         <div className="flex flex-col items-start gap-2.5">
           <HeroSearch />
