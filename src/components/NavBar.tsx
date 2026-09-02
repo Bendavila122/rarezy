@@ -133,7 +133,7 @@ export function NavBar() {
               to="/account"
               onClick={handleGatedClick({ to: "/account", gateReason: ACCOUNT_GATE_REASON })}
               aria-label="Account"
-              className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60"
+              className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60 transition-transform duration-200 ease-out hover:scale-110"
             >
               <User className="h-4 w-4" strokeWidth={2} />
             </NavLink>
