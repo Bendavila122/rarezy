@@ -35,16 +35,17 @@ const TRACK = [...LOGOS, ...LOGOS];
 
 /**
  * A continuous conveyor of brand logos feeding into the search bar — a
- * two-slot window, never pausing between logos. A static blur "gate" sits
- * over the near slot (right against the search bar) so whatever logo is
- * passing through it blurs and fades as it's about to disappear behind the
- * bar, while the far slot stays perfectly sharp. The strip sits with a
- * slight negative margin under the search bar's higher z-index, so the bar
- * physically occludes the near slot too.
+ * three-slot window, never pausing between logos. A static blur + dark
+ * gradient "gate" sits over the near slot (right against the search bar) so
+ * whatever logo is passing through it doesn't just blur — it visually
+ * dissolves into the same shadow as the page background, rather than
+ * staying a bright white circle that merely loses focus. The strip sits
+ * with a slight negative margin under the search bar's higher z-index, so
+ * the bar physically occludes the near slot too.
  */
 export function LogoEater() {
   return (
-    <div className="relative z-0 -ml-4 hidden h-11 w-[84px] items-center overflow-hidden sm:flex">
+    <div className="relative z-0 -ml-4 hidden h-11 w-[132px] items-center overflow-hidden sm:flex">
       <motion.div
         className="flex items-center gap-3"
         animate={{ x: ["0%", "-50%"] }}
@@ -60,10 +61,17 @@ export function LogoEater() {
         ))}
       </motion.div>
 
-      {/* Blur gate over the near slot, fading outward so the transition into blur reads smoothly rather than a hard edge. */}
+      {/* Blur + dark gradient gate over the near slot, so whatever's passing through doesn't just go
+          fuzzy — it visually dissolves into the same shadow as the page background behind it. */}
       <div
-        className="pointer-events-none absolute inset-y-0 left-0 w-11 backdrop-blur-[3px]"
-        style={{ maskImage: "linear-gradient(to right, black 55%, transparent 100%)" }}
+        className="pointer-events-none absolute inset-y-0 left-0 w-16 backdrop-blur-[5px]"
+        style={{ maskImage: "linear-gradient(to right, black 45%, transparent 100%)" }}
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 left-0 w-16"
+        style={{
+          background: "linear-gradient(to right, oklch(0.15 0.008 260 / 92%) 30%, transparent 100%)",
+        }}
       />
     </div>
   );
