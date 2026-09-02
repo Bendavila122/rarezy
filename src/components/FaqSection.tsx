@@ -81,6 +81,9 @@ export function FaqSection() {
           >
             <ChevronLeft className="h-4 w-4" strokeWidth={2.2} />
           </button>
+          <p className="tabular w-10 text-center text-[0.78rem] text-muted">
+            {index + 1}/{FAQS.length}
+          </p>
           <button
             type="button"
             onClick={() => go(index + 1)}
