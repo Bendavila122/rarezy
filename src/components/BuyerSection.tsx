@@ -75,7 +75,7 @@ export function BuyerSection() {
       ctaLabel="Browse all watches"
       ctaTo="/browse"
       corner={
-        <div className="flex w-full justify-center">
+        <div className="flex w-full justify-start">
           <HeroSearch />
         </div>
       }
