@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Compass, Info, Plus, ShoppingBag, Ticket } from "lucide-react";
+import { Compass, Info, Plus, ShoppingBag, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
@@ -39,7 +39,7 @@ function TabGlass() {
   return (
     <motion.span
       layoutId="navTabGlass"
-      className="glass-dark absolute inset-0"
+      className="glass-block absolute inset-0"
       transition={{ type: "spring", bounce: 0.25, duration: 0.45 }}
     />
   );
@@ -134,13 +134,9 @@ export function NavBar() {
               to="/account"
               onClick={handleGatedClick({ to: "/account", gateReason: ACCOUNT_GATE_REASON })}
               aria-label="Account"
-              className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden border border-white/15"
+              className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60"
             >
-              <img
-                src={`https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(currentUser?.username ?? "guest")}&backgroundColor=0f1f16,17301f`}
-                alt={currentUser ? `${currentUser.username}'s profile picture` : "Profile"}
-                className="h-full w-full object-cover"
-              />
+              <User className="h-4 w-4" strokeWidth={2} />
             </NavLink>
           </div>
         </nav>
