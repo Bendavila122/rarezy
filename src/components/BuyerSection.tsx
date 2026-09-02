@@ -29,25 +29,25 @@ function HeroSearch() {
   };
 
   return (
-    <form onSubmit={submit} className="glass-dark relative w-56 sm:w-64">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" strokeWidth={2} />
+    <form onSubmit={submit} className="glass-dark relative w-72 sm:w-[24rem]">
+      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" strokeWidth={2} />
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={`Search from ${liveCount} watches`}
-        className="w-full rounded-none border-none bg-transparent py-2.5 pl-9 pr-3 text-[0.82rem] tracking-tight text-white outline-none placeholder:text-white/40"
+        className="w-full rounded-none border-none bg-transparent py-3.5 pl-11 pr-4 text-[0.92rem] tracking-tight text-white outline-none placeholder:text-white/40"
       />
     </form>
   );
 }
 
-/** Opens the "what do we actually do" explainer tour — shorter than the search bar above it so the pair doesn't read as two equal-weight fields. */
+/** Opens the "what do we actually do" explainer tour. */
 function WhatWeDoButton() {
   return (
     <button
       type="button"
       onClick={() => tourState.open()}
-      className="group glass-dark press relative inline-flex items-center gap-2 overflow-hidden border border-mint/30 px-4 py-2 text-[0.78rem] font-bold tracking-tight"
+      className="group glass-dark brand-glow press relative inline-flex items-center gap-2.5 overflow-hidden border border-mint/40 px-5 py-3 text-[0.82rem] font-bold tracking-tight"
     >
       <span className="absolute -right-1.5 -top-1.5 z-20 flex h-3.5 w-3.5">
         <motion.span
@@ -58,8 +58,8 @@ function WhatWeDoButton() {
         <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-red-500" />
       </span>
       <span className="absolute inset-0 origin-left scale-x-0 bg-white transition-transform duration-300 ease-out group-hover:scale-x-100" />
-      <span className="relative z-10 flex items-center gap-2 text-white transition-colors duration-300 group-hover:text-black">
-        <HelpCircle className="h-4 w-4 text-mint transition-colors duration-300 group-hover:text-black" strokeWidth={2.2} />
+      <span className="relative z-10 flex items-center gap-2.5 text-white transition-colors duration-300 group-hover:text-black">
+        <HelpCircle className="h-[1.1rem] w-[1.1rem] text-mint transition-colors duration-300 group-hover:text-black" strokeWidth={2.2} />
         What do we actually do?
       </span>
     </button>
@@ -106,9 +106,13 @@ export function BuyerSection() {
       phoneLayoutId={TOUR_PHONE_LAYOUT_ID}
       hidePhone={tourOpen}
       corner={
-        <div className="flex flex-col items-start gap-2.5">
-          <HeroSearch />
-          <WhatWeDoButton />
+        <div className="relative flex w-full flex-col gap-4">
+          <div className="flex justify-start">
+            <WhatWeDoButton />
+          </div>
+          <div className="flex justify-center sm:absolute sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2">
+            <HeroSearch />
+          </div>
         </div>
       }
       stepStrip={<HowItWorksStrip />}
