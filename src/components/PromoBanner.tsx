@@ -1,22 +1,46 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, PartyPopper } from "lucide-react";
+import { motion } from "motion/react";
+import { ArrowRight } from "lucide-react";
 
-/** Slim announcement strip right under the header — blurred glass so it reads as part of the page, not a solid banner slapped on top. */
+const ITEMS = [
+  "Win a luxury watch for £2",
+  "Every item independently authenticated",
+  "New competitions close daily",
+  "Sellers earn more than a private sale",
+  "Not just watches — jewellery, bags & more",
+  "Instant cash offers available",
+];
+
+function TickerRow() {
+  return (
+    <>
+      {ITEMS.map((item, i) => (
+        <span key={i} className="mx-5 flex shrink-0 items-center gap-2">
+          <span className="h-1 w-1 shrink-0 rounded-full bg-mint" />
+          {item}
+        </span>
+      ))}
+      <span className="mx-5 flex shrink-0 items-center gap-1.5 text-mint">
+        Browse now
+        <ArrowRight className="h-3 w-3" strokeWidth={2.4} />
+      </span>
+    </>
+  );
+}
+
+/** Continuously sliding ticker under the header — a bunch of short flash-info lines looping left, glass-dark background so it reads as part of the page. */
 export function PromoBanner() {
   return (
-    <div className="glass-dark relative z-10 w-full">
-      <Link
-        to="/browse"
-        className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-2.5 gap-y-1 px-6 py-2.5 text-center text-[0.8rem] font-semibold tracking-tight text-white/85 transition-colors hover:text-white"
-      >
-        <PartyPopper className="h-3.5 w-3.5 shrink-0 text-mint" strokeWidth={2.2} />
-        <span>
-          Win a luxury watch for <span className="text-mint">£2</span> — new competitions close daily
-        </span>
-        <span className="inline-flex items-center gap-1 text-mint">
-          Browse now
-          <ArrowRight className="h-3 w-3" strokeWidth={2.4} />
-        </span>
+    <div className="glass-dark relative z-10 w-full overflow-hidden">
+      <Link to="/browse" className="block py-2.5">
+        <motion.div
+          className="flex whitespace-nowrap text-[0.8rem] font-semibold tracking-tight text-white/85"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 28, ease: "linear", repeat: Infinity }}
+        >
+          <TickerRow />
+          <TickerRow />
+        </motion.div>
       </Link>
     </div>
   );
