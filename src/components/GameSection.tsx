@@ -23,7 +23,7 @@ export function GameSection({
 
       <div className="relative z-[2] mx-auto flex w-full max-w-xl flex-col items-center px-6 py-20 text-center">
         <Reveal>
-          <p className="flex items-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">
+          <p className="flex items-center justify-center gap-1.5 text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">
             <Gamepad2 className="h-3.5 w-3.5" strokeWidth={2.4} />
             The game
           </p>
