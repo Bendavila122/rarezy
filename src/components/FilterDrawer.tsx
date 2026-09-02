@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { categoryOf, CONDITIONS, MOVEMENT_TYPES, movementType, type Condition } from "@/lib/marketplace";
 import type { CompetitionListing } from "@/lib/store";
 import { activeFilterCount, EMPTY_FILTERS, facetCounts, toggleValue, type WatchFilters } from "@/lib/filters";
@@ -14,7 +14,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   electronics: "Electronics",
 };
 
-const DEFAULT_OPEN = new Set(["category", "brand", "price"]);
+const DEFAULT_OPEN = new Set(["brand", "price"]);
 
 function Section({
   id,
@@ -88,6 +88,23 @@ function CheckRow({
   );
 }
 
+/** A full-width row for picking a category, distinct from CheckRow's checkbox style — this is a "go to the next stage" tap, not a toggle. */
+function CategoryRow({ label, count, onClick }: { label: string; count: number; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="press flex w-full items-center justify-between gap-2 border-b border-white/[0.06] py-3.5 text-left"
+    >
+      <span className="text-[0.9rem] font-medium tracking-tight text-foreground">{label}</span>
+      <span className="flex items-center gap-2">
+        <span className="tabular text-[0.75rem] text-muted">{count}</span>
+        <ChevronRight className="h-4 w-4 text-muted" strokeWidth={2} />
+      </span>
+    </button>
+  );
+}
+
 function RangeRow({
   unit,
   min,
@@ -142,6 +159,15 @@ function RangeRow({
   );
 }
 
+/**
+ * Staged filtering: with no category chosen, the drawer shows nothing but
+ * the category picker (a full-width row per category, with a live count).
+ * Picking one narrows to that category (single-select — picking a
+ * different one replaces it) and reveals the filters relevant to it: the
+ * shared set (brand, ticket price, value, condition, year, delivery &
+ * timing) plus watch-only technical fields (movement, case material,
+ * diameter, bracelet, dial) when the category is "watch".
+ */
 export function FilterDrawer({
   open,
   onClose,
@@ -171,14 +197,21 @@ export function FilterDrawer({
 
   const patch = (p: Partial<WatchFilters>) => onChange({ ...filters, ...p });
 
+  const selectedCategory = filters.categories[0];
   const categoryFacets = facetCounts(listings, (c) => categoryOf(c.item));
-  const brandFacets = facetCounts(listings, (c) => c.item.brand);
-  const caseMaterialFacets = facetCounts(listings, (c) => c.item.caseMaterial);
-  const braceletFacets = facetCounts(listings, (c) => c.item.braceletMaterial);
-  const dialFacets = facetCounts(listings, (c) => c.item.dialColor);
+
+  // Brand/movement/case/etc. facets are scoped to the chosen category once
+  // picked, so e.g. car brands never show up in a watch brand list.
+  const categoryListings = selectedCategory
+    ? listings.filter((c) => categoryOf(c.item) === selectedCategory)
+    : listings;
+  const brandFacets = facetCounts(categoryListings, (c) => c.item.brand);
+  const caseMaterialFacets = facetCounts(categoryListings, (c) => c.item.caseMaterial);
+  const braceletFacets = facetCounts(categoryListings, (c) => c.item.braceletMaterial);
+  const dialFacets = facetCounts(categoryListings, (c) => c.item.dialColor);
   const movementFacets = MOVEMENT_TYPES.map((m) => ({
     value: m,
-    count: listings.filter((c) => movementType(c.item.movement) === m).length,
+    count: categoryListings.filter((c) => movementType(c.item.movement) === m).length,
   })).filter((f) => f.count > 0);
 
   return (
@@ -201,7 +234,9 @@ export function FilterDrawer({
             className="fixed inset-y-0 right-0 z-50 flex w-[88vw] max-w-sm flex-col bg-background shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-white/[0.08] px-5 py-4">
-              <h2 className="text-[1rem] font-semibold tracking-tight">Filters</h2>
+              <h2 className="text-[1rem] font-semibold tracking-tight">
+                {selectedCategory ? CATEGORY_LABELS[selectedCategory] ?? "Filters" : "Filters"}
+              </h2>
               <button
                 type="button"
                 onClick={onClose}
@@ -213,219 +248,230 @@ export function FilterDrawer({
             </div>
 
             <div className="flex-1 overflow-y-auto px-5">
-              <Section
-                id="category"
-                title="Category"
-                count={filters.categories.length}
-                open={openSections.has("category")}
-                onToggle={toggleSection}
-              >
-                {categoryFacets.map((f) => (
-                  <CheckRow
-                    key={f.value}
-                    label={CATEGORY_LABELS[f.value] ?? f.value}
-                    hint={f.count}
-                    checked={filters.categories.includes(f.value)}
-                    onClick={() => patch({ categories: toggleValue(filters.categories, f.value) })}
-                  />
-                ))}
-              </Section>
+              {!selectedCategory ? (
+                <div className="pt-2">
+                  <p className="pb-1 text-[0.72rem] uppercase tracking-[0.16em] text-muted">Choose a category</p>
+                  {categoryFacets.map((f) => (
+                    <CategoryRow
+                      key={f.value}
+                      label={CATEGORY_LABELS[f.value] ?? f.value}
+                      count={f.count}
+                      onClick={() => patch({ categories: [f.value] })}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onChange(EMPTY_FILTERS)}
+                    className="press mb-1 mt-3 flex items-center gap-1 py-1 text-[0.78rem] font-medium text-brand"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" strokeWidth={2.4} />
+                    Change category
+                  </button>
 
-              <Section
-                id="brand"
-                title="Brand"
-                count={filters.brands.length}
-                open={openSections.has("brand")}
-                onToggle={toggleSection}
-              >
-                {brandFacets.map((f) => (
-                  <CheckRow
-                    key={f.value}
-                    label={f.value}
-                    hint={f.count}
-                    checked={filters.brands.includes(f.value)}
-                    onClick={() => patch({ brands: toggleValue(filters.brands, f.value) })}
-                  />
-                ))}
-              </Section>
+                  <Section
+                    id="brand"
+                    title="Brand"
+                    count={filters.brands.length}
+                    open={openSections.has("brand")}
+                    onToggle={toggleSection}
+                  >
+                    {brandFacets.map((f) => (
+                      <CheckRow
+                        key={f.value}
+                        label={f.value}
+                        hint={f.count}
+                        checked={filters.brands.includes(f.value)}
+                        onClick={() => patch({ brands: toggleValue(filters.brands, f.value) })}
+                      />
+                    ))}
+                  </Section>
 
-              <Section
-                id="price"
-                title="Ticket price"
-                count={(filters.priceMin ? 1 : 0) + (filters.priceMax ? 1 : 0)}
-                open={openSections.has("price")}
-                onToggle={toggleSection}
-              >
-                <RangeRow
-                  unit="£"
-                  min={filters.priceMin}
-                  max={filters.priceMax}
-                  onMin={(v) => patch({ priceMin: v })}
-                  onMax={(v) => patch({ priceMax: v })}
-                  placeholderMin="Min"
-                  placeholderMax="Max"
-                />
-              </Section>
+                  <Section
+                    id="price"
+                    title="Ticket price"
+                    count={(filters.priceMin ? 1 : 0) + (filters.priceMax ? 1 : 0)}
+                    open={openSections.has("price")}
+                    onToggle={toggleSection}
+                  >
+                    <RangeRow
+                      unit="£"
+                      min={filters.priceMin}
+                      max={filters.priceMax}
+                      onMin={(v) => patch({ priceMin: v })}
+                      onMax={(v) => patch({ priceMax: v })}
+                      placeholderMin="Min"
+                      placeholderMax="Max"
+                    />
+                  </Section>
 
-              <Section
-                id="value"
-                title="Watch value"
-                count={(filters.valueMin ? 1 : 0) + (filters.valueMax ? 1 : 0)}
-                open={openSections.has("value")}
-                onToggle={toggleSection}
-              >
-                <RangeRow
-                  unit="£"
-                  min={filters.valueMin}
-                  max={filters.valueMax}
-                  onMin={(v) => patch({ valueMin: v })}
-                  onMax={(v) => patch({ valueMax: v })}
-                  placeholderMin="Min"
-                  placeholderMax="Max"
-                />
-              </Section>
+                  <Section
+                    id="value"
+                    title="Value"
+                    count={(filters.valueMin ? 1 : 0) + (filters.valueMax ? 1 : 0)}
+                    open={openSections.has("value")}
+                    onToggle={toggleSection}
+                  >
+                    <RangeRow
+                      unit="£"
+                      min={filters.valueMin}
+                      max={filters.valueMax}
+                      onMin={(v) => patch({ valueMin: v })}
+                      onMax={(v) => patch({ valueMax: v })}
+                      placeholderMin="Min"
+                      placeholderMax="Max"
+                    />
+                  </Section>
 
-              <Section
-                id="condition"
-                title="Condition"
-                count={filters.conditions.length}
-                open={openSections.has("condition")}
-                onToggle={toggleSection}
-              >
-                {CONDITIONS.map((c) => (
-                  <CheckRow
-                    key={c.id}
-                    label={c.label}
-                    checked={filters.conditions.includes(c.id)}
-                    onClick={() => patch({ conditions: toggleValue<Condition>(filters.conditions, c.id) })}
-                  />
-                ))}
-              </Section>
+                  <Section
+                    id="condition"
+                    title="Condition"
+                    count={filters.conditions.length}
+                    open={openSections.has("condition")}
+                    onToggle={toggleSection}
+                  >
+                    {CONDITIONS.map((c) => (
+                      <CheckRow
+                        key={c.id}
+                        label={c.label}
+                        checked={filters.conditions.includes(c.id)}
+                        onClick={() => patch({ conditions: toggleValue<Condition>(filters.conditions, c.id) })}
+                      />
+                    ))}
+                  </Section>
 
-              <Section
-                id="year"
-                title="Year of production"
-                count={(filters.yearMin ? 1 : 0) + (filters.yearMax ? 1 : 0)}
-                open={openSections.has("year")}
-                onToggle={toggleSection}
-              >
-                <RangeRow
-                  min={filters.yearMin}
-                  max={filters.yearMax}
-                  onMin={(v) => patch({ yearMin: v })}
-                  onMax={(v) => patch({ yearMax: v })}
-                  placeholderMin="From"
-                  placeholderMax="To"
-                />
-              </Section>
+                  <Section
+                    id="year"
+                    title="Year of production"
+                    count={(filters.yearMin ? 1 : 0) + (filters.yearMax ? 1 : 0)}
+                    open={openSections.has("year")}
+                    onToggle={toggleSection}
+                  >
+                    <RangeRow
+                      min={filters.yearMin}
+                      max={filters.yearMax}
+                      onMin={(v) => patch({ yearMin: v })}
+                      onMax={(v) => patch({ yearMax: v })}
+                      placeholderMin="From"
+                      placeholderMax="To"
+                    />
+                  </Section>
 
-              <Section
-                id="movement"
-                title="Movement"
-                count={filters.movements.length}
-                open={openSections.has("movement")}
-                onToggle={toggleSection}
-              >
-                {movementFacets.map((f) => (
-                  <CheckRow
-                    key={f.value}
-                    label={f.value}
-                    hint={f.count}
-                    checked={filters.movements.includes(f.value)}
-                    onClick={() => patch({ movements: toggleValue(filters.movements, f.value) })}
-                  />
-                ))}
-              </Section>
+                  {selectedCategory === "watch" && (
+                    <>
+                      <Section
+                        id="movement"
+                        title="Movement"
+                        count={filters.movements.length}
+                        open={openSections.has("movement")}
+                        onToggle={toggleSection}
+                      >
+                        {movementFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.movements.includes(f.value)}
+                            onClick={() => patch({ movements: toggleValue(filters.movements, f.value) })}
+                          />
+                        ))}
+                      </Section>
 
-              <Section
-                id="case-material"
-                title="Case material"
-                count={filters.caseMaterials.length}
-                open={openSections.has("case-material")}
-                onToggle={toggleSection}
-              >
-                {caseMaterialFacets.map((f) => (
-                  <CheckRow
-                    key={f.value}
-                    label={f.value}
-                    hint={f.count}
-                    checked={filters.caseMaterials.includes(f.value)}
-                    onClick={() => patch({ caseMaterials: toggleValue(filters.caseMaterials, f.value) })}
-                  />
-                ))}
-              </Section>
+                      <Section
+                        id="case-material"
+                        title="Case material"
+                        count={filters.caseMaterials.length}
+                        open={openSections.has("case-material")}
+                        onToggle={toggleSection}
+                      >
+                        {caseMaterialFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.caseMaterials.includes(f.value)}
+                            onClick={() => patch({ caseMaterials: toggleValue(filters.caseMaterials, f.value) })}
+                          />
+                        ))}
+                      </Section>
 
-              <Section
-                id="diameter"
-                title="Case diameter"
-                count={(filters.diameterMin ? 1 : 0) + (filters.diameterMax ? 1 : 0)}
-                open={openSections.has("diameter")}
-                onToggle={toggleSection}
-              >
-                <RangeRow
-                  unit="mm"
-                  min={filters.diameterMin}
-                  max={filters.diameterMax}
-                  onMin={(v) => patch({ diameterMin: v })}
-                  onMax={(v) => patch({ diameterMax: v })}
-                  placeholderMin="Min"
-                  placeholderMax="Max"
-                />
-              </Section>
+                      <Section
+                        id="diameter"
+                        title="Case diameter"
+                        count={(filters.diameterMin ? 1 : 0) + (filters.diameterMax ? 1 : 0)}
+                        open={openSections.has("diameter")}
+                        onToggle={toggleSection}
+                      >
+                        <RangeRow
+                          unit="mm"
+                          min={filters.diameterMin}
+                          max={filters.diameterMax}
+                          onMin={(v) => patch({ diameterMin: v })}
+                          onMax={(v) => patch({ diameterMax: v })}
+                          placeholderMin="Min"
+                          placeholderMax="Max"
+                        />
+                      </Section>
 
-              <Section
-                id="bracelet"
-                title="Bracelet / strap"
-                count={filters.braceletMaterials.length}
-                open={openSections.has("bracelet")}
-                onToggle={toggleSection}
-              >
-                {braceletFacets.map((f) => (
-                  <CheckRow
-                    key={f.value}
-                    label={f.value}
-                    hint={f.count}
-                    checked={filters.braceletMaterials.includes(f.value)}
-                    onClick={() => patch({ braceletMaterials: toggleValue(filters.braceletMaterials, f.value) })}
-                  />
-                ))}
-              </Section>
+                      <Section
+                        id="bracelet"
+                        title="Bracelet / strap"
+                        count={filters.braceletMaterials.length}
+                        open={openSections.has("bracelet")}
+                        onToggle={toggleSection}
+                      >
+                        {braceletFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.braceletMaterials.includes(f.value)}
+                            onClick={() => patch({ braceletMaterials: toggleValue(filters.braceletMaterials, f.value) })}
+                          />
+                        ))}
+                      </Section>
 
-              <Section
-                id="dial"
-                title="Dial colour"
-                count={filters.dialColors.length}
-                open={openSections.has("dial")}
-                onToggle={toggleSection}
-              >
-                {dialFacets.map((f) => (
-                  <CheckRow
-                    key={f.value}
-                    label={f.value}
-                    hint={f.count}
-                    checked={filters.dialColors.includes(f.value)}
-                    onClick={() => patch({ dialColors: toggleValue(filters.dialColors, f.value) })}
-                  />
-                ))}
-              </Section>
+                      <Section
+                        id="dial"
+                        title="Dial colour"
+                        count={filters.dialColors.length}
+                        open={openSections.has("dial")}
+                        onToggle={toggleSection}
+                      >
+                        {dialFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.dialColors.includes(f.value)}
+                            onClick={() => patch({ dialColors: toggleValue(filters.dialColors, f.value) })}
+                          />
+                        ))}
+                      </Section>
+                    </>
+                  )}
 
-              <Section
-                id="more"
-                title="Scope of delivery & timing"
-                open={openSections.has("more")}
-                onToggle={toggleSection}
-              >
-                <CheckRow
-                  label="Original box & papers only"
-                  checked={filters.fullSetOnly}
-                  onClick={() => patch({ fullSetOnly: !filters.fullSetOnly })}
-                />
-                <CheckRow
-                  label="Ending within 48 hours"
-                  checked={filters.endingSoon}
-                  onClick={() => patch({ endingSoon: !filters.endingSoon })}
-                />
-              </Section>
+                  <Section
+                    id="more"
+                    title="Scope of delivery & timing"
+                    open={openSections.has("more")}
+                    onToggle={toggleSection}
+                  >
+                    <CheckRow
+                      label="Original box & papers only"
+                      checked={filters.fullSetOnly}
+                      onClick={() => patch({ fullSetOnly: !filters.fullSetOnly })}
+                    />
+                    <CheckRow
+                      label="Ending within 48 hours"
+                      checked={filters.endingSoon}
+                      onClick={() => patch({ endingSoon: !filters.endingSoon })}
+                    />
+                  </Section>
+                </>
+              )}
 
               <div className="h-4" />
             </div>
