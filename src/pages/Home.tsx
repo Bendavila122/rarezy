@@ -34,7 +34,7 @@ export function Home() {
       <div className="snap-start scroll-mt-16">
         <EndingSoonSection />
       </div>
-      <div className="snap-start scroll-mt-16">
+      <div id="game-section" className="snap-start scroll-mt-16">
         <GameSection
           score={heroScore}
           onTry={() => setHeroPlaying(true)}

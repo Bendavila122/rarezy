@@ -92,13 +92,30 @@ export function ScrollStory() {
               <div className="mt-5">
                 <StopLines lines={stop.lines} />
               </div>
-              {i === STOPS.length - 1 && (
+              {i === 0 && (
                 <Link
                   to="/browse"
                   className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
                 >
                   Browse now
                 </Link>
+              )}
+              {i === 1 && (
+                <Link
+                  to="/sell"
+                  className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
+                >
+                  Instant valuation
+                </Link>
+              )}
+              {i === STOPS.length - 1 && (
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("game-section")?.scrollIntoView({ behavior: "smooth" })}
+                  className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
+                >
+                  Try out the game
+                </button>
               )}
             </div>
           ))}

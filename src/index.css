@@ -23,9 +23,13 @@ body,
 
 /* Page-wide section snap-scrolling, scoped to whichever page opts in (the
    home page toggles this class on <html> for as long as it's mounted) so
-   other pages keep normal free scrolling. */
+   other pages keep normal free scrolling. `proximity`, not `mandatory` —
+   the last snap-marked section (Why Rarezy) isn't the last thing on the
+   page anymore (Reviews/FAQ/affiliates after it aren't snap points), and
+   `mandatory` fights free scrolling past a final snap point into
+   unmarked trailing content instead of just letting it through. */
 html.snap-page {
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
 }
 
 /* Hides the native scrollbar on the story's nested snap-scrolling text
