@@ -3,9 +3,9 @@ import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { FaqSection } from "@/components/FaqSection";
-import { BuyerSection } from "@/components/BuyerSection";
+import { SearchHero } from "@/components/SearchHero";
+import { ScrollStory } from "@/components/ScrollStory";
 import { GameSection } from "@/components/GameSection";
-import { SellerSection } from "@/components/SellerSection";
 import { WhyRarezySection } from "@/components/WhyRarezySection";
 import { EndingSoonSection } from "@/components/EndingSoonSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
@@ -20,12 +20,12 @@ export function Home() {
 
   return (
     <>
-      {/* Buyer story (phone right) then seller story (phone left) — the two
-          alternating narrative beats — followed by the game itself given room
-          to breathe, then social proof, partner services, and FAQs before the
-          footer. */}
-      <BuyerSection />
-      <SellerSection />
+      {/* Search bar, then the same three-stop story as the About tour (buyers,
+          sellers, marketplace) delivered inline via scroll-snap instead of a
+          modal, followed by the game itself given room to breathe, then
+          social proof, partner services, and FAQs before the footer. */}
+      <SearchHero />
+      <ScrollStory />
       <WhyRarezySection />
       <GameSection
         score={heroScore}

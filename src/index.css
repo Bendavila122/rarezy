@@ -208,6 +208,17 @@ body {
   }
 }
 
+/* Hides the native scrollbar on a snap-scrolling panel — the dot/arrow nav
+   below it is the visible affordance, a raw OS scrollbar would look like a
+   layout accident next to it. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Cursor-tracking radial glow — position set via --spot-x/--spot-y from JS.
    Sits above the surface (z-index 1) but below content (z-index 2 on children). */
 .spotlight {
