@@ -41,7 +41,7 @@ function HeroSearch() {
 }
 
 const STEP_ITEMS = [
-  { label: "Enter for £2", Icon: Ticket },
+  { label: "Enter from £1", Icon: Ticket },
   { label: "Play", Icon: Gamepad2 },
   { label: "Best score wins", Icon: Trophy },
 ] as const;

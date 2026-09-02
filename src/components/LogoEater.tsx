@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
 /** A big spread of recognisable brands — watch houses plus a few other prestige names — so the strip never feels like it's just looping the same handful. */
 const LOGOS = [
@@ -32,51 +31,40 @@ const LOGOS = [
   { name: "Tesla", src: "https://cdn.jsdelivr.net/npm/simple-icons@16.29.0/icons/tesla.svg" },
 ] as const;
 
-let uid = 0;
-const nextLogo = (i: number) => LOGOS[i % LOGOS.length]!;
+const TRACK = [...LOGOS, ...LOGOS];
 
 /**
- * A little conveyor of brand logos feeding into the search bar — three
- * slots visible at a time, the leftmost (closest to the search bar, about
- * to be "eaten") blurring and fading out as it's replaced. Sits directly
- * against the search bar's right edge with a slight negative margin and a
- * lower z-index so the bar visually occludes it, selling the illusion.
+ * A continuous conveyor of brand logos feeding into the search bar — a
+ * two-slot window, never pausing between logos. A static blur "gate" sits
+ * over the near slot (right against the search bar) so whatever logo is
+ * passing through it blurs and fades as it's about to disappear behind the
+ * bar, while the far slot stays perfectly sharp. The strip sits with a
+ * slight negative margin under the search bar's higher z-index, so the bar
+ * physically occludes the near slot too.
  */
 export function LogoEater() {
-  const [queue, setQueue] = useState(() =>
-    Array.from({ length: 3 }, (_, i) => ({ id: uid++, logo: nextLogo(i) })),
-  );
-  const cursor = useRef(3);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setQueue((q) => [...q.slice(1), { id: uid++, logo: nextLogo(cursor.current++) }]);
-    }, 1300);
-    return () => window.clearInterval(id);
-  }, []);
-
   return (
-    <div className="relative z-0 -ml-4 hidden h-11 items-center gap-3 sm:flex">
-      <AnimatePresence initial={false}>
-        {queue.map((item, i) => (
-          <motion.div
-            key={item.id}
-            layout
-            initial={{ opacity: 0, scale: 0.6, x: 16 }}
-            animate={{
-              opacity: i === 0 ? 0.3 : 1,
-              scale: i === 0 ? 0.85 : 1,
-              x: 0,
-              filter: i === 0 ? "blur(2.5px)" : "blur(0px)",
-            }}
-            exit={{ opacity: 0, scale: 0.3 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+    <div className="relative z-0 -ml-4 hidden h-11 w-[84px] items-center overflow-hidden sm:flex">
+      <motion.div
+        className="flex items-center gap-3"
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 34, ease: "linear", repeat: Infinity }}
+      >
+        {TRACK.map((logo, i) => (
+          <div
+            key={i}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white p-[7px] shadow-md"
           >
-            <img src={item.logo.src} alt={item.logo.name} className="h-full w-full object-contain" />
-          </motion.div>
+            <img src={logo.src} alt={logo.name} className="h-full w-full object-contain" />
+          </div>
         ))}
-      </AnimatePresence>
+      </motion.div>
+
+      {/* Blur gate over the near slot, fading outward so the transition into blur reads smoothly rather than a hard edge. */}
+      <div
+        className="pointer-events-none absolute inset-y-0 left-0 w-11 backdrop-blur-[3px]"
+        style={{ maskImage: "linear-gradient(to right, black 55%, transparent 100%)" }}
+      />
     </div>
   );
 }
