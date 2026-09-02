@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-import { SearchLogoBadge } from "@/components/SearchLogoBadge";
 import { browseState } from "@/lib/browseState";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
@@ -72,7 +71,7 @@ export function SearchHero() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Search watches"
-        className="w-full rounded-none border-none bg-transparent py-2 pl-9 pr-9 text-[0.8rem] tracking-tight text-white outline-none"
+        className="w-full rounded-none border-none bg-transparent py-2 pl-9 pr-3 text-[0.8rem] tracking-tight text-white outline-none"
       />
       {query.length === 0 && (
         <span className="pointer-events-none absolute left-9 top-1/2 flex -translate-y-1/2 items-center overflow-hidden text-[0.8rem] tracking-tight text-white/40">
@@ -80,7 +79,6 @@ export function SearchHero() {
           <span className="ml-0.5 animate-pulse">▌</span>
         </span>
       )}
-      <SearchLogoBadge />
     </form>
   );
 }
