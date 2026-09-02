@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Banknote, Car, Headphones, Laptop, Search, Shirt, ShoppingBag, SlidersHorizontal, Watch, X } from "lucide-react";
+import { Banknote, Car, Headphones, Search, Shirt, ShoppingBag, SlidersHorizontal, Watch, X } from "lucide-react";
 import { CONDITIONS, money, titleOf } from "@/lib/marketplace";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 import { ListingCard } from "@/components/ListingCard";
@@ -18,7 +18,7 @@ const CATEGORIES = [
   { key: "handbags", icons: [ShoppingBag] },
   { key: "cash", icons: [Banknote] },
   { key: "clothing", icons: [Shirt] },
-  { key: "electronics", icons: [Headphones, Laptop] },
+  { key: "electronics", icons: [Headphones] },
 ] as const;
 
 /**
