@@ -47,18 +47,21 @@ function WhatWeDoButton() {
     <button
       type="button"
       onClick={() => tourState.open()}
-      className="glass-dark press relative inline-flex items-center gap-2 border border-mint/30 px-4 py-2 text-[0.78rem] font-bold tracking-tight text-white"
+      className="group glass-dark press relative inline-flex items-center gap-2 overflow-hidden border border-mint/30 px-4 py-2 text-[0.78rem] font-bold tracking-tight"
     >
-      <span className="absolute -right-1.5 -top-1.5 flex h-3.5 w-3.5">
+      <span className="absolute -right-1.5 -top-1.5 z-20 flex h-3.5 w-3.5">
         <motion.span
-          className="absolute inline-flex h-full w-full rounded-full bg-mint"
+          className="absolute inline-flex h-full w-full rounded-full bg-red-500"
           animate={{ scale: [1, 2.4], opacity: [0.8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
         />
-        <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-mint" />
+        <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-red-500" />
       </span>
-      <HelpCircle className="h-4 w-4 text-mint" strokeWidth={2.2} />
-      What do we actually do?
+      <span className="absolute inset-0 origin-left scale-x-0 bg-white transition-transform duration-300 ease-out group-hover:scale-x-100" />
+      <span className="relative z-10 flex items-center gap-2 text-white transition-colors duration-300 group-hover:text-black">
+        <HelpCircle className="h-4 w-4 text-mint transition-colors duration-300 group-hover:text-black" strokeWidth={2.2} />
+        What do we actually do?
+      </span>
     </button>
   );
 }
