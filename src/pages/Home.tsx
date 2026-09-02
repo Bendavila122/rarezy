@@ -12,6 +12,7 @@ import { ReviewsSection } from "@/components/ReviewsSection";
 import { AffiliateStrip } from "@/components/AffiliateStrip";
 import { SkillGame } from "@/components/SkillGame";
 import { ScrollHint } from "@/components/ScrollHint";
+import { PromoBanner } from "@/components/PromoBanner";
 
 export function Home() {
   const [heroPlaying, setHeroPlaying] = useState(false);
@@ -23,6 +24,7 @@ export function Home() {
           alternating narrative beats — followed by the game itself given room
           to breathe, then social proof, partner services, and FAQs before the
           footer. */}
+      <PromoBanner />
       <BuyerSection />
       <SellerSection />
       <WhyRarezySection />
