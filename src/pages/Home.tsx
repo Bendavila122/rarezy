@@ -3,7 +3,6 @@ import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { FaqSection } from "@/components/FaqSection";
-import { SearchHero } from "@/components/SearchHero";
 import { ScrollStory } from "@/components/ScrollStory";
 import { GameSection } from "@/components/GameSection";
 import { WhyRarezySection } from "@/components/WhyRarezySection";
@@ -28,15 +27,11 @@ export function Home() {
   return (
     <>
       {/* Search bar plus the three-stop story (buyers, sellers, marketplace)
-          together fill exactly one screen below the sticky nav — nothing of
-          "Why Rarezy" is visible until the story's finished — followed by
-          the game itself given room to breathe, then social proof, partner
-          services, and FAQs before the footer. Every section below is its
-          own snap point. */}
-      <div className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col">
-        <SearchHero />
-        <ScrollStory />
-      </div>
+          — real page content, real scroll, each stop its own snap point —
+          followed by the game itself given room to breathe, then social
+          proof, partner services, and FAQs before the footer. Every
+          section below is its own snap point too. */}
+      <ScrollStory />
       <div className="snap-start scroll-mt-16">
         <WhyRarezySection />
       </div>

@@ -63,7 +63,7 @@ export function SearchHero() {
   };
 
   return (
-    <div className="relative z-10 mx-auto flex w-full max-w-6xl justify-center px-6 pt-6 sm:justify-start sm:pt-8">
+    <div className="relative z-10 mx-auto flex w-full max-w-6xl justify-center px-6 pb-6 pt-6 sm:justify-start sm:pb-12 sm:pt-8">
       <form onSubmit={submit} className="glass-dark relative w-72 sm:w-[24rem]">
         <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" strokeWidth={2} />
         <input

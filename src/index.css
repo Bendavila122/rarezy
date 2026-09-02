@@ -28,6 +28,16 @@ html.snap-page {
   scroll-snap-type: y mandatory;
 }
 
+/* Hides the native scrollbar on the story's nested snap-scrolling text
+   column — a raw OS scrollbar there would look like a layout accident. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   margin: 0;
   background: var(--color-background);
