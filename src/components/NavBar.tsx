@@ -4,6 +4,7 @@ import { Compass, HelpCircle, Info, Menu, Plus, ShoppingBag, Ticket, User, X } f
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
 import { tourState } from "@/lib/tourState";
+import { TourHintBubble } from "@/components/TourHintBubble";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
@@ -63,15 +64,18 @@ export function NavBar() {
 
         <div className="flex h-9 items-center gap-3">
           <nav className="flex h-9 items-center gap-5">
-            <button
-              type="button"
-              onClick={() => tourState.open()}
-              className="group press relative flex h-9 items-center gap-1.5 border border-white/15 bg-white px-3 text-[0.92rem] font-semibold tracking-tight text-black transition-all duration-200 ease-out hover:-translate-y-[1px] hover:bg-white/90"
-            >
-              <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full bg-red-500" />
-              <Info className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
-              About
-            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => tourState.open()}
+                className="group press relative flex h-9 items-center gap-1.5 border border-white/15 bg-white px-3 text-[0.92rem] font-semibold tracking-tight text-black transition-all duration-200 ease-out hover:-translate-y-[1px] hover:bg-white/90"
+              >
+                <span className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-full bg-red-500" />
+                <Info className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
+                About
+              </button>
+              <TourHintBubble />
+            </div>
             {PRIMARY_LINKS.map((item) => {
               const badge = badgeFor(item.to);
               return (

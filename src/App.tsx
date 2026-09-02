@@ -4,6 +4,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { AuthGateRedirect } from "@/components/AuthGateRedirect";
+import { CookieBanner } from "@/components/CookieBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { Home } from "@/pages/Home";
 import { Browse } from "@/pages/Browse";
@@ -64,6 +65,7 @@ export function App() {
       </div>
       <Footer />
       <AuthGateRedirect />
+      <CookieBanner />
       <Analytics />
       <SpeedInsights />
     </div>
