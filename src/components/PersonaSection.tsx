@@ -30,6 +30,7 @@ export function PersonaSection({
   ctaTo,
   reverse = false,
   corner,
+  stepStrip,
 }: {
   eyebrow: string;
   Icon: LucideIcon;
@@ -42,6 +43,7 @@ export function PersonaSection({
   ctaTo: string;
   reverse?: boolean;
   corner?: ReactNode;
+  stepStrip?: ReactNode;
 }) {
   const [index, setIndex] = useState(0);
 
@@ -116,6 +118,8 @@ export function PersonaSection({
       <p className={`mt-5 text-[0.95rem] leading-relaxed text-white/55 sm:text-[1rem] ${reverse ? "sm:ml-auto" : ""} max-w-md`}>
         {subtext}
       </p>
+
+      {stepStrip && <div className={`mt-5 ${reverse ? "sm:flex sm:justify-end" : ""}`}>{stepStrip}</div>}
 
       <Link
         to={ctaTo}

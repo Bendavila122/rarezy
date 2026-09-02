@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles } from "lucide-react";
+import { ArrowRight, Gamepad2, Search, Sparkles, Ticket, Trophy } from "lucide-react";
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
 import { browseState } from "@/lib/browseState";
@@ -39,6 +39,29 @@ function HeroSearch() {
   );
 }
 
+const STEP_ITEMS = [
+  { label: "Enter for £2", Icon: Ticket },
+  { label: "Play", Icon: Gamepad2 },
+  { label: "Best score wins", Icon: Trophy },
+] as const;
+
+/** Spells out the core mechanic in one glance — same eyebrow-style typography as the rest of the hero, so it reads as part of it rather than a bolted-on banner. */
+function HowItWorksStrip() {
+  return (
+    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-2 text-[0.78rem] font-bold tracking-tight text-white/70">
+      {STEP_ITEMS.map((item, i) => (
+        <span key={item.label} className="flex items-center gap-2.5">
+          {i > 0 && <ArrowRight className="h-3 w-3 text-white/25" strokeWidth={2.4} />}
+          <span className="flex items-center gap-1.5">
+            <item.Icon className="h-3.5 w-3.5 text-mint" strokeWidth={2.2} />
+            {item.label}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function BuyerSection() {
   return (
     <PersonaSection
@@ -52,6 +75,7 @@ export function BuyerSection() {
       ctaLabel="Browse all watches"
       ctaTo="/browse"
       corner={<HeroSearch />}
+      stepStrip={<HowItWorksStrip />}
     />
   );
 }
