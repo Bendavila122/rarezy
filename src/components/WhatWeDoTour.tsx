@@ -133,7 +133,7 @@ export function WhatWeDoTour() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[1000] bg-black/75 backdrop-blur-2xl"
           onClick={() => tourState.close()}
         >
@@ -157,7 +157,7 @@ export function WhatWeDoTour() {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+                  transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <p className="text-[0.68rem] font-bold uppercase tracking-[0.32em] text-mint">
                     {current.eyebrow}
@@ -187,7 +187,7 @@ export function WhatWeDoTour() {
               <div className="order-first flex justify-center sm:order-last">
                 <motion.div
                   layoutId={TOUR_PHONE_LAYOUT_ID}
-                  transition={{ type: "spring", stiffness: 170, damping: 22, mass: 0.9 }}
+                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <PhoneMockup glow={current.glow} glow2={current.glow2}>
                     <AnimatePresence mode="wait">

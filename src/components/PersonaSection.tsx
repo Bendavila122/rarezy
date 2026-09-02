@@ -64,7 +64,7 @@ export function PersonaSection({
     <Reveal delay={0.1} y={36} className={`order-2 ${reverse ? "sm:order-1" : "sm:order-2"}`}>
       <motion.div
         {...(phoneLayoutId ? { layoutId: phoneLayoutId } : {})}
-        transition={{ type: "spring", stiffness: 170, damping: 22, mass: 0.9 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       >
         <PhoneMockup glow={glow} glow2={glow2} floatDelay={reverse ? 1.4 : 0}>
           <AnimatePresence mode="wait">
