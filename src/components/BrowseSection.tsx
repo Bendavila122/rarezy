@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Banknote, Car, Headphones, Laptop, Search, Shirt, ShoppingBag, SlidersHorizontal, Watch, X } from "lucide-react";
 import { CONDITIONS, money, titleOf } from "@/lib/marketplace";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 import { ListingCard } from "@/components/ListingCard";
@@ -11,14 +11,14 @@ import { Reveal } from "@/components/Reveal";
 
 type Chip = { key: string; label: string; remove: () => void };
 
-/** Decorative category strip — colourful iOS-style emoji glyphs, no labels. Watches are the only category the store actually models; the rest are a visual preview of where the marketplace is headed. */
+/** Decorative category strip — muted grey glyphs on frosted glass tiles, no labels. Watches are the only category the store actually models; the rest are a visual preview of where the marketplace is headed. */
 const CATEGORIES = [
-  { key: "watches", emoji: "⌚" },
-  { key: "cars", emoji: "🚗" },
-  { key: "handbags", emoji: "👜" },
-  { key: "cash", emoji: "💵" },
-  { key: "clothing", emoji: "👕" },
-  { key: "electronics", emoji: "🎧💻" },
+  { key: "watches", icons: [Watch] },
+  { key: "cars", icons: [Car] },
+  { key: "handbags", icons: [ShoppingBag] },
+  { key: "cash", icons: [Banknote] },
+  { key: "clothing", icons: [Shirt] },
+  { key: "electronics", icons: [Headphones, Laptop] },
 ] as const;
 
 /**
@@ -143,9 +143,15 @@ export function BrowseSection() {
           {CATEGORIES.map((c) => (
             <div
               key={c.key}
-              className="glass-dark flex h-16 w-16 items-center justify-center text-[1.6rem] leading-none sm:h-20 sm:w-20 sm:text-[2rem]"
+              className="glass-block group flex h-16 w-16 cursor-pointer items-center justify-center gap-1.5 transition-colors duration-200 hover:border-mint/50 hover:bg-white/[0.14] sm:h-20 sm:w-20"
             >
-              {c.emoji}
+              {c.icons.map((Icon, i) => (
+                <Icon
+                  key={i}
+                  className="h-6 w-6 text-white/50 transition-colors duration-200 group-hover:text-mint sm:h-7 sm:w-7"
+                  strokeWidth={1.6}
+                />
+              ))}
             </div>
           ))}
         </div>
