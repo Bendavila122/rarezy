@@ -105,8 +105,8 @@ export function WhatWeDoTour() {
     if (open) setStop(0);
   }, [open]);
 
-  // Auto-advance every 30s — manual prev/next/dot clicks also change `stop`,
-  // which restarts this timer so a slide always gets its full 30s after the
+  // Auto-advance every 15s — manual prev/next/dot clicks also change `stop`,
+  // which restarts this timer so a slide always gets its full 15s after the
   // visitor last touched it. Past the final stop, close and return home.
   useEffect(() => {
     if (!open) return;
@@ -117,7 +117,7 @@ export function WhatWeDoTour() {
         tourState.close();
         navigate("/");
       }
-    }, 30_000);
+    }, 15_000);
     return () => window.clearTimeout(id);
   }, [open, stop, navigate]);
 
