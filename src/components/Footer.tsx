@@ -7,8 +7,6 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
     links: [
       { label: "Browse watches", to: "/browse" },
       { label: "Sell your watch", to: "/sell" },
-      { label: "How it works", to: "/how-it-works" },
-      { label: "Partner services", to: "/partners" },
     ],
   },
   {

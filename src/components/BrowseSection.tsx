@@ -11,6 +11,16 @@ import { Reveal } from "@/components/Reveal";
 
 type Chip = { key: string; label: string; remove: () => void };
 
+/** Decorative category strip — colourful iOS-style emoji glyphs, no labels. Watches are the only category the store actually models; the rest are a visual preview of where the marketplace is headed. */
+const CATEGORIES = [
+  { key: "watches", emoji: "⌚" },
+  { key: "cars", emoji: "🚗" },
+  { key: "handbags", emoji: "👜" },
+  { key: "cash", emoji: "💵" },
+  { key: "clothing", emoji: "👕" },
+  { key: "electronics", emoji: "🎧💻" },
+] as const;
+
 /**
  * Search, filters and the full watch grid — rendered by the standalone
  * `/browse` page. Search/sort/filters seed from (and save back to)
@@ -129,10 +139,16 @@ export function BrowseSection() {
   return (
     <div className="mx-auto max-w-6xl px-6 pb-6 pt-10">
       <Reveal amount={0.5}>
-        <h1 className="text-[1.4rem] font-semibold tracking-[-0.02em]">All watches</h1>
-        <p className="mt-1 text-[0.78rem] text-muted">
-          {shown.length} watch{shown.length === 1 ? "" : "es"} live now
-        </p>
+        <div className="flex flex-wrap gap-3">
+          {CATEGORIES.map((c) => (
+            <div
+              key={c.key}
+              className="glass-dark flex h-16 w-16 items-center justify-center text-[1.6rem] leading-none sm:h-20 sm:w-20 sm:text-[2rem]"
+            >
+              {c.emoji}
+            </div>
+          ))}
+        </div>
       </Reveal>
 
       <div className="relative mt-5">
