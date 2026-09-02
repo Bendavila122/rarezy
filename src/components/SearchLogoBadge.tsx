@@ -1,6 +1,7 @@
-import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
-/** A big spread of recognisable brands — watch houses plus a few other prestige names — so the strip never feels like it's just looping the same handful. */
+/** A big spread of recognisable brands — watch houses plus a few other prestige names — so the badge never feels like it's just looping the same handful. */
 const LOGOS = [
   { name: "Rolex", src: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Rolex_wordmark_logo.svg" },
   { name: "Omega", src: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Omega_Logo.svg" },
@@ -31,48 +32,31 @@ const LOGOS = [
   { name: "Tesla", src: "https://cdn.jsdelivr.net/npm/simple-icons@16.29.0/icons/tesla.svg" },
 ] as const;
 
-const TRACK = [...LOGOS, ...LOGOS];
+/** One brand badge at a time, crossfading, tucked inside the search bar's right edge. */
+export function SearchLogoBadge() {
+  const [index, setIndex] = useState(0);
 
-/**
- * A continuous conveyor of brand logos feeding into the search bar — a
- * three-slot window, never pausing between logos. A static blur + dark
- * gradient "gate" sits over the near slot (right against the search bar) so
- * whatever logo is passing through it doesn't just blur — it visually
- * dissolves into the same shadow as the page background, rather than
- * staying a bright white circle that merely loses focus. The strip sits
- * with a slight negative margin under the search bar's higher z-index, so
- * the bar physically occludes the near slot too.
- */
-export function LogoEater() {
+  useEffect(() => {
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % LOGOS.length), 1800);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const logo = LOGOS[index]!;
+
   return (
-    <div className="relative z-0 -ml-4 hidden h-11 w-[132px] items-center overflow-hidden sm:flex">
-      <motion.div
-        className="flex items-center gap-3"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 34, ease: "linear", repeat: Infinity }}
-      >
-        {TRACK.map((logo, i) => (
-          <div
-            key={i}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white p-[7px] shadow-md"
-          >
-            <img src={logo.src} alt={logo.name} className="h-full w-full object-contain" />
-          </div>
-        ))}
-      </motion.div>
-
-      {/* Blur + dark gradient gate over the near slot, so whatever's passing through doesn't just go
-          fuzzy — it visually dissolves into the same shadow as the page background behind it. */}
-      <div
-        className="pointer-events-none absolute inset-y-0 left-0 w-16 backdrop-blur-[5px]"
-        style={{ maskImage: "linear-gradient(to right, black 45%, transparent 100%)" }}
-      />
-      <div
-        className="pointer-events-none absolute inset-y-0 left-0 w-16"
-        style={{
-          background: "linear-gradient(to right, oklch(0.15 0.008 260 / 92%) 30%, transparent 100%)",
-        }}
-      />
+    <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={logo.name}
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.7 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-white p-[5px] shadow-md"
+        >
+          <img src={logo.src} alt={logo.name} className="h-full w-full object-contain" />
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Gamepad2, Search, Sparkles, Ticket, Trophy } from "lucide-react";
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
-import { LogoEater } from "@/components/LogoEater";
+import { SearchLogoBadge } from "@/components/SearchLogoBadge";
 import { browseState } from "@/lib/browseState";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
@@ -12,7 +12,39 @@ const STEPS = [
   { headline: "Take it home for a fraction of the price.", Screen: WinScreen },
 ];
 
-/** Straight-to-results search — no filters or sort here, just type and go. Those live on the Browse page itself, seeded with whatever's typed here via `browseState`. */
+const TYPE_SPEED = 45;
+const CLEAR_SPEED = 18;
+const HOLD_MS = 1700;
+
+/** Types out `text`, waits, deletes it, then hands control back to the caller to swap in the next phrase — a loop-friendly single-phrase typewriter. */
+function useTypewriterCycle(phrases: readonly string[]) {
+  const [index, setIndex] = useState(0);
+  const [display, setDisplay] = useState("");
+  const [clearing, setClearing] = useState(false);
+
+  useEffect(() => {
+    const text = phrases[index] ?? "";
+    if (!clearing) {
+      if (display.length < text.length) {
+        const id = window.setTimeout(() => setDisplay(text.slice(0, display.length + 1)), TYPE_SPEED);
+        return () => window.clearTimeout(id);
+      }
+      const id = window.setTimeout(() => setClearing(true), HOLD_MS);
+      return () => window.clearTimeout(id);
+    }
+    if (display.length > 0) {
+      const id = window.setTimeout(() => setDisplay((d) => d.slice(0, -1)), CLEAR_SPEED);
+      return () => window.clearTimeout(id);
+    }
+    setClearing(false);
+    setIndex((i) => (i + 1) % phrases.length);
+    return undefined;
+  }, [display, clearing, index, phrases]);
+
+  return display;
+}
+
+/** Straight-to-results search — no filters or sort here, just type and go. Those live on the Browse page itself, seeded with whatever's typed here via `browseState`. The placeholder types out a loop of what's actually available, one category at a time. */
 function HeroSearch() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
@@ -20,6 +52,16 @@ function HeroSearch() {
   const liveCount = records.filter(
     (r): r is CompetitionListing => r.kind === "competition" && r.status === "live",
   ).length;
+
+  const phrases = [
+    `Search from ${liveCount} watches`,
+    "Search from 24 electronics",
+    "Search from 1 cash prize",
+    "Search from 16 handbags",
+    "Search from 12 clothing items",
+    "Search from 8 cars",
+  ];
+  const typed = useTypewriterCycle(phrases);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +75,16 @@ function HeroSearch() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={`Search from ${liveCount} watches`}
-        className="w-full rounded-none border-none bg-transparent py-3.5 pl-11 pr-4 text-[0.92rem] tracking-tight text-white outline-none placeholder:text-white/40"
+        aria-label="Search watches"
+        className="w-full rounded-none border-none bg-transparent py-3.5 pl-11 pr-12 text-[0.92rem] tracking-tight text-white outline-none"
       />
+      {query.length === 0 && (
+        <span className="pointer-events-none absolute left-11 top-1/2 flex -translate-y-1/2 items-center text-[0.92rem] tracking-tight text-white/40">
+          {typed}
+          <span className="ml-0.5 animate-pulse">▌</span>
+        </span>
+      )}
+      <SearchLogoBadge />
     </form>
   );
 }
@@ -78,7 +127,6 @@ export function BuyerSection() {
       corner={
         <div className="flex w-full items-center justify-start">
           <HeroSearch />
-          <LogoEater />
         </div>
       }
       stepStrip={<HowItWorksStrip />}
