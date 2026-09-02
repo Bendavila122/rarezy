@@ -82,7 +82,7 @@ export function ScrollStory() {
   return (
     <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
       <div className="grid grid-cols-1 items-start gap-10 sm:grid-cols-2">
-        <div className="order-1">
+        <div className="order-2 sm:order-1">
           <div className="snap-start scroll-mt-16">
             <SearchHero />
           </div>
@@ -110,7 +110,7 @@ export function ScrollStory() {
           ))}
         </div>
 
-        <div className="order-2 flex items-center justify-center pb-10 sm:sticky sm:top-16 sm:h-[calc(100vh-4rem)] sm:pb-0">
+        <div className="order-1 flex items-center justify-center pb-6 pt-6 sm:order-2 sm:sticky sm:top-16 sm:h-[calc(100vh-4rem)] sm:pb-0 sm:pt-0">
           <PhoneMockup glow={current.glow} glow2={current.glow2}>
             <AnimatePresence mode="wait">
               <motion.div

@@ -144,7 +144,7 @@ export function PhoneMockup({
         <motion.div
           {...phoneMotion}
           style={{ transformStyle: "preserve-3d" }}
-          className="relative mx-auto w-[13.5rem] sm:w-[15rem]"
+          className="relative mx-auto w-[9.5rem] sm:w-[15rem]"
         >
           {/* Front face — the screen itself. Sits at the box's z=0 face; hidden
               once it rotates past the point where its back would show, so it
