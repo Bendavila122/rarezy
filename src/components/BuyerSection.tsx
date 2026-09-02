@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Gamepad2, Search, Sparkles, Ticket, Trophy } from "lucide-react";
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
+import { LogoEater } from "@/components/LogoEater";
 import { browseState } from "@/lib/browseState";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
@@ -27,7 +28,7 @@ function HeroSearch() {
   };
 
   return (
-    <form onSubmit={submit} className="glass-dark relative w-72 sm:w-[24rem]">
+    <form onSubmit={submit} className="glass-dark relative z-10 w-72 sm:w-[24rem]">
       <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" strokeWidth={2} />
       <input
         value={query}
@@ -75,8 +76,9 @@ export function BuyerSection() {
       ctaLabel="Browse all watches"
       ctaTo="/browse"
       corner={
-        <div className="flex w-full justify-start">
+        <div className="flex w-full items-center justify-start">
           <HeroSearch />
+          <LogoEater />
         </div>
       }
       stepStrip={<HowItWorksStrip />}
