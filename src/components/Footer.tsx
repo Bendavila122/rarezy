@@ -74,9 +74,15 @@ export function Footer() {
           </p>
           <a
             href="mailto:help@rarezy.co.uk"
-            className="mt-4 inline-block text-[0.78rem] font-medium text-mint hover:underline"
+            className="mt-4 block text-[0.78rem] font-medium text-mint hover:underline"
           >
             help@rarezy.co.uk
+          </a>
+          <a
+            href="tel:+442079460958"
+            className="mt-1.5 block text-[0.78rem] font-medium text-white/55 hover:text-mint hover:underline"
+          >
+            020 7946 0958
           </a>
         </div>
 

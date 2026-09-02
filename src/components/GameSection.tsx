@@ -73,6 +73,9 @@ export function GameSection({
               >
                 Try before you buy
               </button>
+              <p className="mt-3 text-center text-[0.72rem] text-muted">
+                Try out the game without paying for it to see if you have a chance.
+              </p>
             </div>
           )}
         </Reveal>

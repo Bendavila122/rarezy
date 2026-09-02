@@ -97,7 +97,7 @@ export function ScrollStory() {
                   to="/browse"
                   className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
                 >
-                  Browse now
+                  Browse competitions
                 </Link>
               )}
               {i === 1 && (
