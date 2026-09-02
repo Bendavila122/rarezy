@@ -139,7 +139,7 @@ export function PersonaSection({
       )}
       <div
         className={`relative z-[2] mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-14 px-6 pb-20 sm:grid-cols-2 sm:gap-10 sm:py-20 ${
-          corner ? "pt-44" : "pt-20"
+          corner ? "pt-36" : "pt-20"
         }`}
       >
         {phone}

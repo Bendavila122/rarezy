@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { motion } from "motion/react";
 import { Compass, HelpCircle, Info, Menu, Plus, ShoppingBag, Ticket, User, X } from "lucide-react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
+import { tourState } from "@/lib/tourState";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
@@ -25,7 +27,6 @@ const MENU_LINKS = [
     gateReason: "Create a free account to sell a watch.",
     highlight: true,
   },
-  { to: "/about", label: "About", Icon: Info, end: false },
   { to: "/help", label: "Help", Icon: HelpCircle, end: false },
   { to: "/account", label: "Account", Icon: User, end: false, gateReason: "Create a free account to continue." },
 ] as const;
@@ -63,6 +64,22 @@ export function NavBar() {
 
         <div className="flex h-9 items-center gap-3">
           <nav className="flex h-9 items-center gap-5">
+            <button
+              type="button"
+              onClick={() => tourState.open()}
+              className="group glass-dark press relative flex h-9 items-center gap-1.5 border border-mint/40 bg-mint/10 px-3 text-[0.92rem] font-semibold tracking-tight text-mint transition-all duration-200 ease-out hover:-translate-y-[1px] hover:bg-mint/15"
+            >
+              <span className="absolute -right-1.5 -top-1.5 flex h-3 w-3">
+                <motion.span
+                  className="absolute inline-flex h-full w-full rounded-full bg-red-500"
+                  animate={{ scale: [1, 2.4], opacity: [0.8, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
+              </span>
+              <Info className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
+              About
+            </button>
             {PRIMARY_LINKS.map((item) => {
               const badge = badgeFor(item.to);
               return (
