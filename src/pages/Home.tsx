@@ -28,12 +28,12 @@ export function Home() {
     <>
       {/* Search bar plus the three-stop story (buyers, sellers, marketplace)
           — real page content, real scroll, each stop its own snap point —
-          followed by the game itself given room to breathe, then social
+          then what's ending soon, the game itself, why Rarezy, social
           proof, partner services, and FAQs before the footer. Every
           section below is its own snap point too. */}
       <ScrollStory />
       <div className="snap-start scroll-mt-16">
-        <WhyRarezySection />
+        <EndingSoonSection />
       </div>
       <div className="snap-start scroll-mt-16">
         <GameSection
@@ -46,7 +46,7 @@ export function Home() {
         />
       </div>
       <div className="snap-start scroll-mt-16">
-        <EndingSoonSection />
+        <WhyRarezySection />
       </div>
       <div className="snap-start scroll-mt-16">
         <ReviewsSection />
