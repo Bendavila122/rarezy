@@ -83,9 +83,6 @@ export function ScrollStory() {
     <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
       <div className="grid grid-cols-1 items-start gap-10 sm:grid-cols-2">
         <div className="order-2 sm:order-1">
-          <div className="snap-start scroll-mt-16">
-            <SearchHero />
-          </div>
           {STOPS.map((stop, i) => (
             <div
               key={stop.eyebrow}
@@ -94,6 +91,7 @@ export function ScrollStory() {
               }}
               className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
             >
+              {i === 0 && <SearchHero />}
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{stop.eyebrow}</p>
               <div className="mt-5">
                 <StopLines lines={stop.lines} />
