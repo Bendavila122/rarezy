@@ -46,7 +46,7 @@ export function FaqSection() {
   }, [a.done, index]);
 
   return (
-    <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-2xl flex-col justify-center px-6 py-16">
+    <div className="relative z-10 mx-auto max-w-2xl px-6 py-16">
       <Reveal>
         <div className="min-h-[15rem]">
           <div

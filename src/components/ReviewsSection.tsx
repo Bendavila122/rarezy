@@ -214,7 +214,7 @@ function ReactionReel() {
 /** Split in half: a clickable stacked-deck carousel of quotes on the left, a looping reel of winners opening their box on the right. */
 export function ReviewsSection() {
   return (
-    <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col justify-center py-16">
+    <div className="relative z-10 py-16">
       <div className="mx-auto max-w-6xl px-6">
         <Reveal>
           <p className="text-[0.62rem] uppercase tracking-[0.24em] text-muted">Reviews</p>
