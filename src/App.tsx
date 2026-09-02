@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { AuthGateRedirect } from "@/components/AuthGateRedirect";
@@ -64,6 +65,7 @@ export function App() {
       <Footer />
       <AuthGateRedirect />
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
