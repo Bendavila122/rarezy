@@ -10,6 +10,7 @@ import { EndingSoonSection } from "@/components/EndingSoonSection";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { AffiliateStrip } from "@/components/AffiliateStrip";
 import { SkillGame } from "@/components/SkillGame";
+import { ScrollHint } from "@/components/ScrollHint";
 
 export function Home() {
   const [heroPlaying, setHeroPlaying] = useState(false);
@@ -35,6 +36,7 @@ export function Home() {
       <ReviewsSection />
       <FaqSection />
       <AffiliateStrip />
+      <ScrollHint />
 
       {heroPlaying &&
         createPortal(
