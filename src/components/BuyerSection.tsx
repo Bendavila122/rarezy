@@ -99,7 +99,7 @@ export function BuyerSection() {
       ctaLabel="Browse all watches"
       ctaTo="/browse"
       corner={
-        <div className="flex flex-col items-start gap-2.5">
+        <div className="flex w-full flex-col items-start gap-2.5 sm:flex-row sm:items-center sm:justify-between">
           <HeroSearch />
           <WhatWeDoButton />
         </div>
