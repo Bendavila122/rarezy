@@ -130,7 +130,7 @@ export function PersonaSection({
     <div className="relative z-10 flex min-h-[85vh] items-center overflow-hidden">
       {corner && (
         <div className="absolute inset-x-0 top-9 z-[5] px-6 sm:top-6">
-          <div className="mx-auto flex w-full max-w-6xl justify-center sm:justify-start">{corner}</div>
+          <div className="mx-auto flex w-full max-w-6xl justify-start">{corner}</div>
         </div>
       )}
       <div
