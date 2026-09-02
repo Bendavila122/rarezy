@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 const inputCls =
@@ -25,6 +25,15 @@ export function Contact() {
         <Mail className="h-4 w-4" strokeWidth={1.8} />
         hello@rarezy.co.uk
       </p>
+      <a
+        href="https://wa.me/443300436788"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-2 flex items-center gap-2 text-[0.85rem] text-muted hover:text-mint"
+      >
+        <MessageCircle className="h-4 w-4" strokeWidth={1.8} />
+        +44 3300 436 788 (WhatsApp)
+      </a>
 
       {sent ? (
         <div className="card mt-8 p-6">
