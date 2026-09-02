@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { browseState } from "@/lib/browseState";
+import { categoryOf, type ItemCategory } from "@/lib/marketplace";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
 const TYPE_SPEED = 45;
@@ -41,18 +42,30 @@ export function SearchHero() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const { records } = useRarezy();
-  const liveCount = records.filter(
+  const live = records.filter(
     (r): r is CompetitionListing => r.kind === "competition" && r.status === "live",
-  ).length;
+  );
+  const countOf = (category: ItemCategory) => live.filter((r) => categoryOf(r.item) === category).length;
 
+  const watchCount = countOf("watch");
+  const carCount = countOf("car");
+  const handbagCount = countOf("handbag");
+  const cashCount = countOf("cash");
+  const clothingCount = countOf("clothing");
+  const electronicsCount = countOf("electronics");
+
+  // Every count here is real, live stock — filtered out entirely if a
+  // category happens to have nothing live, rather than ever showing "0".
   const phrases = [
-    `Search from ${liveCount} watches`,
-    "Search from 24 electronics",
-    "Search from 1 cash prize",
-    "Search from 16 handbags",
-    "Search from 12 clothing items",
-    "Search from 8 cars",
-  ];
+    { count: watchCount, text: `Search from ${watchCount} watch${watchCount === 1 ? "" : "es"}` },
+    { count: electronicsCount, text: `Search from ${electronicsCount} electronics` },
+    { count: cashCount, text: `Search from ${cashCount} cash prize${cashCount === 1 ? "" : "s"}` },
+    { count: handbagCount, text: `Search from ${handbagCount} handbag${handbagCount === 1 ? "" : "s"}` },
+    { count: clothingCount, text: `Search from ${clothingCount} clothing item${clothingCount === 1 ? "" : "s"}` },
+    { count: carCount, text: `Search from ${carCount} car${carCount === 1 ? "" : "s"}` },
+  ]
+    .filter((p) => p.count > 0)
+    .map((p) => p.text);
   const typed = useTypewriterCycle(phrases);
 
   const submit = (e: React.FormEvent) => {

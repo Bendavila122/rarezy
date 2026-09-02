@@ -1,11 +1,20 @@
 import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, X } from "lucide-react";
-import { CONDITIONS, MOVEMENT_TYPES, movementType, type Condition } from "@/lib/marketplace";
+import { categoryOf, CONDITIONS, MOVEMENT_TYPES, movementType, type Condition } from "@/lib/marketplace";
 import type { CompetitionListing } from "@/lib/store";
 import { activeFilterCount, EMPTY_FILTERS, facetCounts, toggleValue, type WatchFilters } from "@/lib/filters";
 
-const DEFAULT_OPEN = new Set(["brand", "price"]);
+const CATEGORY_LABELS: Record<string, string> = {
+  watch: "Watches",
+  car: "Cars",
+  handbag: "Handbags",
+  cash: "Cash prizes",
+  clothing: "Clothing",
+  electronics: "Electronics",
+};
+
+const DEFAULT_OPEN = new Set(["category", "brand", "price"]);
 
 function Section({
   id,
@@ -162,6 +171,7 @@ export function FilterDrawer({
 
   const patch = (p: Partial<WatchFilters>) => onChange({ ...filters, ...p });
 
+  const categoryFacets = facetCounts(listings, (c) => categoryOf(c.item));
   const brandFacets = facetCounts(listings, (c) => c.item.brand);
   const caseMaterialFacets = facetCounts(listings, (c) => c.item.caseMaterial);
   const braceletFacets = facetCounts(listings, (c) => c.item.braceletMaterial);
@@ -203,6 +213,24 @@ export function FilterDrawer({
             </div>
 
             <div className="flex-1 overflow-y-auto px-5">
+              <Section
+                id="category"
+                title="Category"
+                count={filters.categories.length}
+                open={openSections.has("category")}
+                onToggle={toggleSection}
+              >
+                {categoryFacets.map((f) => (
+                  <CheckRow
+                    key={f.value}
+                    label={CATEGORY_LABELS[f.value] ?? f.value}
+                    hint={f.count}
+                    checked={filters.categories.includes(f.value)}
+                    onClick={() => patch({ categories: toggleValue(filters.categories, f.value) })}
+                  />
+                ))}
+              </Section>
+
               <Section
                 id="brand"
                 title="Brand"
@@ -416,7 +444,7 @@ export function FilterDrawer({
                 onClick={onClose}
                 className="press flex-[1.4] rounded-none bg-brand py-3 text-center text-[0.82rem] font-medium tracking-tight text-background"
               >
-                Show {resultCount} watch{resultCount === 1 ? "" : "es"}
+                Show {resultCount} competition{resultCount === 1 ? "" : "s"}
               </button>
             </div>
           </motion.div>

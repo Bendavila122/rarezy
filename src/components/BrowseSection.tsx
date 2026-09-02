@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Banknote, Car, Headphones, Search, Shirt, ShoppingBag, SlidersHorizontal, Watch, X } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { CONDITIONS, money, titleOf } from "@/lib/marketplace";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 import { ListingCard } from "@/components/ListingCard";
@@ -11,21 +11,12 @@ import { Reveal } from "@/components/Reveal";
 
 type Chip = { key: string; label: string; remove: () => void };
 
-/** Decorative category strip — muted grey glyphs on frosted glass tiles, no labels. Watches are the only category the store actually models; the rest are a visual preview of where the marketplace is headed. */
-const CATEGORIES = [
-  { key: "watches", icons: [Watch] },
-  { key: "cars", icons: [Car] },
-  { key: "handbags", icons: [ShoppingBag] },
-  { key: "cash", icons: [Banknote] },
-  { key: "clothing", icons: [Shirt] },
-  { key: "electronics", icons: [Headphones] },
-] as const;
-
 /**
- * Search, filters and the full watch grid — rendered by the standalone
- * `/browse` page. Search/sort/filters seed from (and save back to)
- * `browseState`, so going to a watch and back reconstructs the exact same
- * filtered grid.
+ * Search, filters and the full competition grid — rendered by the
+ * standalone `/browse` page. Every category is shown here; narrow to one
+ * via the Category filter (the first section in the filter drawer).
+ * Search/sort/filters seed from (and save back to) `browseState`, so
+ * going to an item and back reconstructs the exact same filtered grid.
  */
 export function BrowseSection() {
   const { records } = useRarezy();
@@ -139,22 +130,10 @@ export function BrowseSection() {
   return (
     <div className="mx-auto max-w-6xl px-6 pb-6 pt-10">
       <Reveal amount={0.5}>
-        <div className="flex flex-wrap gap-3">
-          {CATEGORIES.map((c) => (
-            <div
-              key={c.key}
-              className="glass-block group flex h-16 w-16 cursor-pointer items-center justify-center gap-1.5 transition-colors duration-200 hover:border-mint/50 hover:bg-white/[0.14] sm:h-20 sm:w-20"
-            >
-              {c.icons.map((Icon, i) => (
-                <Icon
-                  key={i}
-                  className="h-6 w-6 text-white/50 transition-colors duration-200 group-hover:text-mint sm:h-7 sm:w-7"
-                  strokeWidth={1.6}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+        <h1 className="text-[1.4rem] font-semibold tracking-[-0.02em]">All competitions</h1>
+        <p className="mt-1 text-[0.78rem] text-muted">
+          {shown.length} competition{shown.length === 1 ? "" : "s"} live now
+        </p>
       </Reveal>
 
       <div className="relative mt-5">

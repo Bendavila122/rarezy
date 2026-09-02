@@ -1,12 +1,14 @@
 /**
- * Rarezy's core logic: sell a watch for an instant cash offer, or list it
+ * Rarezy's core logic: sell an item for an instant cash offer, or list it
  * with an entry price that can pay out more — for people willing to wait,
  * and willing to play for it. No random draws: the winner is whoever tops
  * the leaderboard when the listing's deadline hits.
  *
- * Rarezy is watches-only at launch — the model and UI assume that, on
- * purpose, rather than carrying unused categories for a future that may
- * never come.
+ * Watches were the whole marketplace at launch, and the detail page and
+ * Browse's filters are still built around them, so `Browse` only ever
+ * shows watch listings. Every other category (cars, handbags, cash,
+ * clothing, electronics) lives in the same `records` array and is real,
+ * counted stock — just not yet browsable in its own dedicated view.
  *
  * Pure — no state, no side effects. The reactive store lives in ./store.
  */
@@ -61,7 +63,12 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 /** Below this, a watch can still take a cash offer, but can't be listed for entries. */
 export const MIN_COMPETITION_VALUE = 2000;
 
+export const ITEM_CATEGORIES = ["watch", "car", "handbag", "cash", "clothing", "electronics"] as const;
+export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
+
 export type LuxuryItem = {
+  /** Absent on every pre-existing watch — treat as "watch" (see `categoryOf`) rather than backfilling every seed entry. */
+  category?: ItemCategory | undefined;
   brand: string;
   model: string;
   reference?: string | undefined;
@@ -72,7 +79,7 @@ export type LuxuryItem = {
   description?: string | undefined;
   /** Professional photos: dial, case back, box and papers. */
   photos?: string[] | undefined;
-  /** Specification table shown on the listing page — Chrono24-style "Basic Info". */
+  /** Specification table shown on the listing page — Chrono24-style "Basic Info". Watch-specific; other categories just leave these unset. */
   movement?: string | undefined;
   caseMaterial?: string | undefined;
   braceletMaterial?: string | undefined;
@@ -84,6 +91,8 @@ export type LuxuryItem = {
   /** What's included — e.g. "Original box, original papers". */
   accessories?: string | undefined;
 };
+
+export const categoryOf = (item: Pick<LuxuryItem, "category">): ItemCategory => item.category ?? "watch";
 
 export type Valuation = {
   /** What Rarezy will pay, cash, within 48 hours. */

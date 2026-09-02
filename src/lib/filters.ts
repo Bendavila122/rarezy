@@ -3,7 +3,15 @@
  * state, no side effects. Filter state lives in the Browse page component.
  */
 
-import { isFullSet, isWithinHours, movementType, type Condition, type MovementType } from "./marketplace";
+import {
+  categoryOf,
+  isFullSet,
+  isWithinHours,
+  movementType,
+  type Condition,
+  type ItemCategory,
+  type MovementType,
+} from "./marketplace";
 import type { CompetitionListing } from "./store";
 
 export type SortId = "ending" | "popular" | "price-asc" | "price-desc" | "value-desc" | "newest";
@@ -27,6 +35,7 @@ export const SORTERS: Record<SortId, (a: CompetitionListing, b: CompetitionListi
 };
 
 export type WatchFilters = {
+  categories: ItemCategory[];
   brands: string[];
   conditions: Condition[];
   caseMaterials: string[];
@@ -46,6 +55,7 @@ export type WatchFilters = {
 };
 
 export const EMPTY_FILTERS: WatchFilters = {
+  categories: [],
   brands: [],
   conditions: [],
   caseMaterials: [],
@@ -70,6 +80,7 @@ export function toggleValue<T>(list: T[], value: T): T[] {
 
 export function activeFilterCount(f: WatchFilters): number {
   return (
+    f.categories.length +
     f.brands.length +
     f.conditions.length +
     f.caseMaterials.length +
@@ -91,6 +102,7 @@ export function activeFilterCount(f: WatchFilters): number {
 
 export function matchesFilters(c: CompetitionListing, f: WatchFilters): boolean {
   const item = c.item;
+  if (f.categories.length && !f.categories.includes(categoryOf(item))) return false;
   if (f.brands.length && !f.brands.includes(item.brand)) return false;
   if (f.conditions.length && !f.conditions.includes(item.condition)) return false;
   if (f.caseMaterials.length && (!item.caseMaterial || !f.caseMaterials.includes(item.caseMaterial))) return false;
