@@ -1,4 +1,11 @@
-import { BrowseScreen, PaidScreen, PlayScreen } from "@/components/WalkthroughScreens";
+import {
+  BrowseScreen,
+  ListScreen,
+  PaidScreen,
+  PlayScreen,
+  ValuationScreen,
+  WinScreen,
+} from "@/components/WalkthroughScreens";
 
 /** "Instagram lyric" text styles — short fragments at wildly different sizes/weights/fonts so the copy reads like it's being spoken aloud rather than sitting as one flat paragraph. Content for the homepage's three-stop scroll story (buyers, sellers, marketplace), kept in its own module so ScrollStory.tsx stays focused on layout/scroll mechanics. */
 export const BASE = "text-[1.05rem] sm:text-[1.15rem] font-medium text-white/60";
@@ -11,7 +18,8 @@ export type Line = { text: string; cls: string };
 
 export type Stop = {
   eyebrow: string;
-  Screen: () => React.JSX.Element;
+  /** A couple of phone screens this stop cycles through on its own while it's the active stop — the scroll gate only advances between stops, not between a stop's own screens. */
+  Screens: Array<() => React.JSX.Element>;
   glow: string;
   glow2: string;
   lines: Line[];
@@ -20,7 +28,7 @@ export type Stop = {
 export const STOPS: Stop[] = [
   {
     eyebrow: "For buyers",
-    Screen: PlayScreen,
+    Screens: [PlayScreen, WinScreen],
     glow: "oklch(0.82 0.19 148)",
     glow2: "oklch(0.82 0.16 80)",
     lines: [
@@ -38,7 +46,7 @@ export const STOPS: Stop[] = [
   },
   {
     eyebrow: "For sellers",
-    Screen: PaidScreen,
+    Screens: [ListScreen, ValuationScreen, PaidScreen],
     glow: "oklch(0.75 0.19 80)",
     glow2: "oklch(0.82 0.19 148)",
     lines: [
@@ -55,7 +63,7 @@ export const STOPS: Stop[] = [
   },
   {
     eyebrow: "The marketplace",
-    Screen: BrowseScreen,
+    Screens: [BrowseScreen, WinScreen],
     glow: "oklch(0.82 0.19 148)",
     glow2: "oklch(0.75 0.19 80)",
     lines: [
