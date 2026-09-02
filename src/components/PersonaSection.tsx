@@ -31,8 +31,6 @@ export function PersonaSection({
   reverse = false,
   corner,
   stepStrip,
-  phoneLayoutId,
-  hidePhone = false,
 }: {
   eyebrow: string;
   Icon: LucideIcon;
@@ -46,9 +44,6 @@ export function PersonaSection({
   reverse?: boolean;
   corner?: ReactNode;
   stepStrip?: ReactNode;
-  /** When set, the phone mockup is wrapped in a `motion.div` sharing this layoutId — pair with `hidePhone` on whichever side should hand off to (or receive from) another element using the same id, e.g. the "what do we actually do" tour popping the same phone out of the hero. */
-  phoneLayoutId?: string;
-  hidePhone?: boolean;
 }) {
   const [index, setIndex] = useState(0);
 
@@ -62,25 +57,20 @@ export function PersonaSection({
 
   const phone = (
     <Reveal delay={0.1} y={36} className={`order-2 ${reverse ? "sm:order-1" : "sm:order-2"}`}>
-      <motion.div
-        {...(phoneLayoutId ? { layoutId: phoneLayoutId } : {})}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <PhoneMockup glow={glow} glow2={glow2} floatDelay={reverse ? 1.4 : 0}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              className="h-full"
-            >
-              <Screen />
-            </motion.div>
-          </AnimatePresence>
-        </PhoneMockup>
-      </motion.div>
+      <PhoneMockup glow={glow} glow2={glow2} floatDelay={reverse ? 1.4 : 0}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="h-full"
+          >
+            <Screen />
+          </motion.div>
+        </AnimatePresence>
+      </PhoneMockup>
     </Reveal>
   );
 
@@ -152,7 +142,7 @@ export function PersonaSection({
           corner ? "pt-44" : "pt-20"
         }`}
       >
-        {!hidePhone && phone}
+        {phone}
         {text}
       </div>
     </div>

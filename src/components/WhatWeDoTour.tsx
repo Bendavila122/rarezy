@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { BrowseScreen, PaidScreen, PlayScreen } from "@/components/WalkthroughScreens";
-import { tourState, TOUR_PHONE_LAYOUT_ID, useTourState } from "@/lib/tourState";
+import { tourState, useTourState } from "@/lib/tourState";
 
 /** "Instagram lyric" text styles — short fragments at wildly different sizes/weights/fonts so the copy reads like it's being spoken aloud rather than sitting as one flat paragraph. */
 const BASE = "text-[1.05rem] sm:text-[1.15rem] font-medium text-white/60";
@@ -180,30 +180,23 @@ export function WhatWeDoTour() {
                 </motion.div>
               </AnimatePresence>
 
-              {/* Same layoutId as the hero's phone (hidden while the tour is open) — Framer
-                  animates the handoff between the two, so it reads as one phone popping out
-                  of the hero rather than a second one appearing. Stays mounted across stops;
-                  only the screen content inside crossfades. */}
+              {/* Same phone design as the hero, mounted once for the whole tour — only the
+                  screen content inside crossfades between stops, no fly-in/out animation. */}
               <div className="order-first flex justify-center sm:order-last">
-                <motion.div
-                  layoutId={TOUR_PHONE_LAYOUT_ID}
-                  transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <PhoneMockup glow={current.glow} glow2={current.glow2}>
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={stop}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="h-full"
-                      >
-                        <current.Screen />
-                      </motion.div>
-                    </AnimatePresence>
-                  </PhoneMockup>
-                </motion.div>
+                <PhoneMockup glow={current.glow} glow2={current.glow2}>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={stop}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="h-full"
+                    >
+                      <current.Screen />
+                    </motion.div>
+                  </AnimatePresence>
+                </PhoneMockup>
               </div>
             </div>
 

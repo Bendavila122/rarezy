@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowRight, Gamepad2, HelpCircle, Search, Sparkles, Ticket, Trophy } from "lucide-react";
+import { ArrowRight, Gamepad2, PlayCircle, Search, Sparkles, Ticket, Trophy } from "lucide-react";
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
 import { browseState } from "@/lib/browseState";
-import { tourState, TOUR_PHONE_LAYOUT_ID, useTourState } from "@/lib/tourState";
+import { tourState } from "@/lib/tourState";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 
 const STEPS = [
@@ -41,13 +41,13 @@ function HeroSearch() {
   );
 }
 
-/** Opens the "what do we actually do" explainer tour. */
+/** Opens the "what do we actually do" explainer tour — a play-button badge plus a two-line label make it obvious this launches a short walkthrough, not just a tooltip. */
 function WhatWeDoButton() {
   return (
     <button
       type="button"
       onClick={() => tourState.open()}
-      className="group glass-dark brand-glow press relative inline-flex items-center gap-2.5 overflow-hidden border border-mint/40 px-5 py-3 text-[0.82rem] font-bold tracking-tight"
+      className="group glass-dark brand-glow press relative flex items-center gap-3 overflow-hidden border border-mint/40 bg-mint/[0.06] py-2.5 pl-2.5 pr-5 text-left"
     >
       <span className="absolute -right-1.5 -top-1.5 z-20 flex h-3.5 w-3.5">
         <motion.span
@@ -58,9 +58,16 @@ function WhatWeDoButton() {
         <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-red-500" />
       </span>
       <span className="absolute inset-0 origin-left scale-x-0 bg-white transition-transform duration-300 ease-out group-hover:scale-x-100" />
-      <span className="relative z-10 flex items-center gap-2.5 text-white transition-colors duration-300 group-hover:text-black">
-        <HelpCircle className="h-[1.1rem] w-[1.1rem] text-mint transition-colors duration-300 group-hover:text-black" strokeWidth={2.2} />
-        What do we actually do?
+      <span className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center bg-mint/15 transition-colors duration-300 group-hover:bg-black/10">
+        <PlayCircle className="h-5 w-5 text-mint transition-colors duration-300 group-hover:text-black" strokeWidth={2} />
+      </span>
+      <span className="relative z-10">
+        <p className="text-[0.85rem] font-bold leading-tight tracking-tight text-white transition-colors duration-300 group-hover:text-black">
+          What do we actually do?
+        </p>
+        <p className="mt-0.5 text-[0.68rem] leading-tight text-white/50 transition-colors duration-300 group-hover:text-black/60">
+          Watch a 30-second tour
+        </p>
       </span>
     </button>
   );
@@ -90,8 +97,6 @@ function HowItWorksStrip() {
 }
 
 export function BuyerSection() {
-  const { open: tourOpen } = useTourState();
-
   return (
     <PersonaSection
       eyebrow="For buyers"
@@ -103,8 +108,6 @@ export function BuyerSection() {
       subtext="Every listing is real stock, independently authenticated and ready to ship. Enter for a few pounds, play one quick round below, and the best score takes the watch home."
       ctaLabel="Browse all watches"
       ctaTo="/browse"
-      phoneLayoutId={TOUR_PHONE_LAYOUT_ID}
-      hidePhone={tourOpen}
       corner={
         <div className="relative flex w-full flex-col gap-4">
           <div className="flex justify-start">
