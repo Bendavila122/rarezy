@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: oklch(0.1 0.012 264);
-  --color-surface: oklch(0.15 0.014 264);
-  --color-foreground: oklch(0.96 0.01 90);
-  --color-muted: oklch(0.68 0.015 264);
-  --color-gold: oklch(0.78 0.13 82);
-  --color-gold-dim: oklch(0.55 0.1 82);
+  --color-background: oklch(0.15 0.008 260);
+  --color-surface: oklch(0.205 0.009 260);
+  --color-foreground: oklch(0.97 0.003 264);
+  --color-muted: oklch(0.64 0.014 264);
+  --color-brand: oklch(0.629 0.166 149.15);
+  --color-brand-dim: oklch(0.5 0.145 149.15);
+  --color-brand-deep: oklch(0.16 0.03 155);
+  --color-mint: oklch(0.82 0.19 148);
   --font-sans:
-    -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-display:
+    "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
 }
 
 html,
@@ -30,11 +34,259 @@ body {
 }
 
 .card {
-  background: color-mix(in oklch, var(--color-surface), transparent 0%);
-  border: 1px solid oklch(1 0 0 / 8%);
-  border-radius: 1.5rem;
+  background: var(--color-surface);
+  border-radius: 0;
+  border: 1px solid oklch(1 0 0 / 7%);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 20%),
+    0 8px 24px -12px oklch(0 0 0 / 40%);
 }
 
-.gold-glow {
-  box-shadow: 0 0 40px -12px oklch(0.78 0.13 82 / 45%);
+.brand-glow {
+  box-shadow: 0 0 40px -12px oklch(0.629 0.166 149.15 / 35%);
+}
+
+/* Shared fine-grain dot texture, layered over any dark gradient tile */
+.grain {
+  position: relative;
+  overflow: hidden;
+}
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(oklch(1 0 0 / 10%) 1px, transparent 1px);
+  background-size: 14px 14px;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Revolut-style layered mesh gradient — dark base, bright green + mint blobs.
+   The three blobs drift slowly so the hero never sits still (background-position
+   animates independently per layer since each gradient is its own background-image). */
+.mesh-hero {
+  background-color: oklch(0.12 0 0);
+  background-image:
+    radial-gradient(circle, oklch(0.4 0 0 / 45%), transparent 55%),
+    radial-gradient(circle, oklch(0.28 0 0 / 65%), transparent 60%),
+    radial-gradient(circle, oklch(0.2 0 0 / 75%), transparent 60%);
+  background-size: 130% 150%, 110% 130%, 150% 150%;
+  background-repeat: no-repeat;
+  background-position:
+    12% -10%,
+    105% 15%,
+    50% 125%;
+  animation: mesh-drift 16s ease-in-out infinite alternate;
+  color: oklch(1 0 0);
+}
+@keyframes mesh-drift {
+  from {
+    background-position:
+      12% -10%,
+      105% 15%,
+      50% 125%;
+  }
+  to {
+    background-position:
+      22% 4%,
+      88% 32%,
+      38% 108%;
+  }
+}
+
+/* Blurred ambient blob that slowly drifts + breathes behind a section — pure decoration */
+.floating-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(50px);
+  pointer-events: none;
+  animation: orb-float 11s ease-in-out infinite;
+}
+@keyframes orb-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18px, -22px) scale(1.1);
+  }
+}
+
+/* Small pulsing "LIVE" indicator dot */
+.live-dot {
+  animation: live-pulse 1.7s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(1.5);
+  }
+}
+
+/* A bright segment travelling down a vertical timeline — used by the process explainer */
+.flow-line {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(to bottom, transparent 0%, var(--color-brand) 12%, transparent 28%);
+  background-size: 100% 300%;
+  animation: flow-line-move 2.6s linear infinite;
+}
+@keyframes flow-line-move {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 0% 300%;
+  }
+}
+
+/* Frosted glass, for use on light surfaces — layered inner highlight + soft
+   outer shadow so it reads as a physical pane of glass, not a flat tint */
+.glass {
+  background: oklch(1 0 0 / 40%);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid oklch(1 0 0 / 65%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 90%),
+    0 8px 32px -8px oklch(0 0 0 / 12%);
+}
+
+/* Frosted glass, for use over photos / dark gradients */
+.glass-dark {
+  background: oklch(0.12 0 0 / 40%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid oklch(1 0 0 / 16%);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 14%),
+    0 8px 32px -8px oklch(0 0 0 / 35%);
+  color: oklch(1 0 0);
+}
+
+/* Cursor-tracking radial glow — position set via --spot-x/--spot-y from JS.
+   Sits above the surface (z-index 1) but below content (z-index 2 on children). */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background: radial-gradient(
+    480px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    oklch(1 0 0 / 16%),
+    transparent 62%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+/* A faint border that sweeps around a card's edge — used sparingly for "alive" chrome */
+.glow-ring {
+  position: relative;
+}
+.glow-ring::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--ring-angle, 0deg),
+    transparent 0%,
+    oklch(0.82 0.19 148 / 70%) 8%,
+    transparent 16%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ring-spin 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes ring-spin {
+  to {
+    --ring-angle: 360deg;
+  }
+}
+@property --ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* iOS-style grouped list row */
+.list-row {
+  background: var(--color-surface);
+  transition: background-color 0.15s ease;
+}
+.list-row:active {
+  background: oklch(1 0 0 / 6%);
+}
+
+/* iOS-style segmented control */
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  background: oklch(1 0 0 / 7%);
+  border-radius: 0;
+}
+.segmented button {
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+.segmented button[data-active="true"] {
+  background: var(--color-surface);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 30%),
+    0 1px 1px oklch(0 0 0 / 20%);
+}
+
+/* Horizontal snap-scroll carousel, no visible scrollbar */
+.scroll-x {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar {
+  display: none;
+}
+.scroll-x > * {
+  scroll-snap-align: start;
+}
+
+.press {
+  transition: transform 0.12s ease;
+}
+.press:active {
+  transform: scale(0.96);
+}
+
+/* Link.me-style scrolling ticker — duplicated content, looped by translating exactly -50% */
+.marquee-track {
+  animation: marquee-scroll 22s linear infinite;
+}
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }

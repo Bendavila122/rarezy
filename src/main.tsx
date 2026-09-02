@@ -11,3 +11,11 @@ createRoot(document.getElementById("root")!).render(
     </BrowserRouter>
   </StrictMode>,
 );
+
+const splash = document.getElementById("splash");
+if (splash) {
+  requestAnimationFrame(() => {
+    splash.classList.add("rz-hide");
+    setTimeout(() => splash.remove(), 400);
+  });
+}

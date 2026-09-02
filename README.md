@@ -1,4 +1,4 @@
-# More4Me
+# Rarezy
 
 Sell a luxury item for an instant cash offer, or enter it into a skill-based
 competition — players compete in a short game, and the leaderboard (not a
