@@ -89,7 +89,9 @@ export function ScrollStory() {
               ref={(el) => {
                 panelRefs.current[i] = el;
               }}
-              className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
+              className={`flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col pl-4 sm:pl-12 ${
+                i === 0 ? "justify-start pt-16 sm:pt-20" : "justify-center"
+              }`}
             >
               {i === 0 && <SearchHero />}
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{stop.eyebrow}</p>
