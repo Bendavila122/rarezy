@@ -128,8 +128,7 @@ export function NavBar() {
             </NavLink>
           </div>
 
-          <div className="relative" onMouseEnter={() => setHovered("account")}>
-            {hovered === "account" && <TabGlass />}
+          <div className="relative" onMouseEnter={() => setHovered(null)}>
             <NavLink
               to="/account"
               onClick={handleGatedClick({ to: "/account", gateReason: ACCOUNT_GATE_REASON })}
