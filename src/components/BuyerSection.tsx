@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "motion/react";
 import { ArrowRight, Gamepad2, HelpCircle, Search, Sparkles, Ticket, Trophy } from "lucide-react";
 import { PersonaSection } from "@/components/PersonaSection";
 import { BrowseScreen, WinScreen } from "@/components/WalkthroughScreens";
@@ -46,8 +47,16 @@ function WhatWeDoButton() {
     <button
       type="button"
       onClick={() => tourState.open()}
-      className="glass-dark press flex w-56 items-center justify-center gap-2 border border-mint/30 py-3 text-[0.82rem] font-bold tracking-tight text-white sm:w-64"
+      className="glass-dark press relative flex w-56 items-center justify-center gap-2 border border-mint/30 py-3 text-[0.82rem] font-bold tracking-tight text-white sm:w-64"
     >
+      <span className="absolute -right-1.5 -top-1.5 flex h-3.5 w-3.5">
+        <motion.span
+          className="absolute inline-flex h-full w-full rounded-full bg-mint"
+          animate={{ scale: [1, 2.4], opacity: [0.8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+        />
+        <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-mint" />
+      </span>
       <HelpCircle className="h-4 w-4 text-mint" strokeWidth={2.2} />
       What do we actually do?
     </button>
