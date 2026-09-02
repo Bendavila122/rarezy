@@ -7,6 +7,7 @@
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
+import { verifiedWelcomeEmail } from "../_shared/email.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, { apiVersion: "2024-06-20" });
 
@@ -52,7 +53,7 @@ Deno.serve(async (req) => {
             from: "Rarezy <verify@rarezy.co.uk>",
             to: [profile.email],
             subject: "You're verified — welcome to Rarezy",
-            html: `<p>Hi ${profile.username},</p><p>Your ID has been verified. You can now log in and start entering competitions.</p>`,
+            html: verifiedWelcomeEmail(profile.username),
           }),
         });
       }

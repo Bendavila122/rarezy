@@ -5,6 +5,7 @@
 //   RESEND_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { verificationCodeEmail } from "../_shared/email.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -46,7 +47,7 @@ Deno.serve(async (req) => {
         from: "Rarezy <verify@rarezy.co.uk>",
         to: [email],
         subject: `${code} is your Rarezy verification code`,
-        html: `<p>Your Rarezy verification code is:</p><h2 style="letter-spacing:0.3em">${code}</h2><p>This code expires in 10 minutes.</p>`,
+        html: verificationCodeEmail(code),
       }),
     });
     if (!resendRes.ok) throw new Error(`Resend error: ${await resendRes.text()}`);
