@@ -1,4 +1,4 @@
-import { BadgeCheck, CalendarDays, Gem, LayoutGrid, TrendingUp, Wallet } from "lucide-react";
+import { BadgeCheck, CalendarDays, Gem, LayoutGrid, ShieldCheck, TrendingUp, Wallet } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 
 const POINTS = [
@@ -26,6 +26,11 @@ const POINTS = [
     Icon: Wallet,
     title: "Cash, if you'd rather not wait",
     body: "Take an instant cash offer any time — including automatically if a listing doesn't hit its minimum by the deadline. Relist or cash out, at no extra cost either way.",
+  },
+  {
+    Icon: ShieldCheck,
+    title: "Insured, every step",
+    body: "Free shipping both ways, and every item held in insured safe deposit from the moment it arrives until a winner's decided.",
   },
 ] as const;
 
@@ -55,7 +60,7 @@ export function WhyRarezySection() {
       <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {POINTS.map((p, i) => (
           <Reveal key={p.title} delay={i * 0.08} y={20}>
-            <div className="card h-full p-6">
+            <div className="glass-dark h-full p-6">
               <span className="flex h-9 w-9 items-center justify-center bg-mint/10">
                 <p.Icon className="h-4 w-4 text-mint" strokeWidth={2} />
               </span>
