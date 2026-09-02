@@ -111,7 +111,7 @@ export function NavBar() {
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
-            className="press relative flex h-9 w-9 items-center justify-center bg-white/10 text-white"
+            className="press relative flex h-9 w-9 items-center justify-center bg-white text-black"
           >
             {menuOpen ? <X className="h-4 w-4" strokeWidth={2.2} /> : <Menu className="h-4 w-4" strokeWidth={2.2} />}
           </button>
