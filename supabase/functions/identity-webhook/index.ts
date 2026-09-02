@@ -49,10 +49,7 @@ Deno.serve(async (req) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            // TODO: switch back to "Rarezy <verify@rarezy.app>" once that domain is verified
-            // at resend.com/domains — Resend's shared test domain only delivers to the
-            // email address on your own Resend account.
-            from: "Rarezy <onboarding@resend.dev>",
+            from: "Rarezy <verify@rarezy.co.uk>",
             to: [profile.email],
             subject: "You're verified — welcome to Rarezy",
             html: `<p>Hi ${profile.username},</p><p>Your ID has been verified. You can now log in and start entering competitions.</p>`,

@@ -44,7 +44,7 @@ into every edge function — no need to set those yourself.)
 
 Verify a sending domain (or use their sandbox for testing) at resend.com,
 then use that API key above. The `from` address in
-`send-verification-code` and `identity-webhook` is `verify@rarezy.app` —
+`send-verification-code` and `identity-webhook` is `verify@rarezy.co.uk` —
 change it to match your verified domain.
 
 ## 5. Stripe Identity

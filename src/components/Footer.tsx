@@ -73,10 +73,10 @@ export function Footer() {
             The UK marketplace for luxury items — authenticated, insured, and won on skill.
           </p>
           <a
-            href="mailto:help@rarezy.app"
+            href="mailto:help@rarezy.co.uk"
             className="mt-4 inline-block text-[0.78rem] font-medium text-mint hover:underline"
           >
-            help@rarezy.app
+            help@rarezy.co.uk
           </a>
         </div>
 
