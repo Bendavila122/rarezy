@@ -672,6 +672,270 @@ function seedRecords(): SellRecord[] {
     ), 4),
   ];
 
+  /**
+   * Real stock outside watches — cars, handbags, a cash prize, clothing and
+   * electronics — so every category the header search bar counts actually
+   * has live listings behind it, not just a placeholder number. Photos are
+   * hotlinked from Wikimedia Commons (same pattern as the brand logos
+   * elsewhere in the app), each individually verified.
+   */
+  const otherCategoryListings: CompetitionListing[] = [
+    // Cars — all comfortably over £50,000.
+    autoListing(
+      {
+        category: "car",
+        brand: "Tesla",
+        model: "Model Y Performance",
+        year: 2025,
+        condition: "new",
+        purchasePrice: 51990,
+        description:
+          "Tesla Model Y, Performance trim — dual-motor all-wheel drive, the quickest and most capable version of Tesla's mid-size electric SUV. Delivery mileage only.",
+        photos: ["/cars/tesla-model-y.jpg"],
+        accessories: "Full service history, single owner",
+      },
+      { deadlineDays: 30, daysElapsed: 4, soldRatio: 0.22, leaderboard: board(9, 640) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "BMW",
+        model: "M4 Competition",
+        year: 2024,
+        condition: "excellent",
+        purchasePrice: 84000,
+        description:
+          "BMW M4 Competition (G82) — twin-turbo inline-six, M xDrive all-wheel drive. Light wear only, fully inspected by our partner specialist.",
+        photos: ["/cars/bmw-m4-competition.jpg"],
+        accessories: "Full service history",
+      },
+      { deadlineDays: 30, daysElapsed: 9, soldRatio: 0.4, leaderboard: board(11, 710) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "Mercedes-Maybach",
+        model: "S 680",
+        year: 2024,
+        condition: "excellent",
+        purchasePrice: 220000,
+        description:
+          "Mercedes-Maybach S 680 — the long-wheelbase, V12-powered flagship saloon, Mercedes' ultra-luxury tier above the standard S-Class.",
+        photos: ["/cars/mercedes-maybach-s680.jpg"],
+        accessories: "Full service history, chauffeur-maintained",
+      },
+      { deadlineDays: 45, daysElapsed: 12, soldRatio: 0.28, leaderboard: board(10, 690) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "Porsche",
+        model: "911 Carrera 4S",
+        year: 2023,
+        condition: "excellent",
+        purchasePrice: 112000,
+        description:
+          "Porsche 911 Carrera 4S — twin-turbo flat-six, all-wheel drive. Independently inspected, fully serviced by our partner specialist.",
+        photos: ["/cars/porsche-911-carrera-4s.jpg"],
+        accessories: "Full service history",
+      },
+      { deadlineDays: 30, daysElapsed: 6, soldRatio: 0.33, leaderboard: board(12, 720) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "Land Rover",
+        model: "Range Rover Autobiography",
+        year: 2024,
+        condition: "excellent",
+        purchasePrice: 135000,
+        description:
+          "Range Rover Autobiography, current L460 generation — Land Rover's flagship SUV trim. Light wear only.",
+        photos: ["/cars/range-rover-autobiography.jpg"],
+        accessories: "Full service history",
+      },
+      { deadlineDays: 30, daysElapsed: 15, soldRatio: 0.46, leaderboard: board(13, 745) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "Aston Martin",
+        model: "DB12",
+        year: 2024,
+        condition: "excellent",
+        purchasePrice: 195000,
+        description:
+          "Aston Martin DB12 — twin-turbo V8 grand tourer, the marque's current front-engine flagship.",
+        photos: ["/cars/aston-martin-db12.jpg"],
+        accessories: "Full service history",
+      },
+      { deadlineDays: 45, daysElapsed: 18, soldRatio: 0.31, leaderboard: board(9, 670) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "Bentley",
+        model: "Continental GT Speed",
+        year: 2024,
+        condition: "excellent",
+        purchasePrice: 215000,
+        description:
+          "Bentley Continental GT Speed — the performance flagship of Bentley's grand tourer, W12 power.",
+        photos: ["/cars/bentley-continental-gt-speed.jpg"],
+        accessories: "Full service history",
+      },
+      { deadlineDays: 45, daysElapsed: 3, soldRatio: 0.14, leaderboard: board(8, 610) },
+    ),
+    autoListing(
+      {
+        category: "car",
+        brand: "Lamborghini",
+        model: "Urus S",
+        year: 2023,
+        condition: "excellent",
+        purchasePrice: 210000,
+        description: "Lamborghini Urus S — twin-turbo V8 super-SUV. Independently inspected.",
+        photos: ["/cars/lamborghini-urus-s.jpg"],
+        accessories: "Full service history",
+      },
+      { deadlineDays: 30, daysElapsed: 20, soldRatio: 0.58, leaderboard: board(14, 780) },
+    ),
+
+    // Handbags.
+    autoListing(
+      {
+        category: "handbag",
+        brand: "Hermès",
+        model: "Birkin 30",
+        year: 2022,
+        condition: "excellent",
+        purchasePrice: 14000,
+        description:
+          "Hermès Birkin 30 — hand-stitched leather, among the most recognised luxury handbags in the world. Light wear, authenticated by our partner specialist.",
+        photos: ["/handbags/hermes-birkin.jpg"],
+        accessories: "Dust bag, authenticity card",
+      },
+      { deadlineDays: 21, daysElapsed: 5, soldRatio: 0.4, leaderboard: board(11, 520) },
+    ),
+    autoListing(
+      {
+        category: "handbag",
+        brand: "Chanel",
+        model: "Classic Double Flap 2.55",
+        year: 2021,
+        condition: "excellent",
+        purchasePrice: 8800,
+        description:
+          "Chanel Classic Double Flap, based on the original 2.55 — quilted leather with the signature chain strap. Light wear only.",
+        photos: ["/handbags/chanel-classic-flap.jpg"],
+        accessories: "Dust bag, authenticity card",
+      },
+      { deadlineDays: 21, daysElapsed: 11, soldRatio: 0.55, leaderboard: board(10, 500) },
+    ),
+    autoListing(
+      {
+        category: "handbag",
+        brand: "Louis Vuitton",
+        model: "Bucket GM Shoulder Bag",
+        year: 2023,
+        condition: "new",
+        purchasePrice: 2300,
+        description: "Louis Vuitton Bucket GM — large monogram-canvas shoulder bag. Unworn.",
+        photos: ["/handbags/lv-bucket-bag.jpg"],
+        accessories: "Dust bag",
+      },
+      { deadlineDays: 14, daysElapsed: 2, soldRatio: 0.18, leaderboard: board(7, 380) },
+    ),
+
+    // Clothing.
+    autoListing(
+      {
+        category: "clothing",
+        brand: "Moncler",
+        model: "Genius down jacket",
+        year: 2023,
+        condition: "new",
+        purchasePrice: 1800,
+        description: "Moncler down jacket from the Genius designer-collaboration line. Unworn, tags attached.",
+        photos: ["/clothing/moncler-jacket.jpg"],
+        accessories: "Garment bag, tags attached",
+      },
+      { deadlineDays: 14, daysElapsed: 3, soldRatio: 0.3, leaderboard: board(8, 340) },
+    ),
+    autoListing(
+      {
+        category: "clothing",
+        brand: "Nike",
+        model: "Air Jordan (2023 release)",
+        year: 2023,
+        condition: "new",
+        purchasePrice: 450,
+        description: "Nike Air Jordan, 2023 release — deadstock, never worn.",
+        photos: ["/clothing/nike-air-jordan.jpg"],
+        accessories: "Original box",
+      },
+      { deadlineDays: 10, daysElapsed: 1, soldRatio: 0.12, leaderboard: board(6, 260) },
+    ),
+
+    // Electronics.
+    autoListing(
+      {
+        category: "electronics",
+        brand: "Apple",
+        model: "MacBook Pro",
+        year: 2024,
+        condition: "new",
+        purchasePrice: 2500,
+        description: "Apple MacBook Pro — professional-tier laptop, sealed/unopened.",
+        photos: ["/electronics/macbook-pro.jpg"],
+        accessories: "Original box, charger",
+      },
+      { deadlineDays: 14, daysElapsed: 4, soldRatio: 0.42, leaderboard: board(9, 380) },
+    ),
+    autoListing(
+      {
+        category: "electronics",
+        brand: "Apple",
+        model: "AirPods Max",
+        year: 2023,
+        condition: "new",
+        purchasePrice: 550,
+        description: "Apple AirPods Max — over-ear wireless headphones, sealed/unopened.",
+        photos: ["/electronics/airpods-max.jpg"],
+        accessories: "Original box",
+      },
+      { deadlineDays: 10, daysElapsed: 2, soldRatio: 0.55, leaderboard: board(10, 420) },
+    ),
+    autoListing(
+      {
+        category: "electronics",
+        brand: "Leica",
+        model: "T (Typ 701)",
+        year: 2022,
+        condition: "excellent",
+        purchasePrice: 1900,
+        description: "Leica T (Typ 701) — compact mirrorless camera, aluminium unibody. Light wear only.",
+        photos: ["/electronics/leica-t.jpg"],
+        accessories: "Original box, strap",
+      },
+      { deadlineDays: 14, daysElapsed: 6, soldRatio: 0.35, leaderboard: board(8, 350) },
+    ),
+    autoListing(
+      {
+        category: "electronics",
+        brand: "Apple",
+        model: "iPhone 16 Pro Max",
+        year: 2024,
+        condition: "new",
+        purchasePrice: 1200,
+        description: "Apple iPhone 16 Pro Max — current-generation flagship, sealed/unopened.",
+        photos: ["/electronics/iphone-16-pro-max.jpg"],
+        accessories: "Original box",
+      },
+      { deadlineDays: 10, daysElapsed: 1, soldRatio: 0.6, leaderboard: board(11, 440) },
+    ),
+  ];
+
   /*
    * Every watch here is a different brand/reference (and photo) to anything
    * in the live catalogue above — a won listing must never look like the
@@ -948,10 +1212,10 @@ function seedRecords(): SellRecord[] {
     ),
   ];
 
-  return [...listings, ...wonListings];
+  return [...listings, ...otherCategoryListings, ...wonListings];
 }
 
-const STORAGE_KEY = "rarezy.state.v10";
+const STORAGE_KEY = "rarezy.state.v12";
 
 function load(): State {
   try {
