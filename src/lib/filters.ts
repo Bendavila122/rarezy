@@ -52,6 +52,17 @@ export type WatchFilters = {
   diameterMax: string;
   fullSetOnly: boolean;
   endingSoon: boolean;
+  /** Cars/handbags/clothing/electronics — see `LuxuryItem` for which category uses which field. */
+  colors: string[];
+  materials: string[];
+  sizes: string[];
+  hardware: string[];
+  fuelTypes: string[];
+  transmissions: string[];
+  bodyTypes: string[];
+  mileageMin: string;
+  mileageMax: string;
+  storageCapacities: string[];
 };
 
 export const EMPTY_FILTERS: WatchFilters = {
@@ -72,6 +83,16 @@ export const EMPTY_FILTERS: WatchFilters = {
   diameterMax: "",
   fullSetOnly: false,
   endingSoon: false,
+  colors: [],
+  materials: [],
+  sizes: [],
+  hardware: [],
+  fuelTypes: [],
+  transmissions: [],
+  bodyTypes: [],
+  mileageMin: "",
+  mileageMax: "",
+  storageCapacities: [],
 };
 
 export function toggleValue<T>(list: T[], value: T): T[] {
@@ -96,7 +117,17 @@ export function activeFilterCount(f: WatchFilters): number {
     (f.diameterMin ? 1 : 0) +
     (f.diameterMax ? 1 : 0) +
     (f.fullSetOnly ? 1 : 0) +
-    (f.endingSoon ? 1 : 0)
+    (f.endingSoon ? 1 : 0) +
+    f.colors.length +
+    f.materials.length +
+    f.sizes.length +
+    f.hardware.length +
+    f.fuelTypes.length +
+    f.transmissions.length +
+    f.bodyTypes.length +
+    (f.mileageMin ? 1 : 0) +
+    (f.mileageMax ? 1 : 0) +
+    f.storageCapacities.length
   );
 }
 
@@ -123,6 +154,21 @@ export function matchesFilters(c: CompetitionListing, f: WatchFilters): boolean 
   if (f.diameterMax && (!item.caseDiameterMm || item.caseDiameterMm > Number(f.diameterMax))) return false;
   if (f.fullSetOnly && !isFullSet(item.accessories)) return false;
   if (f.endingSoon && !isWithinHours(c.deadlineAt, 48)) return false;
+  if (f.colors.length && (!item.color || !f.colors.includes(item.color))) return false;
+  if (f.materials.length && (!item.material || !f.materials.includes(item.material))) return false;
+  if (f.sizes.length && (!item.size || !f.sizes.includes(item.size))) return false;
+  if (f.hardware.length && (!item.hardware || !f.hardware.includes(item.hardware))) return false;
+  if (f.fuelTypes.length && (!item.fuelType || !f.fuelTypes.includes(item.fuelType))) return false;
+  if (f.transmissions.length && (!item.transmission || !f.transmissions.includes(item.transmission)))
+    return false;
+  if (f.bodyTypes.length && (!item.bodyType || !f.bodyTypes.includes(item.bodyType))) return false;
+  if (f.mileageMin && (item.mileage === undefined || item.mileage < Number(f.mileageMin))) return false;
+  if (f.mileageMax && (item.mileage === undefined || item.mileage > Number(f.mileageMax))) return false;
+  if (
+    f.storageCapacities.length &&
+    (!item.storageCapacity || !f.storageCapacities.includes(item.storageCapacity))
+  )
+    return false;
   return true;
 }
 

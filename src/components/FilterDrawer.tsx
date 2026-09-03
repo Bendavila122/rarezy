@@ -214,6 +214,15 @@ export function FilterDrawer({
     count: categoryListings.filter((c) => movementType(c.item.movement) === m).length,
   })).filter((f) => f.count > 0);
 
+  const colorFacets = facetCounts(categoryListings, (c) => c.item.color);
+  const materialFacets = facetCounts(categoryListings, (c) => c.item.material);
+  const sizeFacets = facetCounts(categoryListings, (c) => c.item.size);
+  const hardwareFacets = facetCounts(categoryListings, (c) => c.item.hardware);
+  const fuelTypeFacets = facetCounts(categoryListings, (c) => c.item.fuelType);
+  const transmissionFacets = facetCounts(categoryListings, (c) => c.item.transmission);
+  const bodyTypeFacets = facetCounts(categoryListings, (c) => c.item.bodyType);
+  const storageFacets = facetCounts(categoryListings, (c) => c.item.storageCapacity);
+
   return (
     <AnimatePresence>
       {open && (
@@ -451,6 +460,183 @@ export function FilterDrawer({
                         ))}
                       </Section>
                     </>
+                  )}
+
+                  {selectedCategory === "car" && (
+                    <>
+                      <Section
+                        id="fuel"
+                        title="Fuel type"
+                        count={filters.fuelTypes.length}
+                        open={openSections.has("fuel")}
+                        onToggle={toggleSection}
+                      >
+                        {fuelTypeFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.fuelTypes.includes(f.value)}
+                            onClick={() => patch({ fuelTypes: toggleValue(filters.fuelTypes, f.value) })}
+                          />
+                        ))}
+                      </Section>
+
+                      <Section
+                        id="transmission"
+                        title="Transmission"
+                        count={filters.transmissions.length}
+                        open={openSections.has("transmission")}
+                        onToggle={toggleSection}
+                      >
+                        {transmissionFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.transmissions.includes(f.value)}
+                            onClick={() => patch({ transmissions: toggleValue(filters.transmissions, f.value) })}
+                          />
+                        ))}
+                      </Section>
+
+                      <Section
+                        id="body-type"
+                        title="Body type"
+                        count={filters.bodyTypes.length}
+                        open={openSections.has("body-type")}
+                        onToggle={toggleSection}
+                      >
+                        {bodyTypeFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.bodyTypes.includes(f.value)}
+                            onClick={() => patch({ bodyTypes: toggleValue(filters.bodyTypes, f.value) })}
+                          />
+                        ))}
+                      </Section>
+
+                      <Section
+                        id="mileage"
+                        title="Mileage"
+                        count={(filters.mileageMin ? 1 : 0) + (filters.mileageMax ? 1 : 0)}
+                        open={openSections.has("mileage")}
+                        onToggle={toggleSection}
+                      >
+                        <RangeRow
+                          min={filters.mileageMin}
+                          max={filters.mileageMax}
+                          onMin={(v) => patch({ mileageMin: v })}
+                          onMax={(v) => patch({ mileageMax: v })}
+                          placeholderMin="Min miles"
+                          placeholderMax="Max miles"
+                        />
+                      </Section>
+                    </>
+                  )}
+
+                  {(selectedCategory === "handbag" ||
+                    selectedCategory === "clothing" ||
+                    selectedCategory === "electronics") && (
+                    <Section
+                      id="colour"
+                      title="Colour"
+                      count={filters.colors.length}
+                      open={openSections.has("colour")}
+                      onToggle={toggleSection}
+                    >
+                      {colorFacets.map((f) => (
+                        <CheckRow
+                          key={f.value}
+                          label={f.value}
+                          hint={f.count}
+                          checked={filters.colors.includes(f.value)}
+                          onClick={() => patch({ colors: toggleValue(filters.colors, f.value) })}
+                        />
+                      ))}
+                    </Section>
+                  )}
+
+                  {(selectedCategory === "handbag" || selectedCategory === "clothing") && (
+                    <>
+                      <Section
+                        id="material"
+                        title="Material"
+                        count={filters.materials.length}
+                        open={openSections.has("material")}
+                        onToggle={toggleSection}
+                      >
+                        {materialFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.materials.includes(f.value)}
+                            onClick={() => patch({ materials: toggleValue(filters.materials, f.value) })}
+                          />
+                        ))}
+                      </Section>
+
+                      <Section
+                        id="size"
+                        title="Size"
+                        count={filters.sizes.length}
+                        open={openSections.has("size")}
+                        onToggle={toggleSection}
+                      >
+                        {sizeFacets.map((f) => (
+                          <CheckRow
+                            key={f.value}
+                            label={f.value}
+                            hint={f.count}
+                            checked={filters.sizes.includes(f.value)}
+                            onClick={() => patch({ sizes: toggleValue(filters.sizes, f.value) })}
+                          />
+                        ))}
+                      </Section>
+                    </>
+                  )}
+
+                  {selectedCategory === "handbag" && (
+                    <Section
+                      id="hardware"
+                      title="Hardware"
+                      count={filters.hardware.length}
+                      open={openSections.has("hardware")}
+                      onToggle={toggleSection}
+                    >
+                      {hardwareFacets.map((f) => (
+                        <CheckRow
+                          key={f.value}
+                          label={f.value}
+                          hint={f.count}
+                          checked={filters.hardware.includes(f.value)}
+                          onClick={() => patch({ hardware: toggleValue(filters.hardware, f.value) })}
+                        />
+                      ))}
+                    </Section>
+                  )}
+
+                  {selectedCategory === "electronics" && (
+                    <Section
+                      id="storage"
+                      title="Storage capacity"
+                      count={filters.storageCapacities.length}
+                      open={openSections.has("storage")}
+                      onToggle={toggleSection}
+                    >
+                      {storageFacets.map((f) => (
+                        <CheckRow
+                          key={f.value}
+                          label={f.value}
+                          hint={f.count}
+                          checked={filters.storageCapacities.includes(f.value)}
+                          onClick={() => patch({ storageCapacities: toggleValue(filters.storageCapacities, f.value) })}
+                        />
+                      ))}
+                    </Section>
                   )}
 
                   <Section

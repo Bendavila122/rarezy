@@ -19,6 +19,23 @@ const SPEC_ROWS: { key: string; label: string }[] = [
   { key: "dialColor", label: "Dial" },
   { key: "bezelMaterial", label: "Bezel" },
   { key: "crystal", label: "Crystal" },
+  // Cars
+  { key: "bodyType", label: "Body type" },
+  { key: "mileage", label: "Mileage" },
+  { key: "fuelType", label: "Fuel type" },
+  { key: "transmission", label: "Transmission" },
+  { key: "drivetrain", label: "Drivetrain" },
+  { key: "enginePowerBhp", label: "Power" },
+  { key: "doors", label: "Doors" },
+  // Handbags / clothing
+  { key: "color", label: "Colour" },
+  { key: "material", label: "Material" },
+  { key: "size", label: "Size" },
+  { key: "hardware", label: "Hardware" },
+  // Electronics
+  { key: "storageCapacity", label: "Storage" },
+  { key: "screenSize", label: "Screen size" },
+  { key: "connectivity", label: "Connectivity" },
   { key: "accessories", label: "Accessories" },
 ];
 
@@ -69,19 +86,28 @@ export function ItemDetail() {
     rarezy.toggleWatchlist(c.id);
   };
 
-  const specs = SPEC_ROWS.map((row) => ({
-    ...row,
-    value:
-      row.key === "caseDiameterMm"
-        ? c.item.caseDiameterMm
-          ? `${c.item.caseDiameterMm} mm`
-          : undefined
-        : row.key === "lugWidthMm"
-          ? c.item.lugWidthMm
-            ? `${c.item.lugWidthMm} mm`
-            : undefined
-          : (c.item as Record<string, unknown>)[row.key],
-  })).filter((row) => row.value);
+  const UNIT_SUFFIX: Record<string, string> = {
+    caseDiameterMm: " mm",
+    lugWidthMm: " mm",
+    mileage: " miles",
+    enginePowerBhp: " bhp",
+  };
+
+  const specs = SPEC_ROWS.map((row) => {
+    const raw = (c.item as Record<string, unknown>)[row.key];
+    const suffix = UNIT_SUFFIX[row.key];
+    return {
+      ...row,
+      value:
+        raw === undefined || raw === null
+          ? undefined
+          : row.key === "mileage" && typeof raw === "number"
+            ? `${raw.toLocaleString("en-GB")}${suffix}`
+            : suffix
+              ? `${raw}${suffix}`
+              : raw,
+    };
+  }).filter((row) => row.value);
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">

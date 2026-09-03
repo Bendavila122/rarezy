@@ -90,6 +90,26 @@ export type LuxuryItem = {
   lugWidthMm?: number | undefined;
   /** What's included — e.g. "Original box, original papers". */
   accessories?: string | undefined;
+
+  /** Shared across cars/handbags/clothing/electronics — absent on watches, which use `dialColor` instead. */
+  color?: string | undefined;
+  /** Handbags and clothing. */
+  material?: string | undefined;
+  size?: string | undefined;
+  /** Handbags only — e.g. "Gold-tone". */
+  hardware?: string | undefined;
+  /** Cars only. */
+  mileage?: number | undefined;
+  fuelType?: string | undefined;
+  transmission?: string | undefined;
+  bodyType?: string | undefined;
+  drivetrain?: string | undefined;
+  enginePowerBhp?: number | undefined;
+  doors?: number | undefined;
+  /** Electronics only. */
+  storageCapacity?: string | undefined;
+  screenSize?: string | undefined;
+  connectivity?: string | undefined;
 };
 
 export const categoryOf = (item: Pick<LuxuryItem, "category">): ItemCategory => item.category ?? "watch";
