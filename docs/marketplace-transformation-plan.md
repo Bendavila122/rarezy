@@ -140,6 +140,55 @@ Each phase is independently shippable and testable against the existing
 "don't break what works" priority — nothing in A–D removes customer browsing
 or the game mechanic; it swaps their data source.
 
+## 5b. Second strategy doc (seller economics & AI marketing) — reconciled
+
+A follow-up strategy doc refined the seller-facing side. Reconciling it
+against what's actually built (Phase B/C/E/G, shipped and live):
+
+**Already aligned, no work needed:**
+- Sellers pay nothing — no subscription/listing/setup fee anywhere in the
+  schema or UI. Rarezy only ever earns via the platform fee taken at
+  checkout (`purchase_entries`, reading `platform_settings.fee`).
+- The 30% + £0.20 fee is already a configurable row in `platform_settings`,
+  not hard-coded — matches the doc's requirement exactly.
+- A basic public seller storefront (`/seller/:id`) already exists.
+- A seller balance summary (pending/available/paid, from
+  `seller_ledger_entries`) already exists on the seller dashboard.
+
+**Genuinely new scope this doc adds:**
+1. **Multi-game architecture.** Today a competition always uses the one
+   `SkillGame` (2048-style) component — there's no `game` field on
+   `competitions`, no game picker in the creation wizard, no second game
+   implemented. Making this real means: a `games` table/registry, a
+   `game_id` column on `competitions`, a game-picker step in the wizard,
+   and — the actual work — building however many additional games are
+   wanted (Reaction/Memory/Precision/Number are named as examples, not
+   specced). This is a content/build task sized per game, not a single
+   architecture change.
+2. **AI Marketing Centre.** By far the largest new item. Needs real
+   external AI provider(s) (text + image, video "where practical") called
+   from a server-side layer — Supabase edge functions are the natural
+   fit, matching the existing `send-verification-code`-style pattern —
+   with **your own API keys and a budget you're absorbing the cost of**,
+   since sellers pay nothing for generation. This can't proceed without
+   you first choosing provider(s) (e.g. an LLM for copy, an image model,
+   optionally a video model) and giving me keys the same safe way the
+   admin work did (server-side secrets, never in the client bundle).
+3. **Attribution/UTM tracking** per channel (Instagram/TikTok/Email/etc.)
+   with a seller-facing breakdown — new tables + link-generation +
+   click/registration/purchase attribution logic.
+4. **Managed-service seller mode** (a Rarezy rep runs the seller's
+   listings for them) and **salesperson commission tracking** — both new,
+   fairly separate subsystems from the core marketplace.
+5. Multiple game legal review (§35 of this doc) — same non-code caveat as
+   the original UK prize-competition flag: each new game mechanic needs
+   its own compliance sign-off, not an assumption it inherits the
+   existing one's.
+
+None of this is started. Given the size (the AI Marketing Centre alone is
+comparable in scope to everything built so far), the honest next step is
+picking one slice deliberately rather than guessing.
+
 ## 5. Immediate recommendation
 
 Start with **Phase A** (content/copy — low risk, immediately visible,
