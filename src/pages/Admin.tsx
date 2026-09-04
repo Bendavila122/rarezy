@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   DEADLINE_OPTIONS,
@@ -10,8 +10,9 @@ import {
   titleOf,
   type AnalysisFinding,
 } from "@/lib/marketplace";
-import { rarezy, useRarezy, type CompetitionListing, type Submission } from "@/lib/store";
+import { rarezy, useRarezy, type CompetitionListing, type SellRecord, type Submission } from "@/lib/store";
 import { CertificateOfAuthenticity } from "@/components/CertificateOfAuthenticity";
+import { marketDb, moneyFromPence, type MarketCompetition, type Seller } from "@/lib/db";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 const fieldCls =
@@ -69,8 +70,16 @@ function NumberField({
   );
 }
 
+const TABS = [
+  { id: "personal", label: "Personal sales" },
+  { id: "sellers", label: "Seller applications" },
+  { id: "competitions", label: "Competitions" },
+] as const;
+type Tab = (typeof TABS)[number]["id"];
+
 export function Admin() {
   const { records, currentUser } = useRarezy();
+  const [tab, setTab] = useState<Tab>("personal");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   if (!currentUser?.isAdmin) {
@@ -84,6 +93,42 @@ export function Admin() {
     );
   }
 
+  return (
+    <div className="mx-auto max-w-5xl px-6 py-10">
+      <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em]">Admin</h1>
+      <p className="mt-2 text-[0.85rem] text-muted">Rarezy's review queue across every side of the marketplace.</p>
+
+      <div className="mt-6 flex gap-1 border-b border-white/[0.08]">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={`press border-b-2 px-4 py-3 text-[0.82rem] font-medium tracking-tight transition-colors ${
+              tab === t.id ? "border-brand text-foreground" : "border-transparent text-muted"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "personal" && <PersonalSalesTab records={records} selectedId={selectedId} setSelectedId={setSelectedId} />}
+      {tab === "sellers" && <SellersTab />}
+      {tab === "competitions" && <CompetitionsTab />}
+    </div>
+  );
+}
+
+function PersonalSalesTab({
+  records,
+  selectedId,
+  setSelectedId,
+}: {
+  records: SellRecord[];
+  selectedId: string | null;
+  setSelectedId: (id: string) => void;
+}) {
   const submissions = records
     .filter((r): r is Submission => r.kind === "submission")
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
@@ -100,11 +145,8 @@ export function Admin() {
     : undefined;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em]">Admin</h1>
-      <p className="mt-2 text-[0.85rem] text-muted">Review queue for everything coming in through Sell.</p>
-
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="mt-8">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Pending review" value={pendingCount} />
         <StatTile label="Offers awaiting seller" value={offerReadyCount} />
         <StatTile label="Visits scheduled" value={visitScheduledCount} />
@@ -524,6 +566,275 @@ function CertificateForm({ submission: s, listing }: { submission: Submission; l
           Publish certificate — go live
         </button>
       </div>
+    </div>
+  );
+}
+
+function SellersTab() {
+  const [sellers, setSellers] = useState<Seller[] | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
+
+  const reload = () => marketDb.fetchPendingSellers().then(setSellers);
+  useEffect(() => {
+    reload();
+  }, []);
+
+  const selected = sellers?.find((s) => s.id === selectedId) ?? sellers?.[0] ?? null;
+
+  const approve = async (id: string) => {
+    await marketDb.approveSeller(id);
+    setRejecting(false);
+    reload();
+  };
+  const reject = async (id: string) => {
+    await marketDb.rejectSeller(id, reason || "Application did not meet Rarezy's seller requirements.");
+    setReason("");
+    setRejecting(false);
+    reload();
+  };
+
+  if (!sellers) return null;
+
+  return (
+    <div className="mt-8">
+      {sellers.length === 0 ? (
+        <p className="mt-6 text-center text-[0.9rem] text-muted">No pending seller applications.</p>
+      ) : (
+        <div className="mt-2 grid gap-6 lg:grid-cols-[320px_1fr]">
+          <div className="flex flex-col gap-2">
+            {sellers.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSelectedId(s.id)}
+                className={`press rounded-none border p-4 text-left transition-colors ${
+                  selected?.id === s.id ? "border-brand/40 bg-brand/10" : "border-white/10 bg-white/[0.03]"
+                }`}
+              >
+                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-brand">{s.status}</p>
+                <p className="mt-2 text-[0.9rem] tracking-tight">{s.businessName}</p>
+                <p className="mt-1 text-[0.7rem] text-muted">{s.contactEmail}</p>
+              </button>
+            ))}
+          </div>
+
+          {selected && (
+            <div className="card p-6">
+              <p className={labelCls}>{selected.category}</p>
+              <h2 className="mt-2 text-[1.3rem] font-semibold tracking-[-0.02em]">{selected.businessName}</h2>
+              {selected.tradingName && <p className="mt-1 text-[0.8rem] text-muted">Trading as {selected.tradingName}</p>}
+
+              <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[0.8rem]">
+                <p className="text-muted">
+                  Contact <span className="text-foreground">{selected.contactEmail}</span>
+                </p>
+                <p className="text-muted">
+                  Phone <span className="text-foreground">{selected.contactPhone || "Not given"}</span>
+                </p>
+                <p className="text-muted">
+                  Website{" "}
+                  <span className="text-foreground">{selected.website || "Not given"}</span>
+                </p>
+                <p className="text-muted">
+                  Years trading <span className="text-foreground">{selected.yearsTrading ?? "Not given"}</span>
+                </p>
+              </div>
+
+              {!rejecting ? (
+                <div className="mt-6 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => approve(selected.id)}
+                    className="flex-1 rounded-none bg-brand py-3 text-[0.85rem] font-medium tracking-tight text-background"
+                  >
+                    Approve seller
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRejecting(true)}
+                    className="rounded-none border border-white/10 px-4 py-3 text-[0.85rem] text-muted"
+                  >
+                    Reject
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    rows={3}
+                    placeholder="Reason for rejecting…"
+                    className={`${fieldCls} resize-none`}
+                  />
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => reject(selected.id)}
+                      className="flex-1 rounded-none border border-red-500/40 py-3 text-[0.85rem] font-medium text-red-400"
+                    >
+                      Confirm reject
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRejecting(false)}
+                      className="rounded-none border border-white/10 px-4 py-3 text-[0.85rem] text-muted"
+                    >
+                      Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CompetitionsTab() {
+  const [competitions, setCompetitions] = useState<MarketCompetition[] | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+  const [rejecting, setRejecting] = useState(false);
+
+  const reload = () => marketDb.fetchPendingCompetitions().then(setCompetitions);
+  useEffect(() => {
+    reload();
+  }, []);
+
+  const selected = competitions?.find((c) => c.id === selectedId) ?? competitions?.[0] ?? null;
+
+  const approve = async (c: MarketCompetition) => {
+    await marketDb.approveCompetition(c.id, c.productId);
+    setRejecting(false);
+    reload();
+  };
+  const reject = async (id: string) => {
+    await marketDb.rejectCompetition(id, reason || "Doesn't meet Rarezy's listing requirements.");
+    setReason("");
+    setRejecting(false);
+    reload();
+  };
+
+  if (!competitions) return null;
+
+  return (
+    <div className="mt-8">
+      {competitions.length === 0 ? (
+        <p className="mt-6 text-center text-[0.9rem] text-muted">Nothing awaiting approval.</p>
+      ) : (
+        <div className="mt-2 grid gap-6 lg:grid-cols-[320px_1fr]">
+          <div className="flex flex-col gap-2">
+            {competitions.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setSelectedId(c.id)}
+                className={`press rounded-none border p-4 text-left transition-colors ${
+                  selected?.id === c.id ? "border-brand/40 bg-brand/10" : "border-white/10 bg-white/[0.03]"
+                }`}
+              >
+                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-brand">{c.seller.businessName}</p>
+                <p className="mt-2 text-[0.9rem] tracking-tight">
+                  {c.product.brand} {c.product.model}
+                </p>
+                <p className="mt-1 text-[0.7rem] text-muted">
+                  {moneyFromPence(c.ticketPricePence)} · {c.maxEntries.toLocaleString("en-GB")} max entries
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {selected && (
+            <div className="card p-6">
+              <p className={labelCls}>Sold by {selected.seller.businessName}</p>
+              <h2 className="mt-2 text-[1.3rem] font-semibold tracking-[-0.02em]">
+                {selected.product.brand} {selected.product.model}
+              </h2>
+
+              {selected.product.images.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {selected.product.images.map((img) => (
+                    <img key={img.id} src={img.url} alt="" className="h-20 w-20 rounded-none border border-white/10 object-cover" />
+                  ))}
+                </div>
+              )}
+
+              <p className="mt-4 text-[0.8rem] leading-relaxed text-muted">{selected.product.description}</p>
+
+              <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[0.8rem]">
+                <p className="text-muted">
+                  Ticket price <span className="text-foreground">{moneyFromPence(selected.ticketPricePence)}</span>
+                </p>
+                <p className="text-muted">
+                  Max entries <span className="text-foreground">{selected.maxEntries.toLocaleString("en-GB")}</span>
+                </p>
+                <p className="text-muted">
+                  Retail value <span className="text-foreground">{moneyFromPence(selected.product.retailValuePence)}</span>
+                </p>
+                <p className="text-muted">
+                  Potential gross{" "}
+                  <span className="text-foreground">{moneyFromPence(selected.maxEntries * selected.ticketPricePence)}</span>
+                </p>
+                <p className="text-muted">
+                  Condition <span className="text-foreground capitalize">{selected.product.condition}</span>
+                </p>
+                <p className="text-muted">
+                  Closes <span className="text-foreground">{formatDate(selected.endsAt)}</span>
+                </p>
+              </div>
+
+              {!rejecting ? (
+                <div className="mt-6 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => approve(selected)}
+                    className="flex-1 rounded-none bg-brand py-3 text-[0.85rem] font-medium tracking-tight text-background"
+                  >
+                    Approve — go live
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRejecting(true)}
+                    className="rounded-none border border-white/10 px-4 py-3 text-[0.85rem] text-muted"
+                  >
+                    Reject
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    rows={3}
+                    placeholder="Reason for rejecting…"
+                    className={`${fieldCls} resize-none`}
+                  />
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => reject(selected.id)}
+                      className="flex-1 rounded-none border border-red-500/40 py-3 text-[0.85rem] font-medium text-red-400"
+                    >
+                      Confirm reject
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRejecting(false)}
+                      className="rounded-none border border-white/10 px-4 py-3 text-[0.85rem] text-muted"
+                    >
+                      Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

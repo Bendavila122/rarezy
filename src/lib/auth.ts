@@ -52,7 +52,7 @@ export const auth = {
         .from("profiles")
         .insert({ id: data.user.id, username: params.username, email: params.email });
       if (profileError) throw profileError;
-      rarezy.signUp(params.username);
+      rarezy.signUp(params.username, { id: data.user.id });
     }
   },
 
@@ -105,7 +105,7 @@ export const auth = {
         .select("username, is_admin")
         .eq("id", data.user.id)
         .maybeSingle();
-      rarezy.signUp(profile?.username ?? identifier, { isAdmin: profile?.is_admin ?? false });
+      rarezy.signUp(profile?.username ?? identifier, { isAdmin: profile?.is_admin ?? false, id: data.user.id });
     }
   },
 

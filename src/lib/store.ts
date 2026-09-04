@@ -98,7 +98,8 @@ export type Submission = {
 
 export type SellRecord = CashDeal | CompetitionListing | Submission;
 export type BasketEntry = { listingId: string; qty: number };
-export type AccountUser = { username: string; isAdmin?: boolean | undefined };
+/** `id` is the real Supabase auth user id when connected to a live project (undefined in demo mode) — needed to query anything owned by this user (seller rows, entries) directly against the database. */
+export type AccountUser = { username: string; isAdmin?: boolean | undefined; id?: string | undefined };
 
 type State = {
   records: SellRecord[];
@@ -1676,10 +1677,10 @@ export const rarezy = {
    * it from anything the client typed, or any signed-in user could grant
    * themselves the admin dashboard.
    */
-  signUp(username: string, opts?: { isAdmin?: boolean }) {
+  signUp(username: string, opts?: { isAdmin?: boolean; id?: string }) {
     const trimmed = username.trim();
     if (!trimmed) return;
-    set({ currentUser: { username: trimmed, isAdmin: opts?.isAdmin ?? false } });
+    set({ currentUser: { username: trimmed, isAdmin: opts?.isAdmin ?? false, id: opts?.id } });
   },
 
   logOut() {

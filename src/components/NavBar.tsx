@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Ticket, User } from "lucide-react";
+import { Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Store, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
@@ -25,6 +25,14 @@ const SELL_LINK = {
   Icon: Plus,
   end: false,
   gateReason: "Create a free account to sell a watch.",
+} as const;
+
+const SELLER_LINK = {
+  to: "/seller",
+  label: "Seller",
+  Icon: Store,
+  end: false,
+  gateReason: "Create a free account to apply as a Rarezy seller.",
 } as const;
 
 const ACCOUNT_GATE_REASON = "Create a free account to continue.";
@@ -94,7 +102,7 @@ function ShopperNavBar() {
   };
 
   const isPathActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
-  const activeKey = [...PRIMARY_LINKS, SELL_LINK].find((item) => isPathActive(item.to))?.to ?? null;
+  const activeKey = [...PRIMARY_LINKS, SELL_LINK, SELLER_LINK].find((item) => isPathActive(item.to))?.to ?? null;
   const highlightKey = hovered ?? activeKey;
 
   const handleGatedClick = (item: object) => (e: React.MouseEvent) => {
@@ -142,6 +150,14 @@ function ShopperNavBar() {
             <NavLink to={SELL_LINK.to} end={SELL_LINK.end} onClick={handleGatedClick(SELL_LINK)} className={({ isActive }) => linkCls(isActive)}>
               <SELL_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
               {SELL_LINK.label}
+            </NavLink>
+          </div>
+
+          <div className="relative hidden lg:block" onMouseEnter={() => setHovered(SELLER_LINK.to)}>
+            {highlightKey === SELLER_LINK.to && <TabGlass />}
+            <NavLink to={SELLER_LINK.to} end={SELLER_LINK.end} onClick={handleGatedClick(SELLER_LINK)} className={({ isActive }) => linkCls(isActive)}>
+              <SELLER_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
+              {SELLER_LINK.label}
             </NavLink>
           </div>
 
