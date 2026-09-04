@@ -1,12 +1,15 @@
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { auth } from "@/lib/auth";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { AuthGateRedirect } from "@/components/AuthGateRedirect";
 import { CookieBanner } from "@/components/CookieBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { AdminGate } from "@/components/AdminGate";
+import { SellerGate } from "@/components/SellerGate";
 import { useRarezy } from "@/lib/store";
 import { Home } from "@/pages/Home";
 import { Browse } from "@/pages/Browse";
@@ -27,6 +30,7 @@ import { SellerNewCompetition } from "@/pages/SellerNewCompetition";
 import { SellerStorefront } from "@/pages/SellerStorefront";
 import { CompetitionDetail } from "@/pages/CompetitionDetail";
 import { MyWins } from "@/pages/MyWins";
+import { MarketingCentre } from "@/pages/MarketingCentre";
 import { Payments } from "@/pages/Payments";
 import { HowItWorks } from "@/pages/HowItWorks";
 import { Help } from "@/pages/Help";
@@ -37,6 +41,10 @@ import { Privacy } from "@/pages/Privacy";
 
 export function App() {
   const { currentUser } = useRarezy();
+
+  useEffect(() => {
+    auth.restoreSession();
+  }, []);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -51,6 +59,7 @@ export function App() {
 
       <ScrollToTop />
       <AdminGate />
+      <SellerGate />
       <NavBar />
       <div className="relative z-10 flex-1">
         <Routes>
@@ -73,6 +82,7 @@ export function App() {
           <Route path="/seller/:sellerId" element={<SellerStorefront />} />
           <Route path="/c/:competitionId" element={<CompetitionDetail />} />
           <Route path="/wins" element={<MyWins />} />
+          <Route path="/seller/marketing/:competitionId" element={<MarketingCentre />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/help" element={<Help />} />
@@ -82,7 +92,7 @@ export function App() {
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </div>
-      {!currentUser?.isAdmin && <Footer />}
+      {!currentUser?.isAdmin && !currentUser?.isSeller && <Footer />}
       <AuthGateRedirect />
       <CookieBanner />
       <Analytics />

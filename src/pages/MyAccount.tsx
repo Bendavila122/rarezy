@@ -132,30 +132,9 @@ const SUBMISSION_STATUS_LABEL: Record<Submission["status"], string> = {
   declined_at_visit: "Declined at visit",
 };
 
-function TicketChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-none border px-3.5 py-2 text-[0.76rem] tracking-tight transition-all active:scale-[0.97] ${
-        active ? "border-brand/40 bg-brand/15 text-brand" : "border-white/10 bg-white/[0.04] text-muted"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
 function SubmissionCard({ submission: s }: { submission: Submission }) {
   const offer = s.offer;
-  const [entryFee, setEntryFee] = useState(2);
-  const [minimumPrice, setMinimumPrice] = useState(offer ? String(offer.suggestedMinimum) : "");
-  const [deadlineDays, setDeadlineDays] = useState<number>(30);
-  const minValue = Number(minimumPrice) || 0;
-
   const proceedCash = () => rarezy.chooseSubmissionOffer(s.id, "cash");
-  const proceedConsignment = () =>
-    rarezy.chooseSubmissionOffer(s.id, "consignment", { entryFee, minimumPrice: minValue, deadlineDays });
 
   return (
     <div>
@@ -195,52 +174,7 @@ function SubmissionCard({ submission: s }: { submission: Submission }) {
               onClick={proceedCash}
               className="mt-3 w-full rounded-none border border-brand/40 py-2.5 text-[0.8rem] font-medium text-brand"
             >
-              Proceed with cash
-            </button>
-          </div>
-
-          <div className="rounded-none border border-white/10 bg-white/[0.03] p-4">
-            <p className={labelCls}>List it on Rarezy</p>
-            <p className="tabular mt-2 text-[1.3rem] font-semibold leading-none tracking-[-0.03em] text-brand">
-              Up to {money(offer.ceiling)}
-            </p>
-
-            <p className={`${labelCls} mt-4`}>Ticket price</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {[1, 2, 5, 10, 25, 50].map((v) => (
-                <TicketChip key={v} active={entryFee === v} onClick={() => setEntryFee(v)}>
-                  {money(v)}
-                </TicketChip>
-              ))}
-            </div>
-
-            <p className={`${labelCls} mt-4`}>Minimum you'll accept</p>
-            <input
-              value={minimumPrice}
-              onChange={(e) => setMinimumPrice(e.target.value.replace(/[^0-9.]/g, ""))}
-              inputMode="decimal"
-              className="mt-2 w-full rounded-none border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-[0.85rem] tracking-tight text-foreground outline-none focus:border-brand/40"
-            />
-            <p className="mt-1.5 text-[0.68rem] text-muted/70">
-              Between {money(offer.cashHigh)} and {money(offer.ceiling)}.
-            </p>
-
-            <p className={`${labelCls} mt-4`}>Deadline</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {DEADLINE_OPTIONS.map((d) => (
-                <TicketChip key={d} active={deadlineDays === d} onClick={() => setDeadlineDays(d)}>
-                  {d} days
-                </TicketChip>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={proceedConsignment}
-              disabled={minValue < offer.cashHigh || minValue > offer.ceiling}
-              className="mt-4 w-full rounded-none border border-brand/40 py-2.5 text-[0.8rem] font-medium text-brand disabled:opacity-30"
-            >
-              Proceed with ticketed listing
+              Accept cash offer
             </button>
           </div>
 
@@ -249,7 +183,7 @@ function SubmissionCard({ submission: s }: { submission: Submission }) {
             onClick={() => rarezy.cancelSubmission(s.id)}
             className="text-[0.72rem] text-muted/60 underline underline-offset-4"
           >
-            Decline both offers
+            Decline offer
           </button>
         </div>
       )}
@@ -265,8 +199,7 @@ function SubmissionCard({ submission: s }: { submission: Submission }) {
             to inspect it in person.
           </p>
           <p className="mt-3 text-[0.72rem] text-muted/70">
-            You'll decide on the spot — the instant cash offer, or consigning it to us — one visit,
-            one decision. If neither works for you, that's fine too, but we'd only send a rep out once.
+            You'll be paid in cash on the spot once they've confirmed it in person.
           </p>
         </div>
       )}

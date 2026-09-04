@@ -99,7 +99,13 @@ export type Submission = {
 export type SellRecord = CashDeal | CompetitionListing | Submission;
 export type BasketEntry = { listingId: string; qty: number };
 /** `id` is the real Supabase auth user id when connected to a live project (undefined in demo mode) — needed to query anything owned by this user (seller rows, entries) directly against the database. */
-export type AccountUser = { username: string; isAdmin?: boolean | undefined; id?: string | undefined };
+export type AccountUser = {
+  username: string;
+  isAdmin?: boolean | undefined;
+  /** True once this account owns a row in the real `sellers` table (any application status) — drives the separate seller-only nav/dashboard, distinct from a shopper who's just used the instant-cash `/sell` route. */
+  isSeller?: boolean | undefined;
+  id?: string | undefined;
+};
 
 type State = {
   records: SellRecord[];
@@ -1677,14 +1683,27 @@ export const rarezy = {
    * it from anything the client typed, or any signed-in user could grant
    * themselves the admin dashboard.
    */
-  signUp(username: string, opts?: { isAdmin?: boolean; id?: string }) {
+  signUp(username: string, opts?: { isAdmin?: boolean; isSeller?: boolean; id?: string }) {
     const trimmed = username.trim();
     if (!trimmed) return;
-    set({ currentUser: { username: trimmed, isAdmin: opts?.isAdmin ?? false, id: opts?.id } });
+    set({
+      currentUser: {
+        username: trimmed,
+        isAdmin: opts?.isAdmin ?? false,
+        isSeller: opts?.isSeller ?? false,
+        id: opts?.id,
+      },
+    });
   },
 
   logOut() {
     set({ currentUser: null });
+  },
+
+  /** Flips the signed-in account into the seller portal the moment their business application is submitted, without needing a fresh login. */
+  setIsSeller(isSeller: boolean) {
+    if (!state.currentUser) return;
+    set({ currentUser: { ...state.currentUser, isSeller } });
   },
 
   /** Kicks off the review pipeline — nothing is paid or listed until an admin approves it and a rep visit confirms it in person. */

@@ -2,15 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
-import {
-  CONDITIONS,
-  MIN_COMPETITION_VALUE,
-  WATCH_BRANDS,
-  estimateValue,
-  money,
-  type Condition,
-  type LuxuryItem,
-} from "@/lib/marketplace";
+import { CONDITIONS, WATCH_BRANDS, estimateValue, money, type Condition, type LuxuryItem } from "@/lib/marketplace";
 import { rarezy, useRarezy } from "@/lib/store";
 import { AccountRequired } from "@/components/AccountRequired";
 
@@ -82,7 +74,6 @@ export function Sell() {
       : null;
 
   const offer = item ? estimateValue(item) : null;
-  const canEnterCompetition = (item?.purchasePrice ?? 0) >= MIN_COMPETITION_VALUE;
 
   // A ref, not state — AnimatePresence keeps the review step's button
   // mounted (with its original stale onClick closure) through its exit
@@ -101,7 +92,7 @@ export function Sell() {
     return (
       <AccountRequired
         title="Create an account to sell"
-        body="Set up a free account so we know where to send your offer or list your watch."
+        body="Set up a free account so we know where to send your cash offer."
       />
     );
   }
@@ -250,10 +241,10 @@ export function Sell() {
               {item.brand} {item.model}
             </p>
             <h1 className="mt-3 text-[1.6rem] font-semibold leading-tight tracking-[-0.03em]">
-              Here's roughly what similar pieces are worth
+              Here's roughly what it's worth
             </h1>
             <p className="mt-3 text-[0.8rem] leading-relaxed text-muted">
-              Ballpark only, from market data — not an offer yet. Your real numbers land in your
+              Ballpark only, from market data — not an offer yet. Your real cash offer lands in your
               dashboard once we've checked the images and details over.
             </p>
 
@@ -264,19 +255,6 @@ export function Sell() {
               </p>
             </div>
 
-            <div className="card mt-5 p-6">
-              <p className={labelCls}>Indicative ticket ceiling</p>
-              <p className="tabular mt-3 text-[1.8rem] font-semibold leading-none tracking-[-0.04em] text-brand">
-                Up to {money(offer.ceiling)}
-              </p>
-              {!canEnterCompetition && (
-                <p className="mt-3 text-[0.72rem] text-muted">
-                  Rarezy needs a watch worth {money(MIN_COMPETITION_VALUE)} or more to list on tickets —
-                  a cash offer is still on the table either way.
-                </p>
-              )}
-            </div>
-
             <h2 className="mt-9 text-[1rem] font-semibold tracking-[-0.02em]">What happens next</h2>
             <ol className="mt-4 flex flex-col gap-3 text-[0.82rem] leading-relaxed text-muted">
               <li>
@@ -285,19 +263,17 @@ export function Sell() {
                 checklist.
               </li>
               <li>
-                <span className="font-medium text-foreground">2. Two real offers land in your dashboard.</span>{" "}
-                An instant cash offer, and a ticketed listing with the minimum you're happy to accept.
-                You choose one, or decline both.
+                <span className="font-medium text-foreground">2. A real cash offer lands in your dashboard.</span>{" "}
+                Accept it, or decline — no obligation either way.
               </li>
               <li>
                 <span className="font-medium text-foreground">3. A rep visits you.</span> We come to
-                your home or office to inspect it in person and pay out or collect it there and then —
-                one visit, one decision on the spot.
+                your home or office to inspect it in person and pay out there and then — one visit, one
+                decision on the spot.
               </li>
               <li>
-                <span className="font-medium text-foreground">4. Cash is paid, or it's vaulted and listed.</span>{" "}
-                A consigned piece gets a full certificate of authenticity before it goes live, and stays
-                insured in our vault the whole time it's in our possession.
+                <span className="font-medium text-foreground">4. Cash is paid.</span> Straight into your
+                account the moment our specialist confirms it in person.
               </li>
             </ol>
 

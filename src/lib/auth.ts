@@ -17,6 +17,33 @@ async function invokeEdgeFunction<T>(name: string, body: Record<string, unknown>
   return data as T;
 }
 
+/**
+ * Loads `profiles`/`sellers` for an already-authenticated Supabase user id
+ * and populates `rarezy.currentUser` from it — the same lookups
+ * `signInWithPassword` does, shared with `restoreSession` so a page reload
+ * ends up in exactly the same state as a fresh login rather than silently
+ * dropping back to the guest shopper nav.
+ */
+async function hydrateFromUserId(userId: string, fallbackUsername: string) {
+  // `is_admin` is server-enforced (see the `protect_is_admin` trigger in
+  // the profiles migration) — a normal user can never set this on
+  // themselves, so trusting whatever the row says here is safe.
+  const { data: profile } = await supabase!
+    .from("profiles")
+    .select("username, is_admin")
+    .eq("id", userId)
+    .maybeSingle();
+  // Owning a `sellers` row at all (any application status) is what routes
+  // this login into the separate seller dashboard rather than the shopper
+  // nav — checked here so it's known before the first render.
+  const { data: sellerRow } = await supabase!.from("sellers").select("id").eq("owner_id", userId).maybeSingle();
+  rarezy.signUp(profile?.username ?? fallbackUsername, {
+    isAdmin: profile?.is_admin ?? false,
+    isSeller: !!sellerRow,
+    id: userId,
+  });
+}
+
 export const auth = {
   async sendVerificationCode(email: string) {
     if (AUTH_DEMO_MODE) return;
@@ -95,18 +122,22 @@ export const auth = {
 
     const { data, error } = await supabase!.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    if (data.user) await hydrateFromUserId(data.user.id, identifier);
+  },
 
-    if (data.user) {
-      // `is_admin` is server-enforced (see the `protect_is_admin` trigger in
-      // the profiles migration) — a normal user can never set this on
-      // themselves, so trusting whatever the row says here is safe.
-      const { data: profile } = await supabase!
-        .from("profiles")
-        .select("username, is_admin")
-        .eq("id", data.user.id)
-        .maybeSingle();
-      rarezy.signUp(profile?.username ?? identifier, { isAdmin: profile?.is_admin ?? false, id: data.user.id });
-    }
+  /**
+   * Called once on app boot. Supabase persists its own session in
+   * localStorage independently of `rarezy.currentUser` (plain in-memory
+   * app state) — without this, a page reload or direct URL visit while
+   * already signed in would leave the Supabase client authenticated but
+   * the app itself thinking the visitor is a logged-out guest, breaking
+   * the seller/admin dashboards' gating on every refresh.
+   */
+  async restoreSession() {
+    if (AUTH_DEMO_MODE) return;
+    const { data } = await supabase!.auth.getSession();
+    const user = data.session?.user;
+    if (user) await hydrateFromUserId(user.id, user.email ?? "");
   },
 
   async signOut() {

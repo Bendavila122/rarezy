@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { useRarezy } from "@/lib/store";
+import { rarezy, useRarezy } from "@/lib/store";
 import { AccountRequired } from "@/components/AccountRequired";
 import { marketDb, moneyFromPence, type MarketCompetition, type Seller } from "@/lib/db";
 
@@ -244,6 +244,10 @@ function CompetitionRow({ c, onChanged }: { c: MarketCompetition; onChanged: () 
         {moneyFromPence(c.entriesSold * c.ticketPricePence)} raised
       </p>
 
+      <Link to={`/seller/marketing/${c.id}`} className="mt-3 inline-block text-[0.74rem] text-brand underline underline-offset-4">
+        Generate marketing
+      </Link>
+
       {needsFulfilment && <FulfilmentPanel c={c} onDone={onChanged} />}
     </div>
   );
@@ -293,7 +297,17 @@ export function SellerDashboard() {
   if (seller === undefined) return null;
 
   if (!seller) {
-    return <ApplicationForm ownerId={currentUser.id!} onApplied={setSeller} />;
+    return (
+      <ApplicationForm
+        ownerId={currentUser.id!}
+        onApplied={(s) => {
+          setSeller(s);
+          // Switches the whole account over to the seller-only nav/dashboard
+          // immediately, without waiting for a fresh login.
+          rarezy.setIsSeller(true);
+        }}
+      />
+    );
   }
 
   if (seller.status === "submitted" || seller.status === "under_review") {

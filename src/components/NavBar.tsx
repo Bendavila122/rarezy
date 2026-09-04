@@ -27,14 +27,6 @@ const SELL_LINK = {
   gateReason: "Create a free account to sell a watch.",
 } as const;
 
-const SELLER_LINK = {
-  to: "/seller",
-  label: "Seller",
-  Icon: Store,
-  end: false,
-  gateReason: "Create a free account to apply as a Rarezy seller.",
-} as const;
-
 const ACCOUNT_GATE_REASON = "Create a free account to continue.";
 
 const linkCls = (isActive: boolean) =>
@@ -81,9 +73,44 @@ function AdminNavBar() {
   );
 }
 
+/**
+ * A verified business seller gets its own header too — no search, basket,
+ * browse or entries, nothing implying they're shopping. Kept as a fully
+ * separate component for the same reason as `AdminNavBar`: no render tree
+ * where shopper-only and seller-only markup share branches.
+ */
+function SellerNavBar() {
+  return (
+    <header className="sticky top-0 z-30">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <NavLink to="/seller" className="flex items-center gap-2 text-white/85">
+          <Store className="h-5 w-5 text-mint" strokeWidth={1.9} />
+          <span className="text-[0.95rem] font-semibold tracking-tight">Rarezy Seller</span>
+        </NavLink>
+        <nav className="flex h-9 items-center gap-1">
+          <NavLink to="/seller/new" className={({ isActive }) => linkCls(isActive)}>
+            <Plus className="h-4 w-4" strokeWidth={1.9} />
+            New competition
+          </NavLink>
+          <button
+            type="button"
+            onClick={() => auth.signOut()}
+            className="press flex h-9 items-center gap-1.5 px-3 text-[0.85rem] font-medium tracking-tight text-white/65 hover:text-mint"
+          >
+            <LogOut className="h-4 w-4" strokeWidth={1.9} />
+            Log out
+          </button>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 export function NavBar() {
   const { currentUser } = useRarezy();
-  return currentUser?.isAdmin ? <AdminNavBar /> : <ShopperNavBar />;
+  if (currentUser?.isAdmin) return <AdminNavBar />;
+  if (currentUser?.isSeller) return <SellerNavBar />;
+  return <ShopperNavBar />;
 }
 
 function ShopperNavBar() {
@@ -102,7 +129,7 @@ function ShopperNavBar() {
   };
 
   const isPathActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
-  const activeKey = [...PRIMARY_LINKS, SELL_LINK, SELLER_LINK].find((item) => isPathActive(item.to))?.to ?? null;
+  const activeKey = [...PRIMARY_LINKS, SELL_LINK].find((item) => isPathActive(item.to))?.to ?? null;
   const highlightKey = hovered ?? activeKey;
 
   const handleGatedClick = (item: object) => (e: React.MouseEvent) => {
@@ -150,14 +177,6 @@ function ShopperNavBar() {
             <NavLink to={SELL_LINK.to} end={SELL_LINK.end} onClick={handleGatedClick(SELL_LINK)} className={({ isActive }) => linkCls(isActive)}>
               <SELL_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
               {SELL_LINK.label}
-            </NavLink>
-          </div>
-
-          <div className="relative hidden lg:block" onMouseEnter={() => setHovered(SELLER_LINK.to)}>
-            {highlightKey === SELLER_LINK.to && <TabGlass />}
-            <NavLink to={SELLER_LINK.to} end={SELLER_LINK.end} onClick={handleGatedClick(SELLER_LINK)} className={({ isActive }) => linkCls(isActive)}>
-              <SELLER_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
-              {SELLER_LINK.label}
             </NavLink>
           </div>
 
