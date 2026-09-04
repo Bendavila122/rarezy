@@ -1616,9 +1616,6 @@ if (typeof window !== "undefined") {
   }, 15_000);
 }
 
-/** Reserved username that unlocks the admin dashboard — this demo has no real backend, so like every other login here it's not actually secured server-side (see `recordScore`'s note on the same trust model). */
-const ADMIN_USERNAME = "admin";
-
 function buildCashDeal(item: LuxuryItem, offer: Valuation, amount: number): CashDeal {
   return {
     id: id(),
@@ -1671,16 +1668,18 @@ function updateSubmission(submissionId: string, patch: Partial<Submission>) {
 }
 
 export const rarezy = {
-  /** Creates the free guest→member account, picking the username shown on leaderboards and the winners wall. Signing up/in as `admin` unlocks the admin dashboard. */
-  signUp(username: string) {
+  /**
+   * Creates the free guest→member account, picking the username shown on
+   * leaderboards and the winners wall. `isAdmin` must come from the
+   * server (the `profiles.is_admin` column, which a normal user can never
+   * set on themselves — see the `protect_is_admin` trigger) — never derive
+   * it from anything the client typed, or any signed-in user could grant
+   * themselves the admin dashboard.
+   */
+  signUp(username: string, opts?: { isAdmin?: boolean }) {
     const trimmed = username.trim();
     if (!trimmed) return;
-    set({
-      currentUser: {
-        username: trimmed,
-        isAdmin: trimmed.toLowerCase() === ADMIN_USERNAME,
-      },
-    });
+    set({ currentUser: { username: trimmed, isAdmin: opts?.isAdmin ?? false } });
   },
 
   logOut() {

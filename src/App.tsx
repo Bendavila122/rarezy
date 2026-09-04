@@ -6,6 +6,8 @@ import { Footer } from "@/components/Footer";
 import { AuthGateRedirect } from "@/components/AuthGateRedirect";
 import { CookieBanner } from "@/components/CookieBanner";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { AdminGate } from "@/components/AdminGate";
+import { useRarezy } from "@/lib/store";
 import { Home } from "@/pages/Home";
 import { Browse } from "@/pages/Browse";
 import { ItemDetail } from "@/pages/ItemDetail";
@@ -29,6 +31,8 @@ import { Terms } from "@/pages/Terms";
 import { Privacy } from "@/pages/Privacy";
 
 export function App() {
+  const { currentUser } = useRarezy();
+
   return (
     <div className="flex min-h-full flex-col">
       {/* One continuous background behind every page, fixed to the viewport —
@@ -41,6 +45,7 @@ export function App() {
       <div className="mesh-hero grain inset-0 z-0" style={{ position: "fixed" }} aria-hidden />
 
       <ScrollToTop />
+      <AdminGate />
       <NavBar />
       <div className="relative z-10 flex-1">
         <Routes>
@@ -67,7 +72,7 @@ export function App() {
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </div>
-      <Footer />
+      {!currentUser?.isAdmin && <Footer />}
       <AuthGateRedirect />
       <CookieBanner />
       <Analytics />

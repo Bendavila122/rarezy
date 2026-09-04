@@ -97,12 +97,15 @@ export const auth = {
     if (error) throw error;
 
     if (data.user) {
+      // `is_admin` is server-enforced (see the `protect_is_admin` trigger in
+      // the profiles migration) — a normal user can never set this on
+      // themselves, so trusting whatever the row says here is safe.
       const { data: profile } = await supabase!
         .from("profiles")
-        .select("username")
+        .select("username, is_admin")
         .eq("id", data.user.id)
         .maybeSingle();
-      rarezy.signUp(profile?.username ?? identifier);
+      rarezy.signUp(profile?.username ?? identifier, { isAdmin: profile?.is_admin ?? false });
     }
   },
 

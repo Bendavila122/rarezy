@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, Plus, ShieldCheck, ShoppingBag, Ticket, User } from "lucide-react";
+import { Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
+import { auth } from "@/lib/auth";
 import { SearchHero } from "@/components/SearchHero";
 
 const PRIMARY_LINKS = [
@@ -44,7 +45,40 @@ function TabGlass() {
   );
 }
 
+/**
+ * The admin account gets its own header entirely — no search, no basket,
+ * no browse/sell links, nothing that implies it's a shopper account. Kept
+ * as a separate component rather than branches threaded through the
+ * regular nav below, so there's no path where admin-only markup and
+ * shopper-only markup share a render tree.
+ */
+function AdminNavBar() {
+  return (
+    <header className="sticky top-0 z-30">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <div className="flex items-center gap-2 text-white/85">
+          <ShieldCheck className="h-5 w-5 text-mint" strokeWidth={1.9} />
+          <span className="text-[0.95rem] font-semibold tracking-tight">Rarezy Admin</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => auth.signOut()}
+          className="press flex h-9 items-center gap-1.5 px-3 text-[0.85rem] font-medium tracking-tight text-white/65 hover:text-mint"
+        >
+          <LogOut className="h-4 w-4" strokeWidth={1.9} />
+          Log out
+        </button>
+      </div>
+    </header>
+  );
+}
+
 export function NavBar() {
+  const { currentUser } = useRarezy();
+  return currentUser?.isAdmin ? <AdminNavBar /> : <ShopperNavBar />;
+}
+
+function ShopperNavBar() {
   const { basket, records, currentUser } = useRarezy();
   const basketCount = basket.reduce((sum, b) => sum + b.qty, 0);
   const playableCount = records.filter(
@@ -60,8 +94,7 @@ export function NavBar() {
   };
 
   const isPathActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
-  const activeKey =
-    [...PRIMARY_LINKS, SELL_LINK, { to: "/admin" }].find((item) => isPathActive(item.to))?.to ?? null;
+  const activeKey = [...PRIMARY_LINKS, SELL_LINK].find((item) => isPathActive(item.to))?.to ?? null;
   const highlightKey = hovered ?? activeKey;
 
   const handleGatedClick = (item: object) => (e: React.MouseEvent) => {
@@ -111,16 +144,6 @@ export function NavBar() {
               {SELL_LINK.label}
             </NavLink>
           </div>
-
-          {currentUser?.isAdmin && (
-            <div className="relative" onMouseEnter={() => setHovered("/admin")}>
-              {highlightKey === "/admin" && <TabGlass />}
-              <NavLink to="/admin" className={({ isActive }) => linkCls(isActive)}>
-                <ShieldCheck className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
-                Admin
-              </NavLink>
-            </div>
-          )}
 
           <div className="relative" onMouseEnter={() => setHovered(null)}>
             <NavLink
