@@ -21,7 +21,7 @@ export function Login() {
     setError(null);
     try {
       await auth.signInWithPassword(identifier.trim(), password);
-      navigate(state?.next ?? "/account");
+      navigate(state?.next ?? "/browse");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't sign you in.");
     } finally {

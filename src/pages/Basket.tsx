@@ -3,15 +3,25 @@ import { useState } from "react";
 import { CheckCircle2, CreditCard, Minus, Plus, Trash2 } from "lucide-react";
 import { entryPricing, formatDate, money, titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy, type CompetitionListing } from "@/lib/store";
+import { AccountRequired } from "@/components/AccountRequired";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 type PayMethod = "card" | "apple-pay";
 
 export function Basket() {
-  const { records, basket } = useRarezy();
+  const { records, basket, currentUser } = useRarezy();
   const [error, setError] = useState<string | null>(null);
   const [payMethod, setPayMethod] = useState<PayMethod>("card");
   const [paid, setPaid] = useState(false);
+
+  if (!currentUser) {
+    return (
+      <AccountRequired
+        title="Create an account to check out"
+        body="Sign up free to buy your tickets and enter."
+      />
+    );
+  }
 
   const items = basket
     .map((b) => {

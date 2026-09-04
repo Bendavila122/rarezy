@@ -3,31 +3,16 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Store, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
-import { authGate } from "@/lib/authGate";
 import { auth } from "@/lib/auth";
 import { SearchHero } from "@/components/SearchHero";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
   { to: "/basket", label: "Basket", Icon: ShoppingBag, end: false },
-  {
-    to: "/entries",
-    label: "Entries",
-    Icon: Ticket,
-    end: false,
-    gateReason: "Create a free account to see your entries.",
-  },
+  { to: "/entries", label: "Entries", Icon: Ticket, end: false },
 ] as const;
 
-const SELL_LINK = {
-  to: "/sell",
-  label: "Sell",
-  Icon: Plus,
-  end: false,
-  gateReason: "Create a free account to sell a watch.",
-} as const;
-
-const ACCOUNT_GATE_REASON = "Create a free account to continue.";
+const SELL_LINK = { to: "/sell", label: "Sell", Icon: Plus, end: false } as const;
 
 const linkCls = (isActive: boolean) =>
   `group relative z-10 flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight transition-colors duration-200 ease-out hover:text-mint ${
@@ -106,15 +91,48 @@ function SellerNavBar() {
   );
 }
 
+/**
+ * A guest gets the home page in full, but none of the account-scoped nav —
+ * no Browse, Basket, Entries or Sell, since none of those are usable
+ * without an account any more. Just the logo and a way in.
+ */
+function GuestNavBar() {
+  return (
+    <header className="sticky top-0 z-30">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <NavLink to="/" className="flex h-9 items-center">
+          <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
+          <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
+        </NavLink>
+        <div className="flex items-center gap-2">
+          <NavLink
+            to="/login"
+            className="press flex h-9 items-center px-4 text-[0.85rem] font-medium tracking-tight text-white/75 hover:text-mint"
+          >
+            Log in
+          </NavLink>
+          <NavLink
+            to="/signup"
+            className="press flex h-9 items-center rounded-full bg-mint px-4 text-[0.85rem] font-semibold tracking-tight text-brand-deep"
+          >
+            Sign up
+          </NavLink>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 export function NavBar() {
   const { currentUser } = useRarezy();
   if (currentUser?.isAdmin) return <AdminNavBar />;
   if (currentUser?.isSeller) return <SellerNavBar />;
+  if (!currentUser) return <GuestNavBar />;
   return <ShopperNavBar />;
 }
 
 function ShopperNavBar() {
-  const { basket, records, currentUser } = useRarezy();
+  const { basket, records } = useRarezy();
   const basketCount = basket.reduce((sum, b) => sum + b.qty, 0);
   const playableCount = records.filter(
     (r) => r.kind === "competition" && r.attemptsRemaining > 0,
@@ -132,18 +150,11 @@ function ShopperNavBar() {
   const activeKey = [...PRIMARY_LINKS, SELL_LINK].find((item) => isPathActive(item.to))?.to ?? null;
   const highlightKey = hovered ?? activeKey;
 
-  const handleGatedClick = (item: object) => (e: React.MouseEvent) => {
-    if ("gateReason" in item && item.gateReason && !currentUser) {
-      e.preventDefault();
-      authGate.request(item.gateReason as string);
-    }
-  };
-
   return (
     <header className="sticky top-0 z-30">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-5">
-          <NavLink to="/" className="flex h-9 items-center">
+          <NavLink to="/browse" className="flex h-9 items-center">
             <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
             <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
           </NavLink>
@@ -156,7 +167,7 @@ function ShopperNavBar() {
             return (
               <div key={item.to} className="relative" onMouseEnter={() => setHovered(item.to)}>
                 {highlightKey === item.to && <TabGlass />}
-                <NavLink to={item.to} end={item.end} onClick={handleGatedClick(item)} className={({ isActive }) => linkCls(isActive)}>
+                <NavLink to={item.to} end={item.end} className={({ isActive }) => linkCls(isActive)}>
                   <item.Icon
                     className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110"
                     strokeWidth={1.9}
@@ -174,7 +185,7 @@ function ShopperNavBar() {
 
           <div className="relative" onMouseEnter={() => setHovered(SELL_LINK.to)}>
             {highlightKey === SELL_LINK.to && <TabGlass />}
-            <NavLink to={SELL_LINK.to} end={SELL_LINK.end} onClick={handleGatedClick(SELL_LINK)} className={({ isActive }) => linkCls(isActive)}>
+            <NavLink to={SELL_LINK.to} end={SELL_LINK.end} className={({ isActive }) => linkCls(isActive)}>
               <SELL_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
               {SELL_LINK.label}
             </NavLink>
@@ -183,7 +194,6 @@ function ShopperNavBar() {
           <div className="relative" onMouseEnter={() => setHovered(null)}>
             <NavLink
               to="/account"
-              onClick={handleGatedClick({ to: "/account", gateReason: ACCOUNT_GATE_REASON })}
               aria-label="Account"
               className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60 transition-transform duration-200 ease-out hover:scale-110"
             >

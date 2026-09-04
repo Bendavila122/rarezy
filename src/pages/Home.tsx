@@ -2,6 +2,8 @@ import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { useRarezy } from "@/lib/store";
 import { FaqSection } from "@/components/FaqSection";
 import { ScrollStory } from "@/components/ScrollStory";
 import { GameSection } from "@/components/GameSection";
@@ -13,6 +15,7 @@ import { SkillGame } from "@/components/SkillGame";
 import { ScrollHint } from "@/components/ScrollHint";
 
 export function Home() {
+  const { currentUser } = useRarezy();
   const [heroPlaying, setHeroPlaying] = useState(false);
   const [heroScore, setHeroScore] = useState<number | null>(null);
 
@@ -23,6 +26,13 @@ export function Home() {
     document.documentElement.classList.add("snap-page");
     return () => document.documentElement.classList.remove("snap-page");
   }, []);
+
+  // The home page is guest-only marketing ground now — a signed-in buyer
+  // opens straight onto Browse instead (admin/seller accounts never reach
+  // here at all, already redirected by their own gates).
+  if (currentUser && !currentUser.isAdmin && !currentUser.isSeller) {
+    return <Navigate to="/browse" replace />;
+  }
 
   return (
     <>
