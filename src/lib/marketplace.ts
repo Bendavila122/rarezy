@@ -89,6 +89,8 @@ export type LuxuryItem = {
   lugWidthMm?: number | undefined;
   /** What's included — e.g. "Original box, original papers". */
   accessories?: string | undefined;
+  /** Where the seller says they originally bought it — collected at submission, checked as part of the authenticity review. */
+  purchasedFrom?: string | undefined;
 
   /** Shared across cars/handbags/clothing/electronics — absent on watches, which use `dialColor` instead. */
   color?: string | undefined;
@@ -114,6 +116,26 @@ export type LuxuryItem = {
 };
 
 export const categoryOf = (item: Pick<LuxuryItem, "category">): ItemCategory => item.category ?? "watch";
+
+/** One line of the in-person inspection checklist on a certificate — e.g. "Movement & timekeeping". */
+export type AnalysisFinding = {
+  label: string;
+  note: string;
+  flagged: boolean;
+};
+
+/**
+ * The certificate of authenticity generated once a consigned item has been
+ * physically inspected — attached to its listing so buyers can see exactly
+ * what was checked before it went into the vault.
+ */
+export type AnalysisReport = {
+  certificateId: string;
+  generatedAt: string;
+  inspectorName: string;
+  summary: string;
+  findings: AnalysisFinding[];
+};
 
 export type Valuation = {
   /** What Rarezy will pay, cash, within 48 hours. */
@@ -176,6 +198,19 @@ const FICTITIOUS_PLAYERS = [
 
 export function randomPlayerName() {
   return FICTITIOUS_PLAYERS[Math.floor(Math.random() * FICTITIOUS_PLAYERS.length)]!;
+}
+
+/** In-house Rarezy specialists who conduct collection visits and inspections — distinct from the fictitious players above. */
+const FICTITIOUS_REPS = [
+  "James Whitfield",
+  "Priya Anand",
+  "Tom Beaumont",
+  "Sofia Marchetti",
+  "Daniel Osei",
+];
+
+export function randomRepName() {
+  return FICTITIOUS_REPS[Math.floor(Math.random() * FICTITIOUS_REPS.length)]!;
 }
 
 export const titleOf = (item: LuxuryItem) =>

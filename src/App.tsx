@@ -18,6 +18,8 @@ import { Partners } from "@/pages/Partners";
 import { Authenticate } from "@/pages/Authenticate";
 import { Sell } from "@/pages/Sell";
 import { MyAccount } from "@/pages/MyAccount";
+import { Admin } from "@/pages/Admin";
+import { Certificate } from "@/pages/Certificate";
 import { Payments } from "@/pages/Payments";
 import { HowItWorks } from "@/pages/HowItWorks";
 import { Help } from "@/pages/Help";
@@ -54,6 +56,8 @@ export function App() {
           <Route path="/authenticate" element={<Authenticate />} />
           <Route path="/sell" element={<Sell />} />
           <Route path="/account" element={<MyAccount />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/certificate/:listingId" element={<Certificate />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/help" element={<Help />} />

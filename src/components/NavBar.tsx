@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, Plus, ShoppingBag, Ticket, User } from "lucide-react";
+import { Compass, Plus, ShieldCheck, ShoppingBag, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
@@ -60,7 +60,8 @@ export function NavBar() {
   };
 
   const isPathActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
-  const activeKey = [...PRIMARY_LINKS, SELL_LINK].find((item) => isPathActive(item.to))?.to ?? null;
+  const activeKey =
+    [...PRIMARY_LINKS, SELL_LINK, { to: "/admin" }].find((item) => isPathActive(item.to))?.to ?? null;
   const highlightKey = hovered ?? activeKey;
 
   const handleGatedClick = (item: object) => (e: React.MouseEvent) => {
@@ -110,6 +111,16 @@ export function NavBar() {
               {SELL_LINK.label}
             </NavLink>
           </div>
+
+          {currentUser?.isAdmin && (
+            <div className="relative" onMouseEnter={() => setHovered("/admin")}>
+              {highlightKey === "/admin" && <TabGlass />}
+              <NavLink to="/admin" className={({ isActive }) => linkCls(isActive)}>
+                <ShieldCheck className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
+                Admin
+              </NavLink>
+            </div>
+          )}
 
           <div className="relative" onMouseEnter={() => setHovered(null)}>
             <NavLink

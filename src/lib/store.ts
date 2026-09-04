@@ -2,7 +2,9 @@ import { useSyncExternalStore } from "react";
 import {
   estimateValue,
   randomPlayerName,
+  randomRepName,
   suggestEntryCount,
+  type AnalysisReport,
   type LuxuryItem,
   type Valuation,
 } from "./marketplace";
@@ -43,6 +45,8 @@ export type CompetitionListing = {
   createdAt: string;
   status: CompetitionStatus;
   certificateId?: string | undefined;
+  /** The full in-person inspection writeup — set once an admin publishes it, which is also what flips a consigned item from "authenticating" to "live". */
+  analysisReport?: AnalysisReport | undefined;
   /** Tickets bought by the signed-in player, not the fictitious field. */
   myEntries: number;
   /** Attempts at the skill game still owed for those tickets. */
@@ -56,9 +60,45 @@ export type CompetitionListing = {
   history: HistoryEntry[];
 };
 
-export type SellRecord = CashDeal | CompetitionListing;
+export type SubmissionStatus =
+  | "pending_review"
+  | "rejected"
+  | "offer_ready"
+  | "visit_scheduled"
+  | "declined_by_seller"
+  | "visit_completed_cash"
+  | "visit_completed_consignment"
+  | "declined_at_visit";
+
+/**
+ * A sell request working its way through admin review, before it becomes a
+ * real `CashDeal` or `CompetitionListing`. Nothing is paid out or listed
+ * until a rep has physically inspected the item at the collection visit.
+ */
+export type Submission = {
+  id: string;
+  kind: "submission";
+  item: LuxuryItem;
+  submittedAt: string;
+  status: SubmissionStatus;
+  /** Set by the admin on approval or rejection. */
+  adminNotes?: string | undefined;
+  /** The admin's rough cash range + ticket ceiling, shown to the seller once approved. */
+  offer?: Valuation | undefined;
+  /** Which of the two offers the seller chose to proceed with, before the visit confirms it. */
+  sellerChoice?: "cash" | "consignment" | undefined;
+  proposedEntryFee?: number | undefined;
+  proposedMinimumPrice?: number | undefined;
+  proposedDeadlineDays?: number | undefined;
+  visit?: { scheduledAt: string; repName: string } | undefined;
+  /** The `CashDeal` or `CompetitionListing` this became, once the visit resolves it. */
+  resultRecordId?: string | undefined;
+  history: HistoryEntry[];
+};
+
+export type SellRecord = CashDeal | CompetitionListing | Submission;
 export type BasketEntry = { listingId: string; qty: number };
-export type AccountUser = { username: string };
+export type AccountUser = { username: string; isAdmin?: boolean | undefined };
 
 type State = {
   records: SellRecord[];
@@ -1489,7 +1529,7 @@ function seedRecords(): SellRecord[] {
   return [...listings, ...otherCategoryListings, ...wonListings];
 }
 
-const STORAGE_KEY = "rarezy.state.v14";
+const STORAGE_KEY = "rarezy.state.v15";
 
 function load(): State {
   try {
@@ -1576,79 +1616,242 @@ if (typeof window !== "undefined") {
   }, 15_000);
 }
 
+/** Reserved username that unlocks the admin dashboard — this demo has no real backend, so like every other login here it's not actually secured server-side (see `recordScore`'s note on the same trust model). */
+const ADMIN_USERNAME = "admin";
+
+function buildCashDeal(item: LuxuryItem, offer: Valuation, amount: number): CashDeal {
+  return {
+    id: id(),
+    kind: "cash",
+    item,
+    offer,
+    acceptedAmount: amount,
+    acceptedAt: now(),
+  };
+}
+
+function buildConsignmentListing(
+  item: LuxuryItem,
+  offer: Valuation,
+  config: { entryFee: number; minimumPrice: number; deadlineDays: number },
+): CompetitionListing {
+  const entriesTotal = suggestEntryCount(offer.ceiling, config.entryFee);
+  const createdAt = now();
+  return {
+    id: id(),
+    kind: "competition",
+    item,
+    offer,
+    entryFee: config.entryFee,
+    entriesTotal,
+    entriesSold: 0,
+    minimumPrice: config.minimumPrice,
+    targetMax: config.entryFee * entriesTotal,
+    deadlineDays: config.deadlineDays,
+    deadlineAt: new Date(Date.now() + config.deadlineDays * 86_400_000).toISOString(),
+    createdAt,
+    status: "authenticating",
+    myEntries: 0,
+    attemptsRemaining: 0,
+    leaderboard: [],
+    history: [{ at: createdAt, label: "Collected and taken into our safe deposit vault for inspection" }],
+  };
+}
+
+function requireSubmission(submissionId: string) {
+  return state.records.find((r) => r.id === submissionId && r.kind === "submission") as
+    | Submission
+    | undefined;
+}
+
+function updateSubmission(submissionId: string, patch: Partial<Submission>) {
+  set({
+    records: state.records.map((r) => (r.id === submissionId && r.kind === "submission" ? { ...r, ...patch } : r)),
+  });
+}
+
 export const rarezy = {
-  /** Creates the free guest→member account, picking the username shown on leaderboards and the winners wall. */
+  /** Creates the free guest→member account, picking the username shown on leaderboards and the winners wall. Signing up/in as `admin` unlocks the admin dashboard. */
   signUp(username: string) {
     const trimmed = username.trim();
     if (!trimmed) return;
-    set({ currentUser: { username: trimmed } });
+    set({
+      currentUser: {
+        username: trimmed,
+        isAdmin: trimmed.toLowerCase() === ADMIN_USERNAME,
+      },
+    });
   },
 
   logOut() {
     set({ currentUser: null });
   },
 
-  /** Instant cash offer, accepted on the spot — paid to the seller's linked payout account. */
-  acceptCash(item: LuxuryItem, offer: Valuation, amount: number) {
-    const deal: CashDeal = {
+  /** Kicks off the review pipeline — nothing is paid or listed until an admin approves it and a rep visit confirms it in person. */
+  submitForReview(item: LuxuryItem, purchasedFrom: string) {
+    const submittedAt = now();
+    const submission: Submission = {
       id: id(),
-      kind: "cash",
-      item,
-      offer,
-      acceptedAmount: amount,
-      acceptedAt: now(),
+      kind: "submission",
+      item: { ...item, purchasedFrom: purchasedFrom.trim() || undefined },
+      submittedAt,
+      status: "pending_review",
+      history: [{ at: submittedAt, label: "Submitted for review" }],
     };
-    set({ records: [deal, ...state.records] });
-    return deal;
+    set({ records: [submission, ...state.records] });
+    return submission;
   },
 
-  /** Ship it in — our partner watch specialist authenticates, certifies and lists it. */
-  startCompetition(
-    item: LuxuryItem,
-    config: { entryFee: number; entriesTotal: number; minimumPrice: number; deadlineDays: number },
+  /** Admin: the images and details check out — generates the two offers the seller will see in their dashboard. */
+  adminApproveSubmission(
+    submissionId: string,
+    opts: { adminNotes: string; cashLow: number; cashHigh: number; suggestedMinimum: number; ceiling: number },
   ) {
-    const offer = estimateValue(item);
-    const createdAt = now();
-    const listing: CompetitionListing = {
-      id: id(),
-      kind: "competition",
-      item,
-      offer,
-      entryFee: config.entryFee,
-      entriesTotal: config.entriesTotal,
-      entriesSold: 0,
-      minimumPrice: config.minimumPrice,
-      targetMax: config.entryFee * config.entriesTotal,
-      deadlineDays: config.deadlineDays,
-      deadlineAt: new Date(Date.now() + config.deadlineDays * 86_400_000).toISOString(),
-      createdAt,
-      status: "authenticating",
-      myEntries: 0,
-      attemptsRemaining: 0,
-      leaderboard: [],
-      history: [{ at: createdAt, label: "Shipped to our partner watch specialist for authentication" }],
-    };
-    set({ records: [listing, ...state.records] });
+    const s = requireSubmission(submissionId);
+    if (!s || s.status !== "pending_review") return;
+    updateSubmission(submissionId, {
+      status: "offer_ready",
+      adminNotes: opts.adminNotes,
+      offer: {
+        cashLow: opts.cashLow,
+        cashHigh: opts.cashHigh,
+        suggestedMinimum: opts.suggestedMinimum,
+        ceiling: opts.ceiling,
+      },
+      history: [...s.history, { at: now(), label: "Approved — offer sent to the seller's dashboard" }],
+    });
+  },
 
-    // The authentication pass — checked, certified and photographed, free of
-    // charge, and quick enough here to watch happen.
-    if (typeof window !== "undefined") {
-      window.setTimeout(() => {
-        set({
-          records: state.records.map((r) =>
-            r.id === listing.id && r.kind === "competition"
-              ? {
-                  ...r,
-                  status: "live",
-                  certificateId: certId(),
-                  history: [...r.history, { at: now(), label: "Authenticated, certified and listed" }],
-                }
-              : r,
-          ),
-        });
-      }, 3200);
+  /** Admin: doesn't check out — images, details or provenance don't add up. */
+  adminRejectSubmission(submissionId: string, adminNotes: string) {
+    const s = requireSubmission(submissionId);
+    if (!s || s.status !== "pending_review") return;
+    updateSubmission(submissionId, {
+      status: "rejected",
+      adminNotes,
+      history: [...s.history, { at: now(), label: "Rejected" }],
+    });
+  },
+
+  /** Seller: picks a direction from their dashboard — this books the collection visit, but nothing is final until it happens. */
+  chooseSubmissionOffer(
+    submissionId: string,
+    choice: "cash" | "consignment",
+    ticketTerms?: { entryFee: number; minimumPrice: number; deadlineDays: number },
+  ) {
+    const s = requireSubmission(submissionId);
+    if (!s || s.status !== "offer_ready" || !s.offer) return;
+    const scheduledAt = new Date(Date.now() + 2 * 86_400_000 + 10 * 3_600_000).toISOString();
+    const repName = randomRepName();
+    updateSubmission(submissionId, {
+      status: "visit_scheduled",
+      sellerChoice: choice,
+      proposedEntryFee: choice === "consignment" ? ticketTerms?.entryFee : undefined,
+      proposedMinimumPrice: choice === "consignment" ? ticketTerms?.minimumPrice : undefined,
+      proposedDeadlineDays: choice === "consignment" ? ticketTerms?.deadlineDays : undefined,
+      visit: { scheduledAt, repName },
+      history: [
+        ...s.history,
+        {
+          at: now(),
+          label: `Chose to proceed with the ${choice === "cash" ? "cash" : "ticketed"} offer — visit booked with ${repName}`,
+        },
+      ],
+    });
+  },
+
+  /** Seller: declines both offers outright, no visit booked. */
+  cancelSubmission(submissionId: string) {
+    const s = requireSubmission(submissionId);
+    if (!s || s.status !== "offer_ready") return;
+    updateSubmission(submissionId, {
+      status: "declined_by_seller",
+      history: [...s.history, { at: now(), label: "Declined both offers" }],
+    });
+  },
+
+  /**
+   * Admin: the one-shot decision made at the visit itself. Cash pays out
+   * immediately; consignment takes the item into the vault as a new listing
+   * (still "authenticating" until the certificate is published); declining
+   * voids the submission — the seller would need to resubmit for a fresh
+   * approval, since a rep is only sent out once.
+   */
+  adminCompleteVisit(
+    submissionId: string,
+    outcome: "cash" | "consignment" | "declined",
+    opts: {
+      finalCashAmount?: number | undefined;
+      finalEntryFee?: number | undefined;
+      finalMinimumPrice?: number | undefined;
+      finalDeadlineDays?: number | undefined;
+    },
+  ) {
+    const s = requireSubmission(submissionId);
+    if (!s || s.status !== "visit_scheduled" || !s.offer) return;
+
+    if (outcome === "declined") {
+      updateSubmission(submissionId, {
+        status: "declined_at_visit",
+        history: [...s.history, { at: now(), label: "Declined both offers at the visit — deal void" }],
+      });
+      return;
     }
-    return listing;
+
+    if (outcome === "cash") {
+      const amount = opts.finalCashAmount ?? s.offer.cashHigh;
+      const deal = buildCashDeal(s.item, s.offer, amount);
+      set({ records: [deal, ...state.records] });
+      updateSubmission(submissionId, {
+        status: "visit_completed_cash",
+        resultRecordId: deal.id,
+        history: [...s.history, { at: now(), label: `Took the instant cash offer — ${amount.toLocaleString("en-GB")}` }],
+      });
+      return;
+    }
+
+    const listing = buildConsignmentListing(s.item, s.offer, {
+      entryFee: opts.finalEntryFee ?? s.proposedEntryFee ?? 2,
+      minimumPrice: opts.finalMinimumPrice ?? s.proposedMinimumPrice ?? s.offer.suggestedMinimum,
+      deadlineDays: opts.finalDeadlineDays ?? s.proposedDeadlineDays ?? 30,
+    });
+    set({ records: [listing, ...state.records] });
+    updateSubmission(submissionId, {
+      status: "visit_completed_consignment",
+      resultRecordId: listing.id,
+      history: [...s.history, { at: now(), label: "Consigned — collected into the vault for inspection" }],
+    });
+  },
+
+  /** Admin: publishes the in-person inspection writeup — this is what puts a vaulted item live on the marketplace. */
+  adminPublishAnalysisReport(
+    listingId: string,
+    report: { inspectorName: string; summary: string; findings: AnalysisReport["findings"] },
+  ) {
+    const c = state.records.find((r) => r.id === listingId && r.kind === "competition") as
+      | CompetitionListing
+      | undefined;
+    if (!c || c.status !== "authenticating") return;
+    const analysisReport: AnalysisReport = {
+      certificateId: certId(),
+      generatedAt: now(),
+      inspectorName: report.inspectorName,
+      summary: report.summary,
+      findings: report.findings,
+    };
+    set({
+      records: state.records.map((r) =>
+        r.id === listingId && r.kind === "competition"
+          ? {
+              ...r,
+              status: "live",
+              certificateId: analysisReport.certificateId,
+              analysisReport,
+              history: [...r.history, { at: now(), label: "Certificate published — live on the marketplace" }],
+            }
+          : r,
+      ),
+    });
   },
 
   toggleWatchlist(listingId: string) {

@@ -1,16 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import {
   CONDITIONS,
-  DEADLINE_OPTIONS,
   MIN_COMPETITION_VALUE,
   WATCH_BRANDS,
-  entryPricing,
   estimateValue,
   money,
-  suggestEntryCount,
   type Condition,
   type LuxuryItem,
 } from "@/lib/marketplace";
@@ -43,7 +40,7 @@ const inputCls =
   "mt-3 w-full rounded-none border border-white/10 bg-white/[0.04] px-5 py-4 text-[16px] tracking-tight text-foreground outline-none placeholder:text-muted/60 focus:border-brand/40";
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 
-type Step = "details" | "valuation" | "competition" | "cash-done" | "competition-done";
+type Step = "details" | "review" | "submitted";
 
 export function Sell() {
   const navigate = useNavigate();
@@ -58,6 +55,7 @@ export function Sell() {
   const [purchasePrice, setPurchasePrice] = useState("");
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [purchasedFrom, setPurchasedFrom] = useState("");
 
   const addPhotos = (files: FileList | null) => {
     if (!files) return;
@@ -67,12 +65,6 @@ export function Sell() {
     setPhotos((prev) => prev.filter((p) => p !== url));
     URL.revokeObjectURL(url);
   };
-
-  const [entryFee, setEntryFee] = useState(2);
-  const [minimumPrice, setMinimumPrice] = useState("");
-  const [deadlineDays, setDeadlineDays] = useState<number>(30);
-
-  const [cashAccepted, setCashAccepted] = useState<number | null>(null);
 
   const price = Number(purchasePrice) || 0;
   const item: LuxuryItem | null =
@@ -91,28 +83,18 @@ export function Sell() {
 
   const offer = item ? estimateValue(item) : null;
   const canEnterCompetition = (item?.purchasePrice ?? 0) >= MIN_COMPETITION_VALUE;
-  const entriesTotal = offer ? suggestEntryCount(offer.ceiling, entryFee) : 0;
-  const pricing = entryPricing(entryFee);
-  const minValue = Number(minimumPrice) || 0;
 
-  const openCompetitionSetup = () => {
-    if (!offer) return;
-    setMinimumPrice(String(offer.suggestedMinimum));
-    setEntryFee(price > 50000 ? 25 : price > 15000 ? 5 : 2);
-    setStep("competition");
-  };
-
-  const acceptCash = () => {
-    if (!item || !offer) return;
-    rarezy.acceptCash(item, offer, offer.cashHigh);
-    setCashAccepted(offer.cashHigh);
-    setStep("cash-done");
-  };
-
-  const submitCompetition = () => {
-    if (!item) return;
-    rarezy.startCompetition(item, { entryFee, entriesTotal, minimumPrice: minValue, deadlineDays });
-    setStep("competition-done");
+  // A ref, not state — AnimatePresence keeps the review step's button
+  // mounted (with its original stale onClick closure) through its exit
+  // animation, so a state check here wouldn't see a second rapid click
+  // coming in on that same stale handler. A ref is shared mutable storage
+  // every closure reads live, so it still catches it.
+  const submittedRef = useRef(false);
+  const submit = () => {
+    if (!item || submittedRef.current) return;
+    submittedRef.current = true;
+    rarezy.submitForReview(item, purchasedFrom);
+    setStep("submitted");
   };
 
   if (!currentUser) {
@@ -208,6 +190,17 @@ export function Sell() {
                   Dial, case back, box and papers — clear photos get a stronger offer.
                 </p>
 
+                <p className={`${labelCls} mt-8`}>Where did you buy it?</p>
+                <input
+                  value={purchasedFrom}
+                  onChange={(e) => setPurchasedFrom(e.target.value)}
+                  placeholder="Authorised dealer, private sale, auction house…"
+                  className={inputCls}
+                />
+                <p className="mt-2 text-[0.68rem] text-muted/70">
+                  Part of the authenticity check — we may ask for a receipt or paperwork.
+                </p>
+
                 <p className={`${labelCls} mt-8`}>Description · optional</p>
                 <textarea
                   value={description}
@@ -239,7 +232,7 @@ export function Sell() {
                 <div className="mt-12">
                   <button
                     type="button"
-                    onClick={() => setStep("valuation")}
+                    onClick={() => setStep("review")}
                     disabled={!item}
                     className="w-full rounded-none bg-brand py-4 text-[0.9rem] font-medium tracking-tight text-background disabled:opacity-30"
                   >
@@ -251,159 +244,88 @@ export function Sell() {
           </motion.div>
         )}
 
-        {step === "valuation" && item && offer && (
-          <motion.div key="valuation" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+        {step === "review" && item && offer && (
+          <motion.div key="review" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <p className={labelCls}>
               {item.brand} {item.model}
             </p>
             <h1 className="mt-3 text-[1.6rem] font-semibold leading-tight tracking-[-0.03em]">
-              Here's what the market says
+              Here's roughly what similar pieces are worth
             </h1>
+            <p className="mt-3 text-[0.8rem] leading-relaxed text-muted">
+              Ballpark only, from market data — not an offer yet. Your real numbers land in your
+              dashboard once we've checked the images and details over.
+            </p>
 
             <div className="card mt-8 p-6">
-              <p className={labelCls}>Instant cash offer</p>
+              <p className={labelCls}>Indicative cash range</p>
               <p className="tabular mt-3 text-[1.8rem] font-semibold leading-none tracking-[-0.04em]">
                 {money(offer.cashLow)} – {money(offer.cashHigh)}
               </p>
-              <p className="mt-3 text-[0.8rem] leading-relaxed text-muted">
-                Deposited within 48 hours. No shipping, no waiting.
-              </p>
-              <div className="mt-5">
-                <button
-                  type="button"
-                  onClick={acceptCash}
-                  className="w-full rounded-none border border-brand/40 py-3.5 text-[0.88rem] font-medium tracking-tight text-brand"
-                >
-                  Take {money(offer.cashHigh)} now
-                </button>
-              </div>
             </div>
 
             <div className="card mt-5 p-6">
-              <p className={labelCls}>List it on Rarezy</p>
+              <p className={labelCls}>Indicative ticket ceiling</p>
               <p className="tabular mt-3 text-[1.8rem] font-semibold leading-none tracking-[-0.04em] text-brand">
                 Up to {money(offer.ceiling)}
               </p>
-              <p className="mt-3 text-[0.8rem] leading-relaxed text-muted">
-                Ship it in free of charge. Our partner watch specialist authenticates it, checks it against
-                stolen-item registers, certifies and photographs it, then holds it insured while
-                players compete to win it. You set the price, the minimum you'll accept, and the
-                deadline.
-              </p>
-              {canEnterCompetition ? (
-                <div className="mt-5">
-                  <button
-                    type="button"
-                    onClick={openCompetitionSetup}
-                    className="w-full rounded-none border border-brand/40 py-3.5 text-[0.88rem] font-medium tracking-tight text-brand"
-                  >
-                    Set up on Rarezy
-                  </button>
-                </div>
-              ) : (
-                <p className="mt-5 text-[0.72rem] text-muted">
-                  Rarezy needs a watch worth {money(MIN_COMPETITION_VALUE)} or more.
+              {!canEnterCompetition && (
+                <p className="mt-3 text-[0.72rem] text-muted">
+                  Rarezy needs a watch worth {money(MIN_COMPETITION_VALUE)} or more to list on tickets —
+                  a cash offer is still on the table either way.
                 </p>
               )}
             </div>
-          </motion.div>
-        )}
 
-        {step === "competition" && item && offer && (
-          <motion.div key="competition" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-            <h1 className="text-[1.6rem] font-semibold leading-tight tracking-[-0.03em]">Price your listing</h1>
-
-            <p className={`${labelCls} mt-8`}>Ticket price</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {[1, 2, 5, 10, 25, 50].map((v) => (
-                <Chip key={v} active={entryFee === v} onClick={() => setEntryFee(v)}>
-                  {money(v)}
-                </Chip>
-              ))}
-            </div>
-            <p className="mt-4 text-[0.78rem] text-muted">
-              {entriesTotal.toLocaleString("en-GB")} tickets at {money(entryFee)} raises up to{" "}
-              {money(entriesTotal * entryFee)}.
-            </p>
-            <p className="mt-2 text-[0.72rem] text-muted/70">
-              At checkout, a player pays your {money(entryFee)} ticket price plus a 50% processing
-              fee — {money(pricing.charge)} total. {money(pricing.profit)} of that fee is kept by
-              Rarezy once VAT is accounted for; the rest goes toward your price.
-            </p>
-
-            <p className={`${labelCls} mt-8`}>Minimum you'll accept</p>
-            <input
-              value={minimumPrice}
-              onChange={(e) => setMinimumPrice(e.target.value.replace(/[^0-9.]/g, ""))}
-              inputMode="decimal"
-              className={inputCls}
-            />
-            <p className="mt-2 text-[0.72rem] text-muted/70">
-              Between {money(offer.cashHigh)} and {money(offer.ceiling)}. Miss it by the deadline and
-              you choose what happens next — nothing is decided for you.
-            </p>
-
-            <p className={`${labelCls} mt-8`}>Deadline</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {DEADLINE_OPTIONS.map((d) => (
-                <Chip key={d} active={deadlineDays === d} onClick={() => setDeadlineDays(d)}>
-                  {d} days
-                </Chip>
-              ))}
-            </div>
+            <h2 className="mt-9 text-[1rem] font-semibold tracking-[-0.02em]">What happens next</h2>
+            <ol className="mt-4 flex flex-col gap-3 text-[0.82rem] leading-relaxed text-muted">
+              <li>
+                <span className="font-medium text-foreground">1. We review it.</span> Your photos,
+                details and where you bought it get checked against market data and our authenticity
+                checklist.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">2. Two real offers land in your dashboard.</span>{" "}
+                An instant cash offer, and a ticketed listing with the minimum you're happy to accept.
+                You choose one, or decline both.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">3. A rep visits you.</span> We come to
+                your home or office to inspect it in person and pay out or collect it there and then —
+                one visit, one decision on the spot.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">4. Cash is paid, or it's vaulted and listed.</span>{" "}
+                A consigned piece gets a full certificate of authenticity before it goes live, and stays
+                insured in our vault the whole time it's in our possession.
+              </li>
+            </ol>
 
             <div className="mt-12">
               <button
                 type="button"
-                onClick={submitCompetition}
-                disabled={minValue < offer.cashHigh || minValue > offer.ceiling}
-                className="w-full rounded-none bg-brand py-4 text-[0.9rem] font-medium tracking-tight text-background disabled:opacity-30"
-              >
-                Ship it in
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {step === "cash-done" && cashAccepted !== null && (
-          <motion.div
-            key="cash-done"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center pt-16 text-center"
-          >
-            <p className={labelCls}>Offer accepted</p>
-            <p className="tabular mt-4 text-[2.8rem] font-semibold leading-none tracking-[-0.04em] text-brand">
-              {money(cashAccepted)}
-            </p>
-            <p className="mt-5 max-w-[16rem] text-[0.85rem] leading-relaxed text-muted">
-              Paid out to your linked account within 48 hours.
-            </p>
-            <div className="mt-12 w-full">
-              <button
-                type="button"
-                onClick={() => navigate("/")}
+                onClick={submit}
                 className="w-full rounded-none bg-brand py-4 text-[0.9rem] font-medium tracking-tight text-background"
               >
-                Done
+                Submit for review
               </button>
             </div>
           </motion.div>
         )}
 
-        {step === "competition-done" && (
+        {step === "submitted" && (
           <motion.div
-            key="competition-done"
+            key="submitted"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center pt-16 text-center"
           >
-            <p className={labelCls}>On its way to us</p>
+            <p className={labelCls}>Submitted</p>
             <p className="mt-4 max-w-[17rem] text-[1.2rem] font-semibold leading-snug tracking-[-0.025em]">
-              We'll authenticate, certify and list it — free of charge.
+              We're reviewing it now.
             </p>
             <p className="mt-5 max-w-[16rem] text-[0.85rem] leading-relaxed text-muted">
-              You'll see it go live from My Listings once our partner watch specialist has checked it over.
+              You'll see your offer land in My Account as soon as it's checked over.
             </p>
             <div className="mt-12 w-full">
               <button
@@ -411,7 +333,7 @@ export function Sell() {
                 onClick={() => navigate("/account")}
                 className="w-full rounded-none bg-brand py-4 text-[0.9rem] font-medium tracking-tight text-background"
               >
-                My listings
+                My account
               </button>
             </div>
           </motion.div>
