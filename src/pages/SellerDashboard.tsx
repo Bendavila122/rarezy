@@ -133,8 +133,98 @@ function ApplicationForm({ ownerId, onApplied }: { ownerId: string; onApplied: (
   );
 }
 
-function CompetitionRow({ c }: { c: MarketCompetition }) {
+function FulfilmentPanel({ c, onDone }: { c: MarketCompetition; onDone: () => void }) {
+  const [winnerName, setWinnerName] = useState<string | null>(null);
+  const [carrier, setCarrier] = useState("");
+  const [tracking, setTracking] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (c.winnerUserId) marketDb.fetchUsername(c.winnerUserId).then(setWinnerName);
+  }, [c.winnerUserId]);
+
+  const dispatch = async () => {
+    if (!carrier.trim() || !tracking.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await marketDb.markDispatched(c.id, carrier.trim(), tracking.trim());
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't mark this dispatched.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deliver = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await marketDb.markDelivered(c.id);
+      onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't mark this delivered.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 border-t border-white/10 pt-4">
+      <p className="text-[0.8rem] text-foreground">
+        Won by <span className="font-medium">{winnerName ?? "…"}</span> — ship the prize directly to them.
+      </p>
+
+      {c.status === "winner_pending" && (
+        <div className="mt-3 flex flex-col gap-2">
+          <input
+            value={carrier}
+            onChange={(e) => setCarrier(e.target.value)}
+            placeholder="Carrier — Royal Mail Special Delivery, DPD…"
+            className="rounded-none border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-[0.82rem] text-foreground outline-none focus:border-brand/40"
+          />
+          <input
+            value={tracking}
+            onChange={(e) => setTracking(e.target.value)}
+            placeholder="Tracking number"
+            className="rounded-none border border-white/10 bg-white/[0.04] px-3.5 py-2.5 text-[0.82rem] text-foreground outline-none focus:border-brand/40"
+          />
+          {error && <p className="text-[0.74rem] text-red-400">{error}</p>}
+          <button
+            type="button"
+            onClick={dispatch}
+            disabled={!carrier.trim() || !tracking.trim() || busy}
+            className="rounded-none bg-brand py-2.5 text-[0.8rem] font-medium tracking-tight text-background disabled:opacity-30"
+          >
+            {busy ? "Saving…" : "Mark dispatched"}
+          </button>
+        </div>
+      )}
+
+      {c.status === "fulfilment_pending" && (
+        <div className="mt-3">
+          {error && <p className="mb-2 text-[0.74rem] text-red-400">{error}</p>}
+          <button
+            type="button"
+            onClick={deliver}
+            disabled={busy}
+            className="rounded-none border border-brand/40 px-4 py-2.5 text-[0.8rem] font-medium text-brand disabled:opacity-30"
+          >
+            {busy ? "Saving…" : "Mark delivered"}
+          </button>
+        </div>
+      )}
+
+      {c.status === "fulfilled" && <p className="mt-2 text-[0.74rem] text-muted">Delivered — this one's done.</p>}
+    </div>
+  );
+}
+
+function CompetitionRow({ c, onChanged }: { c: MarketCompetition; onChanged: () => void }) {
   const pct = Math.min(100, Math.round((c.entriesSold / c.maxEntries) * 100));
+  const needsFulfilment = c.status === "winner_pending" || c.status === "fulfilment_pending" || c.status === "fulfilled";
   return (
     <div className="card p-5">
       <div className="flex items-start justify-between gap-3">
@@ -153,6 +243,8 @@ function CompetitionRow({ c }: { c: MarketCompetition }) {
         {c.entriesSold.toLocaleString("en-GB")}/{c.maxEntries.toLocaleString("en-GB")} entries ·{" "}
         {moneyFromPence(c.entriesSold * c.ticketPricePence)} raised
       </p>
+
+      {needsFulfilment && <FulfilmentPanel c={c} onDone={onChanged} />}
     </div>
   );
 }
@@ -161,15 +253,32 @@ export function SellerDashboard() {
   const { currentUser } = useRarezy();
   const [seller, setSeller] = useState<Seller | null | undefined>(undefined);
   const [competitions, setCompetitions] = useState<MarketCompetition[]>([]);
+  const [ledger, setLedger] = useState<{ pendingPence: number; availablePence: number; paidPence: number } | null>(null);
 
   useEffect(() => {
     if (!currentUser?.id) return;
     marketDb.fetchMySeller(currentUser.id).then(setSeller);
   }, [currentUser?.id]);
 
-  useEffect(() => {
+  const reloadCompetitions = async () => {
     if (!seller || seller.status !== "approved") return;
-    marketDb.fetchMyCompetitions(seller.id).then(setCompetitions);
+    const mine = await marketDb.fetchMyCompetitions(seller.id);
+    // No scheduled job resolves expired competitions in this project — a
+    // seller loading their dashboard is one of the places that lazily
+    // triggers it, same as a customer visiting the listing.
+    const dueForResolution = mine.filter((c) => c.status === "live" && new Date(c.endsAt) < new Date());
+    if (dueForResolution.length > 0) {
+      await Promise.all(dueForResolution.map((c) => marketDb.resolveIfDue(c.id).catch(() => {})));
+      setCompetitions(await marketDb.fetchMyCompetitions(seller.id));
+    } else {
+      setCompetitions(mine);
+    }
+    marketDb.fetchSellerLedgerSummary(seller.id).then(setLedger);
+  };
+
+  useEffect(() => {
+    reloadCompetitions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seller]);
 
   if (!currentUser) {
@@ -255,6 +364,27 @@ export function SellerDashboard() {
         </div>
       </div>
 
+      {ledger && (ledger.pendingPence > 0 || ledger.availablePence > 0 || ledger.paidPence > 0) && (
+        <>
+          <h2 className="mt-10 text-[1.2rem] font-semibold tracking-[-0.02em]">Balance</h2>
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="card p-4">
+              <p className={labelCls}>Pending</p>
+              <p className="tabular mt-2 text-[1.2rem] font-semibold leading-none">{moneyFromPence(ledger.pendingPence)}</p>
+            </div>
+            <div className="card p-4">
+              <p className={labelCls}>Available</p>
+              <p className="tabular mt-2 text-[1.2rem] font-semibold leading-none">{moneyFromPence(ledger.availablePence)}</p>
+            </div>
+            <div className="card p-4">
+              <p className={labelCls}>Paid out</p>
+              <p className="tabular mt-2 text-[1.2rem] font-semibold leading-none">{moneyFromPence(ledger.paidPence)}</p>
+            </div>
+          </div>
+          <p className="mt-2 text-[0.7rem] text-muted/70">Payouts aren't connected yet — balances are tracked here ready for when they are.</p>
+        </>
+      )}
+
       <h2 className="mt-10 text-[1.2rem] font-semibold tracking-[-0.02em]">Your competitions</h2>
       {competitions.length === 0 ? (
         <p className="mt-6 text-[0.85rem] text-muted">
@@ -268,7 +398,7 @@ export function SellerDashboard() {
         <div className="mt-6 flex flex-col gap-3">
           {competitions.map((c, i) => (
             <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-              <CompetitionRow c={c} />
+              <CompetitionRow c={c} onChanged={reloadCompetitions} />
             </motion.div>
           ))}
         </div>

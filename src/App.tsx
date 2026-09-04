@@ -26,6 +26,7 @@ import { SellerDashboard } from "@/pages/SellerDashboard";
 import { SellerNewCompetition } from "@/pages/SellerNewCompetition";
 import { SellerStorefront } from "@/pages/SellerStorefront";
 import { CompetitionDetail } from "@/pages/CompetitionDetail";
+import { MyWins } from "@/pages/MyWins";
 import { Payments } from "@/pages/Payments";
 import { HowItWorks } from "@/pages/HowItWorks";
 import { Help } from "@/pages/Help";
@@ -71,6 +72,7 @@ export function App() {
           <Route path="/seller/new" element={<SellerNewCompetition />} />
           <Route path="/seller/:sellerId" element={<SellerStorefront />} />
           <Route path="/c/:competitionId" element={<CompetitionDetail />} />
+          <Route path="/wins" element={<MyWins />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/help" element={<Help />} />

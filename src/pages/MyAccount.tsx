@@ -54,6 +54,9 @@ export function MyAccount() {
         <Link to="/entries" className={quickLinkCls}>
           My entries
         </Link>
+        <Link to="/wins" className={quickLinkCls}>
+          My wins
+        </Link>
         <Link to="/watchlist" className={quickLinkCls}>
           Watchlist
         </Link>

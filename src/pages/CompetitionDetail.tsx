@@ -23,22 +23,33 @@ export function CompetitionDetail() {
     used: 0,
     remaining: 0,
   });
+  const [winnerName, setWinnerName] = useState<string | null>(null);
   const [activePhoto, setActivePhoto] = useState(0);
   const [qty, setQty] = useState(1);
   const [playing, setPlaying] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const reload = () => {
+  const reload = async () => {
     if (!competitionId) return;
-    marketDb.fetchCompetition(competitionId).then(setC);
+    // No scheduled job resolves competitions in this project — a visit to
+    // an expired-but-still-"live" competition is what triggers the winner
+    // being picked, same lazy-sweep pattern the legacy store already uses.
+    await marketDb.resolveIfDue(competitionId).catch(() => {});
+    marketDb.fetchCompetition(competitionId).then((comp) => {
+      setC(comp);
+      if (comp?.winnerUserId) marketDb.fetchUsername(comp.winnerUserId).then(setWinnerName);
+    });
     marketDb.fetchLeaderboard(competitionId).then(setLeaderboard);
     if (currentUser?.id) {
       marketDb.myAttempts(competitionId, currentUser.id).then(setAttempts);
     }
   };
 
-  useEffect(reload, [competitionId, currentUser?.id]);
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competitionId, currentUser?.id]);
 
   const goBack = () => {
     if (window.history.length > 1) navigate(-1);
@@ -184,15 +195,19 @@ export function CompetitionDetail() {
         </div>
       ) : (
         <p className="mt-5 text-[0.85rem] leading-relaxed text-muted">
-          {c.status === "completed" || c.status === "winner_pending"
-            ? "This competition has closed."
-            : "Entries aren't open on this one right now."}
+          {c.status === "cancelled"
+            ? "This competition closed with no entries and was cancelled."
+            : c.status === "rejected" || c.status === "draft" || c.status === "pending_approval"
+              ? "Entries aren't open on this one right now."
+              : winnerName
+                ? `This competition has closed. Won by ${winnerName}.`
+                : "This competition has closed."}
         </p>
       )}
 
       {c.status === "live" && <div className="mt-4"><FreeTrial onClick={() => setPlaying(true)} ticketCta="Add a real ticket" /></div>}
 
-      {attempts.remaining > 0 && (
+      {c.status === "live" && attempts.remaining > 0 && (
         <div className="mt-4 rounded-none border border-brand/30 bg-brand/10 p-4">
           <p className="text-[0.8rem] text-brand">
             You have {attempts.remaining} attempt{attempts.remaining > 1 ? "s" : ""} to play.

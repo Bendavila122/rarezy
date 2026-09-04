@@ -12,7 +12,7 @@ import {
 } from "@/lib/marketplace";
 import { rarezy, useRarezy, type CompetitionListing, type SellRecord, type Submission } from "@/lib/store";
 import { CertificateOfAuthenticity } from "@/components/CertificateOfAuthenticity";
-import { marketDb, moneyFromPence, type MarketCompetition, type Seller } from "@/lib/db";
+import { marketDb, moneyFromPence, type Dispute, type MarketCompetition, type Seller } from "@/lib/db";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 const fieldCls =
@@ -74,6 +74,7 @@ const TABS = [
   { id: "personal", label: "Personal sales" },
   { id: "sellers", label: "Seller applications" },
   { id: "competitions", label: "Competitions" },
+  { id: "disputes", label: "Disputes" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
 
@@ -116,6 +117,7 @@ export function Admin() {
       {tab === "personal" && <PersonalSalesTab records={records} selectedId={selectedId} setSelectedId={setSelectedId} />}
       {tab === "sellers" && <SellersTab />}
       {tab === "competitions" && <CompetitionsTab />}
+      {tab === "disputes" && <DisputesTab />}
     </div>
   );
 }
@@ -831,6 +833,97 @@ function CompetitionsTab() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const DISPUTE_TYPE_LABEL: Record<string, string> = {
+  not_received: "Never arrived",
+  materially_different: "Not what was listed",
+  damaged: "Arrived damaged",
+  wrong_product: "Wrong item entirely",
+  other: "Other",
+};
+
+function DisputesTab() {
+  const [disputes, setDisputes] = useState<Dispute[] | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [resolution, setResolution] = useState("");
+
+  const reload = () => marketDb.fetchOpenDisputes().then(setDisputes);
+  useEffect(() => {
+    reload();
+  }, []);
+
+  const selected = disputes?.find((d) => d.id === selectedId) ?? disputes?.[0] ?? null;
+
+  const resolve = async (id: string) => {
+    await marketDb.resolveDispute(id, resolution || "Resolved by Rarezy.");
+    setResolution("");
+    reload();
+  };
+
+  if (!disputes) return null;
+
+  return (
+    <div className="mt-8">
+      {disputes.length === 0 ? (
+        <p className="mt-6 text-center text-[0.9rem] text-muted">No open disputes.</p>
+      ) : (
+        <div className="mt-2 grid gap-6 lg:grid-cols-[320px_1fr]">
+          <div className="flex flex-col gap-2">
+            {disputes.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                onClick={() => setSelectedId(d.id)}
+                className={`press rounded-none border p-4 text-left transition-colors ${
+                  selected?.id === d.id ? "border-brand/40 bg-brand/10" : "border-white/10 bg-white/[0.03]"
+                }`}
+              >
+                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-brand">{DISPUTE_TYPE_LABEL[d.type] ?? d.type}</p>
+                <p className="mt-2 text-[0.9rem] tracking-tight">
+                  {d.competition ? `${d.competition.product.brand} ${d.competition.product.model}` : "Competition"}
+                </p>
+                <p className="mt-1 text-[0.7rem] text-muted">{formatDate(d.createdAt)}</p>
+              </button>
+            ))}
+          </div>
+
+          {selected && (
+            <div className="card p-6">
+              <p className={labelCls}>{DISPUTE_TYPE_LABEL[selected.type] ?? selected.type}</p>
+              <h2 className="mt-2 text-[1.3rem] font-semibold tracking-[-0.02em]">
+                {selected.competition ? `${selected.competition.product.brand} ${selected.competition.product.model}` : "Competition"}
+              </h2>
+              {selected.competition && (
+                <p className="mt-1 text-[0.8rem] text-muted">Sold by {selected.competition.seller.businessName}</p>
+              )}
+
+              <p className="mt-4 text-[0.8rem] leading-relaxed text-muted">{selected.description}</p>
+
+              <p className={`${labelCls} mt-6`}>Resolution notes</p>
+              <textarea
+                value={resolution}
+                onChange={(e) => setResolution(e.target.value)}
+                rows={3}
+                placeholder="What was agreed / done…"
+                className={`${fieldCls} resize-none`}
+              />
+
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => resolve(selected.id)}
+                  className="w-full rounded-none bg-brand py-3 text-[0.85rem] font-medium tracking-tight text-background"
+                >
+                  Mark resolved
+                </button>
+              </div>
             </div>
           )}
         </div>

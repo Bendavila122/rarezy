@@ -88,6 +88,31 @@ export type MarketCompetition = {
   seller: Seller;
 };
 
+export type FulfilmentStatus = "pending" | "preparing" | "dispatched" | "delivered" | "confirmed";
+export type Fulfilment = {
+  competitionId: string;
+  status: FulfilmentStatus;
+  carrier: string | null;
+  trackingNumber: string | null;
+  dispatchedAt: string | null;
+  deliveredAt: string | null;
+};
+
+export type DisputeType = "not_received" | "materially_different" | "damaged" | "wrong_product" | "other";
+export type DisputeStatus = "open" | "awaiting_seller" | "awaiting_customer" | "resolved" | "escalated";
+export type Dispute = {
+  id: string;
+  competitionId: string;
+  userId: string;
+  sellerId: string;
+  type: DisputeType;
+  description: string;
+  status: DisputeStatus;
+  resolution: string | null;
+  createdAt: string;
+  competition?: MarketCompetition | undefined;
+};
+
 function db() {
   if (!supabase) throw new Error("Supabase isn't configured in this environment.");
   return supabase;
@@ -310,6 +335,12 @@ export const marketDb = {
     return data as number;
   },
 
+  async fetchUsername(userId: string): Promise<string | null> {
+    const { data, error } = await db().from("profiles").select("username").eq("id", userId).maybeSingle();
+    if (error) throw error;
+    return data?.username ?? null;
+  },
+
   async fetchLeaderboard(competitionId: string) {
     const { data, error } = await db()
       .from("competition_leaderboard")
@@ -383,5 +414,120 @@ export const marketDb = {
   async rejectCompetition(competitionId: string, reason: string) {
     const { error } = await db().from("competitions").update({ status: "rejected", admin_notes: reason }).eq("id", competitionId);
     if (error) throw error;
+  },
+
+  // ---- Winner resolution & fulfilment ----
+
+  /** No scheduled job in this project — call lazily whenever a competition whose deadline may have passed is loaded, same pattern as the legacy store's own deadline sweep. Safe to call repeatedly; a no-op once already resolved. */
+  async resolveIfDue(competitionId: string) {
+    const { error } = await db().rpc("resolve_competition", { p_competition_id: competitionId });
+    if (error) throw error;
+  },
+
+  async fetchMyWins(userId: string): Promise<MarketCompetition[]> {
+    const { data, error } = await db()
+      .from("competitions")
+      .select(COMPETITION_SELECT)
+      .eq("winner_user_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((r) => mapCompetition(r as unknown as Record<string, unknown>));
+  },
+
+  async fetchFulfilment(competitionId: string): Promise<Fulfilment | null> {
+    const { data, error } = await db().from("fulfilments").select("*").eq("competition_id", competitionId).maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    return {
+      competitionId: data.competition_id,
+      status: data.status,
+      carrier: data.carrier,
+      trackingNumber: data.tracking_number,
+      dispatchedAt: data.dispatched_at,
+      deliveredAt: data.delivered_at,
+    };
+  },
+
+  async markDispatched(competitionId: string, carrier: string, trackingNumber: string) {
+    const { error } = await db().rpc("mark_dispatched", {
+      p_competition_id: competitionId,
+      p_carrier: carrier,
+      p_tracking: trackingNumber,
+    });
+    if (error) throw error;
+  },
+
+  async markDelivered(competitionId: string) {
+    const { error } = await db().rpc("mark_delivered", { p_competition_id: competitionId });
+    if (error) throw error;
+  },
+
+  // ---- Disputes ----
+
+  async openDispute(input: { competitionId: string; userId: string; sellerId: string; type: DisputeType; description: string }) {
+    const { error } = await db().from("disputes").insert({
+      competition_id: input.competitionId,
+      user_id: input.userId,
+      seller_id: input.sellerId,
+      type: input.type,
+      description: input.description,
+    });
+    if (error) throw error;
+  },
+
+  async fetchMyDisputes(userId: string): Promise<Dispute[]> {
+    const { data, error } = await db().from("disputes").select("*").eq("user_id", userId).order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((d) => ({
+      id: d.id,
+      competitionId: d.competition_id,
+      userId: d.user_id,
+      sellerId: d.seller_id,
+      type: d.type,
+      description: d.description,
+      status: d.status,
+      resolution: d.resolution,
+      createdAt: d.created_at,
+    }));
+  },
+
+  async fetchOpenDisputes(): Promise<Dispute[]> {
+    const { data, error } = await db()
+      .from("disputes")
+      .select(`*, competitions(${COMPETITION_SELECT})`)
+      .neq("status", "resolved")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map((d) => ({
+      id: d.id,
+      competitionId: d.competition_id,
+      userId: d.user_id,
+      sellerId: d.seller_id,
+      type: d.type,
+      description: d.description,
+      status: d.status,
+      resolution: d.resolution,
+      createdAt: d.created_at,
+      competition: d.competitions ? mapCompetition(d.competitions as unknown as Record<string, unknown>) : undefined,
+    }));
+  },
+
+  async resolveDispute(id: string, resolution: string) {
+    const { error } = await db()
+      .from("disputes")
+      .update({ status: "resolved", resolution, resolved_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  // ---- Seller ledger ----
+  async fetchSellerLedgerSummary(sellerId: string) {
+    const { data, error } = await db().from("seller_ledger_entries").select("amount_pence, status, type").eq("seller_id", sellerId);
+    if (error) throw error;
+    const rows = data ?? [];
+    const pendingPence = rows.filter((r) => r.status === "pending").reduce((s, r) => s + r.amount_pence, 0);
+    const availablePence = rows.filter((r) => r.status === "available").reduce((s, r) => s + r.amount_pence, 0);
+    const paidPence = rows.filter((r) => r.status === "paid").reduce((s, r) => s + r.amount_pence, 0);
+    return { pendingPence, availablePence, paidPence };
   },
 };
