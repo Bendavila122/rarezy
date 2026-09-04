@@ -12,6 +12,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   cash: "Cash prizes",
   clothing: "Clothing",
   electronics: "Electronics",
+  jewellery: "Jewellery",
 };
 
 const DEFAULT_OPEN = new Set(["brand", "price"]);
@@ -218,6 +219,7 @@ export function FilterDrawer({
   const materialFacets = facetCounts(categoryListings, (c) => c.item.material);
   const sizeFacets = facetCounts(categoryListings, (c) => c.item.size);
   const hardwareFacets = facetCounts(categoryListings, (c) => c.item.hardware);
+  const gemstoneFacets = facetCounts(categoryListings, (c) => c.item.gemstone);
   const fuelTypeFacets = facetCounts(categoryListings, (c) => c.item.fuelType);
   const transmissionFacets = facetCounts(categoryListings, (c) => c.item.transmission);
   const bodyTypeFacets = facetCounts(categoryListings, (c) => c.item.bodyType);
@@ -559,7 +561,9 @@ export function FilterDrawer({
                     </Section>
                   )}
 
-                  {(selectedCategory === "handbag" || selectedCategory === "clothing") && (
+                  {(selectedCategory === "handbag" ||
+                    selectedCategory === "clothing" ||
+                    selectedCategory === "jewellery") && (
                     <>
                       <Section
                         id="material"
@@ -614,6 +618,26 @@ export function FilterDrawer({
                           hint={f.count}
                           checked={filters.hardware.includes(f.value)}
                           onClick={() => patch({ hardware: toggleValue(filters.hardware, f.value) })}
+                        />
+                      ))}
+                    </Section>
+                  )}
+
+                  {selectedCategory === "jewellery" && (
+                    <Section
+                      id="gemstone"
+                      title="Gemstone"
+                      count={filters.gemstones.length}
+                      open={openSections.has("gemstone")}
+                      onToggle={toggleSection}
+                    >
+                      {gemstoneFacets.map((f) => (
+                        <CheckRow
+                          key={f.value}
+                          label={f.value}
+                          hint={f.count}
+                          checked={filters.gemstones.includes(f.value)}
+                          onClick={() => patch({ gemstones: toggleValue(filters.gemstones, f.value) })}
                         />
                       ))}
                     </Section>

@@ -32,6 +32,7 @@ const SPEC_ROWS: { key: string; label: string }[] = [
   { key: "material", label: "Material" },
   { key: "size", label: "Size" },
   { key: "hardware", label: "Hardware" },
+  { key: "gemstone", label: "Gemstone" },
   // Electronics
   { key: "storageCapacity", label: "Storage" },
   { key: "screenSize", label: "Screen size" },

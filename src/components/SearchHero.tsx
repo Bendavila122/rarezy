@@ -53,6 +53,7 @@ export function SearchHero() {
   const cashCount = countOf("cash");
   const clothingCount = countOf("clothing");
   const electronicsCount = countOf("electronics");
+  const jewelleryCount = countOf("jewellery");
 
   // Every count here is real, live stock — filtered out entirely if a
   // category happens to have nothing live, rather than ever showing "0".
@@ -62,6 +63,7 @@ export function SearchHero() {
     { count: cashCount, text: `Search from ${cashCount} cash prize${cashCount === 1 ? "" : "s"}` },
     { count: handbagCount, text: `Search from ${handbagCount} handbag${handbagCount === 1 ? "" : "s"}` },
     { count: clothingCount, text: `Search from ${clothingCount} clothing item${clothingCount === 1 ? "" : "s"}` },
+    { count: jewelleryCount, text: `Search from ${jewelleryCount} jewellery item${jewelleryCount === 1 ? "" : "s"}` },
     { count: carCount, text: `Search from ${carCount} car${carCount === 1 ? "" : "s"}` },
   ]
     .filter((p) => p.count > 0)

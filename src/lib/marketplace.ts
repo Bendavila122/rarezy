@@ -4,11 +4,10 @@
  * and willing to play for it. No random draws: the winner is whoever tops
  * the leaderboard when the listing's deadline hits.
  *
- * Watches were the whole marketplace at launch, and the detail page and
- * Browse's filters are still built around them, so `Browse` only ever
- * shows watch listings. Every other category (cars, handbags, cash,
- * clothing, electronics) lives in the same `records` array and is real,
- * counted stock — just not yet browsable in its own dedicated view.
+ * Watches were the whole marketplace at launch; Browse now shows every
+ * category. `car` stays in `ITEM_CATEGORIES` and the filter drawer even
+ * though no seed listing currently uses it — cars were pulled "for now"
+ * and the category is meant to be repopulated later, not deleted.
  *
  * Pure — no state, no side effects. The reactive store lives in ./store.
  */
@@ -63,7 +62,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 /** Below this, a watch can still take a cash offer, but can't be listed for entries. */
 export const MIN_COMPETITION_VALUE = 2000;
 
-export const ITEM_CATEGORIES = ["watch", "car", "handbag", "cash", "clothing", "electronics"] as const;
+export const ITEM_CATEGORIES = ["watch", "car", "handbag", "cash", "clothing", "electronics", "jewellery"] as const;
 export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
 
 export type LuxuryItem = {
@@ -98,6 +97,8 @@ export type LuxuryItem = {
   size?: string | undefined;
   /** Handbags only — e.g. "Gold-tone". */
   hardware?: string | undefined;
+  /** Jewellery only — e.g. "0.5ct round brilliant diamond". */
+  gemstone?: string | undefined;
   /** Cars only. */
   mileage?: number | undefined;
   fuelType?: string | undefined;

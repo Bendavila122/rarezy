@@ -57,6 +57,7 @@ export type WatchFilters = {
   materials: string[];
   sizes: string[];
   hardware: string[];
+  gemstones: string[];
   fuelTypes: string[];
   transmissions: string[];
   bodyTypes: string[];
@@ -87,6 +88,7 @@ export const EMPTY_FILTERS: WatchFilters = {
   materials: [],
   sizes: [],
   hardware: [],
+  gemstones: [],
   fuelTypes: [],
   transmissions: [],
   bodyTypes: [],
@@ -122,6 +124,7 @@ export function activeFilterCount(f: WatchFilters): number {
     f.materials.length +
     f.sizes.length +
     f.hardware.length +
+    f.gemstones.length +
     f.fuelTypes.length +
     f.transmissions.length +
     f.bodyTypes.length +
@@ -158,6 +161,7 @@ export function matchesFilters(c: CompetitionListing, f: WatchFilters): boolean 
   if (f.materials.length && (!item.material || !f.materials.includes(item.material))) return false;
   if (f.sizes.length && (!item.size || !f.sizes.includes(item.size))) return false;
   if (f.hardware.length && (!item.hardware || !f.hardware.includes(item.hardware))) return false;
+  if (f.gemstones.length && (!item.gemstone || !f.gemstones.includes(item.gemstone))) return false;
   if (f.fuelTypes.length && (!item.fuelType || !f.fuelTypes.includes(item.fuelType))) return false;
   if (f.transmissions.length && (!item.transmission || !f.transmissions.includes(item.transmission)))
     return false;
