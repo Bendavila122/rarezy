@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Store, Ticket, User } from "lucide-react";
+import { Building2, Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Store, Ticket, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { auth } from "@/lib/auth";
@@ -104,7 +104,18 @@ function GuestNavBar() {
           <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
           <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
         </NavLink>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Below sm:, the full text link doesn't fit next to Log in/Sign up — a
+              compact icon (amber, matching the for-business page's own accent so
+              it reads as "a different, business side of the site") keeps the
+              entry point one tap away without crowding the header. */}
+          <NavLink
+            to="/for-business"
+            aria-label="Rarezy for Businesses"
+            className="press flex h-9 w-9 items-center justify-center text-amber-300 sm:hidden"
+          >
+            <Building2 className="h-4 w-4" strokeWidth={2.2} />
+          </NavLink>
           <NavLink
             to="/for-business"
             className="press hidden h-9 items-center px-4 text-[0.85rem] font-medium tracking-tight text-white/75 hover:text-mint sm:flex"
