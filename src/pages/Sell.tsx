@@ -2,9 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
-import { CONDITIONS, WATCH_BRANDS, estimateValue, money, type Condition, type LuxuryItem } from "@/lib/marketplace";
+import { CONDITIONS, WATCH_BRANDS, estimateValue, money, type Condition, type ItemCategory, type LuxuryItem } from "@/lib/marketplace";
 import { rarezy, useRarezy } from "@/lib/store";
 import { AccountRequired } from "@/components/AccountRequired";
+import { CATEGORY_LABELS } from "@/components/FilterDrawer";
+
+/** Every category we'll take, excluding "cash" — that's a prize type on the buyer side, not something anyone sells us. */
+const SELLABLE_CATEGORIES: ItemCategory[] = ["watch", "jewellery", "handbag", "clothing", "electronics", "car"];
+
+const MODEL_PLACEHOLDER: Record<ItemCategory, string> = {
+  watch: "Submariner Date",
+  jewellery: "Love Bracelet",
+  handbag: "Birkin 30",
+  clothing: "Trench Coat",
+  electronics: "MacBook Pro",
+  car: "911 Carrera 4S",
+  cash: "",
+};
 
 function Chip({
   active,
@@ -39,6 +53,7 @@ export function Sell() {
   const { currentUser } = useRarezy();
   const [step, setStep] = useState<Step>("details");
 
+  const [category, setCategory] = useState<ItemCategory | null>(null);
   const [brand, setBrand] = useState<string | null>(null);
   const [model, setModel] = useState("");
   const [reference, setReference] = useState("");
@@ -60,8 +75,9 @@ export function Sell() {
 
   const price = Number(purchasePrice) || 0;
   const item: LuxuryItem | null =
-    brand && model.trim() && price > 0
+    category && brand && model.trim() && price > 0
       ? {
+          category,
           brand,
           model: model.trim(),
           reference: reference.trim() || undefined,
@@ -103,25 +119,62 @@ export function Sell() {
         {step === "details" && (
           <motion.div key="details" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <h1 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.03em]">
-              What watch are you selling?
+              What are you selling?
             </h1>
+            <p className="mt-2 text-[0.85rem] text-muted">
+              We buy watches, jewellery, handbags, clothing, electronics and cars — for the right price.
+            </p>
             <Link to="/account" className="mt-3 inline-block text-[0.72rem] text-muted underline underline-offset-4">
               My sell requests
             </Link>
 
-            <p className={`${labelCls} mt-9`}>Brand</p>
+            <p className={`${labelCls} mt-9`}>Category</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {WATCH_BRANDS.map((b) => (
-                <Chip key={b} active={brand === b} onClick={() => setBrand(b)}>
-                  {b}
+              {SELLABLE_CATEGORIES.map((c) => (
+                <Chip
+                  key={c}
+                  active={category === c}
+                  onClick={() => {
+                    setCategory(c);
+                    setBrand(null);
+                  }}
+                >
+                  {CATEGORY_LABELS[c] ?? c}
                 </Chip>
               ))}
             </div>
 
-            {brand && (
+            {category && (
+              <>
+                <p className={`${labelCls} mt-8`}>Brand</p>
+                {category === "watch" ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {WATCH_BRANDS.map((b) => (
+                      <Chip key={b} active={brand === b} onClick={() => setBrand(b)}>
+                        {b}
+                      </Chip>
+                    ))}
+                  </div>
+                ) : (
+                  <input
+                    value={brand ?? ""}
+                    onChange={(e) => setBrand(e.target.value || null)}
+                    placeholder="Hermès"
+                    className={inputCls}
+                  />
+                )}
+              </>
+            )}
+
+            {category && brand && (
               <>
                 <p className={`${labelCls} mt-8`}>Model</p>
-                <input value={model} onChange={(e) => setModel(e.target.value)} placeholder="Submariner Date" className={inputCls} />
+                <input
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  placeholder={MODEL_PLACEHOLDER[category]}
+                  className={inputCls}
+                />
 
                 <p className={`${labelCls} mt-8`}>Reference · optional</p>
                 <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="126610LN" className={inputCls} />
@@ -178,7 +231,7 @@ export function Sell() {
                   )}
                 </div>
                 <p className="mt-2 text-[0.68rem] text-muted/70">
-                  Dial, case back, box and papers — clear photos get a stronger offer.
+                  Clear photos from every angle, plus box, papers or authenticity extras — the more detail, the stronger the offer.
                 </p>
 
                 <p className={`${labelCls} mt-8`}>Where did you buy it?</p>

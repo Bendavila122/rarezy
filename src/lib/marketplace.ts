@@ -117,26 +117,6 @@ export type LuxuryItem = {
 
 export const categoryOf = (item: Pick<LuxuryItem, "category">): ItemCategory => item.category ?? "watch";
 
-/** One line of the in-person inspection checklist on a certificate — e.g. "Movement & timekeeping". */
-export type AnalysisFinding = {
-  label: string;
-  note: string;
-  flagged: boolean;
-};
-
-/**
- * The certificate of authenticity generated once a consigned item has been
- * physically inspected — attached to its listing so buyers can see exactly
- * what was checked before it went into the vault.
- */
-export type AnalysisReport = {
-  certificateId: string;
-  generatedAt: string;
-  inspectorName: string;
-  summary: string;
-  findings: AnalysisFinding[];
-};
-
 export type Valuation = {
   /** What Rarezy will pay, cash, within 48 hours. */
   cashLow: number;

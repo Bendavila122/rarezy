@@ -4,7 +4,6 @@ import {
   randomPlayerName,
   randomRepName,
   suggestEntryCount,
-  type AnalysisReport,
   type LuxuryItem,
   type Valuation,
 } from "./marketplace";
@@ -51,8 +50,6 @@ export type CompetitionListing = {
   /** Which skill game decides this listing — set once, at creation, and fixed for its whole lifetime, however it's later relisted or extended. */
   gameId: GameId;
   certificateId?: string | undefined;
-  /** The full in-person inspection writeup — set once an admin publishes it, which is also what flips a consigned item from "authenticating" to "live". */
-  analysisReport?: AnalysisReport | undefined;
   /** Tickets bought by the signed-in player, not the fictitious field. */
   myEntries: number;
   /** Attempts at the skill game still owed for those tickets. */

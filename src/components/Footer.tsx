@@ -6,7 +6,7 @@ const headingCls = "text-[0.62rem] font-semibold uppercase tracking-[0.2em] text
 /** Genuinely useful destinations for a player/guest — the only audience this footer ever renders for (admin/seller get their own nav entirely). Nothing corporate or repeated from elsewhere in the header. */
 const QUICK_LINKS = [
   { label: "Browse competitions", to: "/browse" },
-  { label: "Sell your watch", to: "/sell" },
+  { label: "Sell to Rarezy", to: "/sell" },
   { label: "How it works", to: "/how-it-works" },
   { label: "Help centre", to: "/help" },
 ];

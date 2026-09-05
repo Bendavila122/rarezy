@@ -9,7 +9,6 @@ import { authGate } from "@/lib/authGate";
 import { LeaderboardView } from "@/components/LeaderboardView";
 import { CountdownBar } from "@/components/Countdown";
 import { FreeTrial } from "@/components/FreeTrial";
-import { CertificateOfAuthenticity } from "@/components/CertificateOfAuthenticity";
 import { DealerCard, HouseStockCard } from "@/components/DealerCard";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
@@ -148,7 +147,7 @@ export function ItemDetail() {
 
       {c.certificateId && (
         <Link
-          to={c.analysisReport ? `/certificate/${c.id}` : "/about#authenticated"}
+          to="/about#authenticated"
           className="press mt-2 inline-flex items-center gap-1.5 text-[0.72rem] text-muted hover:text-foreground"
         >
           Authenticated
@@ -278,21 +277,6 @@ export function ItemDetail() {
             ))}
           </div>
         </>
-      )}
-
-      {c.analysisReport && (
-        <div className="mt-9">
-          <p className={labelCls}>Certificate of authenticity</p>
-          <div className="mt-3">
-            <CertificateOfAuthenticity item={c.item} report={c.analysisReport} compact />
-          </div>
-          <Link
-            to={`/certificate/${c.id}`}
-            className="mt-3 inline-block text-[0.78rem] text-brand underline underline-offset-4"
-          >
-            View full certificate
-          </Link>
-        </div>
       )}
 
       {c.leaderboard.length > 0 && (

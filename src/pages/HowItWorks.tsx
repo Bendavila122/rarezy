@@ -15,7 +15,7 @@ const STEPS = [
   {
     Icon: Banknote,
     title: "3. Get a real cash offer",
-    body: "A firm cash offer lands in your account. No obligation — accept it, or decline and keep the watch.",
+    body: "A firm cash offer lands in your account. No obligation — accept it, or decline and keep it.",
   },
   {
     Icon: Truck,
@@ -29,8 +29,8 @@ export function HowItWorks() {
     <div className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="text-[1.9rem] font-semibold leading-tight tracking-[-0.03em]">How selling to Rarezy works</h1>
       <p className="mt-3 max-w-lg text-[0.9rem] leading-relaxed text-muted">
-        A straightforward instant cash sale for your watch — no auctions, no waiting on a buyer,
-        no listing it yourself. Tell us about it, get an offer, get paid in person.
+        We buy watches, jewellery, handbags, cars and more — for the right price. A straightforward
+        instant cash sale, no auctions, no waiting on a buyer, no listing it yourself.
       </p>
 
       <div className="mt-10 flex flex-col gap-4">
@@ -61,7 +61,7 @@ export function HowItWorks() {
           to="/sell"
           className="rounded-none bg-brand px-6 py-3.5 text-[0.9rem] font-medium tracking-tight text-background transition-transform active:scale-[0.97]"
         >
-          Sell your watch
+          Sell to Rarezy
         </Link>
         <Link
           to="/help"

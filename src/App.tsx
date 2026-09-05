@@ -25,7 +25,6 @@ import { Sell } from "@/pages/Sell";
 import { MyAccount } from "@/pages/MyAccount";
 import { Settings } from "@/pages/Settings";
 import { Admin } from "@/pages/Admin";
-import { Certificate } from "@/pages/Certificate";
 import { SellerDashboard } from "@/pages/SellerDashboard";
 import { SellerNewCompetition } from "@/pages/SellerNewCompetition";
 import { SellerShopSettings } from "@/pages/SellerShopSettings";
@@ -79,7 +78,6 @@ export function App() {
           <Route path="/account" element={<MyAccount />} />
           <Route path="/account/settings" element={<Settings />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/certificate/:listingId" element={<Certificate />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/new" element={<SellerNewCompetition />} />
           <Route path="/seller/shop" element={<SellerShopSettings />} />

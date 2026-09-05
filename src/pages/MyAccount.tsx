@@ -78,7 +78,7 @@ export function MyAccount() {
         <p className="mt-6 text-[0.85rem] text-muted">
           Nothing here yet.{" "}
           <Link to="/sell" className="text-brand underline underline-offset-4">
-            Sell a watch
+            Sell to Rarezy
           </Link>{" "}
           and it'll show up the moment you do.
         </p>
