@@ -82,6 +82,22 @@ export function Admin() {
   const { records, currentUser } = useRarezy();
   const [tab, setTab] = useState<Tab>("personal");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [sellers, setSellers] = useState<Seller[] | null>(null);
+  const [competitions, setCompetitions] = useState<MarketCompetition[] | null>(null);
+  const [disputes, setDisputes] = useState<Dispute[] | null>(null);
+
+  const reloadSellers = () => marketDb.fetchPendingSellers().then(setSellers);
+  const reloadCompetitions = () => marketDb.fetchPendingCompetitions().then(setCompetitions);
+  const reloadDisputes = () => marketDb.fetchOpenDisputes().then(setDisputes);
+
+  // Fetched once here (not per-tab) so every tab's badge count is known
+  // before it's ever opened, and switching tabs never re-triggers a fetch.
+  useEffect(() => {
+    if (!currentUser?.isAdmin) return;
+    reloadSellers();
+    reloadCompetitions();
+    reloadDisputes();
+  }, [currentUser?.isAdmin]);
 
   if (!currentUser?.isAdmin) {
     return (
@@ -94,10 +110,34 @@ export function Admin() {
     );
   }
 
+  const pendingReviewCount = records.filter(
+    (r): r is Submission => r.kind === "submission" && r.status === "pending_review",
+  ).length;
+
+  const TAB_COUNTS: Record<Tab, number> = {
+    personal: pendingReviewCount,
+    sellers: sellers?.length ?? 0,
+    competitions: competitions?.length ?? 0,
+    disputes: disputes?.length ?? 0,
+  };
+  const totalNeedingAttention = Object.values(TAB_COUNTS).reduce((a, b) => a + b, 0);
+
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
-      <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em]">Admin</h1>
-      <p className="mt-2 text-[0.85rem] text-muted">Rarezy's review queue across every side of the marketplace.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em]">Admin</h1>
+          <p className="mt-2 text-[0.85rem] text-muted">Rarezy's review queue across every side of the marketplace.</p>
+        </div>
+        {totalNeedingAttention > 0 && (
+          <div className="shrink-0 text-right">
+            <p className="tabular text-[1.6rem] font-semibold leading-none tracking-[-0.03em] text-brand">
+              {totalNeedingAttention}
+            </p>
+            <p className="mt-1 text-[0.62rem] uppercase tracking-[0.2em] text-muted">Needing attention</p>
+          </div>
+        )}
+      </div>
 
       <div className="mt-6 flex gap-1 border-b border-white/[0.08]">
         {TABS.map((t) => (
@@ -105,19 +145,24 @@ export function Admin() {
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`press border-b-2 px-4 py-3 text-[0.82rem] font-medium tracking-tight transition-colors ${
+            className={`press flex items-center gap-1.5 border-b-2 px-4 py-3 text-[0.82rem] font-medium tracking-tight transition-colors ${
               tab === t.id ? "border-brand text-foreground" : "border-transparent text-muted"
             }`}
           >
             {t.label}
+            {TAB_COUNTS[t.id] > 0 && (
+              <span className="tabular rounded-full bg-brand/20 px-1.5 py-0.5 text-[0.62rem] font-semibold leading-none text-brand">
+                {TAB_COUNTS[t.id]}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
       {tab === "personal" && <PersonalSalesTab records={records} selectedId={selectedId} setSelectedId={setSelectedId} />}
-      {tab === "sellers" && <SellersTab />}
-      {tab === "competitions" && <CompetitionsTab />}
-      {tab === "disputes" && <DisputesTab />}
+      {tab === "sellers" && <SellersTab sellers={sellers} reload={reloadSellers} />}
+      {tab === "competitions" && <CompetitionsTab competitions={competitions} reload={reloadCompetitions} />}
+      {tab === "disputes" && <DisputesTab disputes={disputes} reload={reloadDisputes} />}
     </div>
   );
 }
@@ -572,16 +617,10 @@ function CertificateForm({ submission: s, listing }: { submission: Submission; l
   );
 }
 
-function SellersTab() {
-  const [sellers, setSellers] = useState<Seller[] | null>(null);
+function SellersTab({ sellers, reload }: { sellers: Seller[] | null; reload: () => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
-
-  const reload = () => marketDb.fetchPendingSellers().then(setSellers);
-  useEffect(() => {
-    reload();
-  }, []);
 
   const selected = sellers?.find((s) => s.id === selectedId) ?? sellers?.[0] ?? null;
 
@@ -597,7 +636,7 @@ function SellersTab() {
     reload();
   };
 
-  if (!sellers) return null;
+  if (!sellers) return <p className="mt-14 text-center text-[0.9rem] text-muted">Loading…</p>;
 
   return (
     <div className="mt-8">
@@ -696,16 +735,16 @@ function SellersTab() {
   );
 }
 
-function CompetitionsTab() {
-  const [competitions, setCompetitions] = useState<MarketCompetition[] | null>(null);
+function CompetitionsTab({
+  competitions,
+  reload,
+}: {
+  competitions: MarketCompetition[] | null;
+  reload: () => void;
+}) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [rejecting, setRejecting] = useState(false);
-
-  const reload = () => marketDb.fetchPendingCompetitions().then(setCompetitions);
-  useEffect(() => {
-    reload();
-  }, []);
 
   const selected = competitions?.find((c) => c.id === selectedId) ?? competitions?.[0] ?? null;
 
@@ -721,7 +760,7 @@ function CompetitionsTab() {
     reload();
   };
 
-  if (!competitions) return null;
+  if (!competitions) return <p className="mt-14 text-center text-[0.9rem] text-muted">Loading…</p>;
 
   return (
     <div className="mt-8">
@@ -849,15 +888,9 @@ const DISPUTE_TYPE_LABEL: Record<string, string> = {
   other: "Other",
 };
 
-function DisputesTab() {
-  const [disputes, setDisputes] = useState<Dispute[] | null>(null);
+function DisputesTab({ disputes, reload }: { disputes: Dispute[] | null; reload: () => void }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resolution, setResolution] = useState("");
-
-  const reload = () => marketDb.fetchOpenDisputes().then(setDisputes);
-  useEffect(() => {
-    reload();
-  }, []);
 
   const selected = disputes?.find((d) => d.id === selectedId) ?? disputes?.[0] ?? null;
 
@@ -867,7 +900,7 @@ function DisputesTab() {
     reload();
   };
 
-  if (!disputes) return null;
+  if (!disputes) return <p className="mt-14 text-center text-[0.9rem] text-muted">Loading…</p>;
 
   return (
     <div className="mt-8">

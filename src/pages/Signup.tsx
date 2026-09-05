@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { CheckCircle2, ChevronLeft, Mail, ShieldCheck, Store, Trophy } from "lucide-react";
+import { CheckCircle2, ChevronLeft, Mail, ShieldCheck } from "lucide-react";
 import { auth, AUTH_DEMO_MODE } from "@/lib/auth";
 import { FieldGroup, FieldRow, FieldInput, PasswordFieldInput, OtpInput } from "@/components/AuthField";
 
 type AccountType = "competitor" | "dealer";
 
-// The dealer track skips personal ID verification (step 5) — a business
-// gets verified through its seller application instead, so its wizard is
-// one step shorter than a competitor's.
-function totalSteps(accountType: AccountType | null) {
-  return accountType === "dealer" ? 5 : 6;
+// There's no type-picker step any more — which account you get is decided
+// entirely by which button sent you here (Home's "Sign up" → competitor,
+// ForBusiness's "Apply to become a seller" → dealer, see the `accountType`
+// route state each passes). The dealer track skips personal ID verification
+// (step 4) — a business gets verified through its seller application
+// instead, so its wizard is one step shorter than a competitor's.
+function totalSteps(accountType: AccountType) {
+  return accountType === "dealer" ? 4 : 5;
 }
 
 const primaryBtnCls =
@@ -61,14 +64,13 @@ export function Signup() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const state = location.state as { reason?: string; next?: string; accountType?: AccountType } | null;
-  // A caller that already knows which account is wanted — the home nav's
-  // "Sign up" (always competitor) or the business page's "Apply to become a
-  // seller" (always dealer) — passes it via router state, skipping straight
-  // past the type-picker step instead of asking again.
-  const preselectedType = state?.accountType ?? null;
+  // Always sent here already knowing which account is wanted — the home
+  // nav's "Sign up" (competitor) or ForBusiness's "Apply to become a
+  // seller" (dealer) — via route state. Falls back to competitor if
+  // something links here without it (e.g. Login's "Create an account").
+  const accountType: AccountType = state?.accountType ?? "competitor";
 
-  const [step, setStep] = useState(preselectedType ? 1 : 0);
-  const [accountType, setAccountType] = useState<AccountType | null>(preselectedType);
+  const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");
@@ -82,15 +84,10 @@ export function Signup() {
   // ?step=done once the user finishes uploading documents there.
   useEffect(() => {
     if (params.get("step") === "done") {
-      setStep(5);
+      setStep(4);
       setIdSubmitted(true);
     }
   }, [params]);
-
-  const chooseAccountType = (type: AccountType) => {
-    setAccountType(type);
-    setStep(1);
-  };
 
   const back = () => {
     setError(null);
@@ -165,7 +162,7 @@ export function Signup() {
         navigate("/seller");
         return;
       }
-      setStep(5);
+      setStep(4);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't create your account.");
     } finally {
@@ -209,47 +206,6 @@ export function Signup() {
         )}
 
         {step === 0 && !idSubmitted && (
-          <div className="mt-5 flex flex-col gap-5">
-            <div>
-              <h1 className="text-[1.4rem] font-semibold leading-tight tracking-[-0.02em]">
-                What brings you to Rarezy?
-              </h1>
-              <p className="mt-1.5 text-[0.82rem] leading-relaxed text-white/55">
-                This decides which account you get — it can't be changed later.
-              </p>
-            </div>
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={() => chooseAccountType("competitor")}
-                className="press flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-colors hover:border-mint/30"
-              >
-                <StepIcon Icon={Trophy} />
-                <span>
-                  <span className="block text-[0.95rem] font-semibold tracking-tight">Competitor</span>
-                  <span className="mt-1 block text-[0.76rem] leading-relaxed text-white/55">
-                    Browse competitions, buy tickets and play to win.
-                  </span>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => chooseAccountType("dealer")}
-                className="press flex items-start gap-3.5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-colors hover:border-mint/30"
-              >
-                <StepIcon Icon={Store} />
-                <span>
-                  <span className="block text-[0.95rem] font-semibold tracking-tight">Dealer</span>
-                  <span className="mt-1 block text-[0.76rem] leading-relaxed text-white/55">
-                    List your own stock as competitions and reach Rarezy's customers.
-                  </span>
-                </span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 1 && !idSubmitted && (
           <form onSubmit={submitEmail} className="mt-5 flex flex-col gap-5">
             <div>
               <h1 className="text-[1.4rem] font-semibold leading-tight tracking-[-0.02em]">What's your email?</h1>
@@ -272,11 +228,10 @@ export function Signup() {
             <button type="submit" disabled={!email.includes("@") || busy} className={primaryBtnCls}>
               {busy ? "Sending…" : "Send code"}
             </button>
-            <BackButton onClick={back} />
           </form>
         )}
 
-        {step === 2 && !idSubmitted && (
+        {step === 1 && !idSubmitted && (
           <form onSubmit={submitCode} className="mt-5 flex flex-col gap-5">
             <div>
               <StepIcon Icon={Mail} />
@@ -296,7 +251,7 @@ export function Signup() {
           </form>
         )}
 
-        {step === 3 && !idSubmitted && (
+        {step === 2 && !idSubmitted && (
           <form onSubmit={submitUsername} className="mt-5 flex flex-col gap-5">
             <div>
               <h1 className="text-[1.4rem] font-semibold leading-tight tracking-[-0.02em]">Pick a username</h1>
@@ -322,7 +277,7 @@ export function Signup() {
           </form>
         )}
 
-        {step === 4 && !idSubmitted && (
+        {step === 3 && !idSubmitted && (
           <form onSubmit={submitPassword} className="mt-5 flex flex-col gap-5">
             <div>
               <h1 className="text-[1.4rem] font-semibold leading-tight tracking-[-0.02em]">Create a password</h1>
@@ -353,7 +308,7 @@ export function Signup() {
           </form>
         )}
 
-        {step === 5 && !idSubmitted && (
+        {step === 4 && !idSubmitted && (
           <div className="mt-5 flex flex-col gap-5">
             <div>
               <StepIcon Icon={ShieldCheck} />

@@ -1,33 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Star } from "lucide-react";
 
-const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
-  {
-    title: "Marketplace",
-    links: [
-      { label: "Browse watches", to: "/browse" },
-      { label: "Sell your watch", to: "/sell" },
-      { label: "Trade with us", to: "/seller" },
-    ],
-  },
-  {
-    title: "Account",
-    links: [
-      { label: "My account", to: "/account" },
-      { label: "My entries", to: "/entries" },
-      { label: "Payments", to: "/payments" },
-      { label: "Help centre", to: "/help" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About us", to: "/about" },
-      { label: "Contact", to: "/contact" },
-      { label: "Terms of service", to: "/terms" },
-      { label: "Privacy policy", to: "/privacy" },
-    ],
-  },
+const FOOTER_LINKS = [
+  { label: "Contact", to: "/contact" },
+  { label: "Terms of service", to: "/terms" },
+  { label: "Privacy policy", to: "/privacy" },
 ];
 
 /** Flat monochrome marks (simple-icons) rather than the official multicolour logos — a colour-inverted official Amex/Mastercard lockup turns into an unreadable solid block at this size, these read cleanly as plain white icons on a dark footer. */
@@ -83,22 +60,17 @@ export function Footer() {
           >
             020 7946 0958
           </a>
-        </div>
 
-        {COLUMNS.map((col) => (
-          <div key={col.title}>
-            <p className="text-[0.62rem] uppercase tracking-[0.24em] text-white/40">{col.title}</p>
-            <ul className="mt-4 flex flex-col gap-2.5">
-              {col.links.map((l) => (
-                <li key={l.to}>
-                  <Link to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          <ul className="mt-4 flex flex-col gap-2.5">
+            {FOOTER_LINKS.map((l) => (
+              <li key={l.to}>
+                <Link to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-col-reverse items-center gap-4 px-6 py-6 sm:flex-row sm:justify-between">
