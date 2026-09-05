@@ -1,7 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
 import { Star } from "lucide-react";
 
-const FOOTER_LINKS = [
+const headingCls = "text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/40";
+
+/** Genuinely useful destinations for a player/guest — the only audience this footer ever renders for (admin/seller get their own nav entirely). Nothing corporate or repeated from elsewhere in the header. */
+const QUICK_LINKS = [
+  { label: "Browse competitions", to: "/browse" },
+  { label: "Sell your watch", to: "/sell" },
+  { label: "How it works", to: "/how-it-works" },
+  { label: "Help centre", to: "/help" },
+];
+
+const COMPANY_LINKS = [
   { label: "Contact", to: "/contact" },
   { label: "Terms of service", to: "/terms" },
   { label: "Privacy policy", to: "/privacy" },
@@ -28,20 +38,16 @@ export function Footer() {
     // No background colour of its own — it sits directly on whatever's behind it (the
     // fixed mesh on the home page, the plain page background elsewhere) rather than
     // reading as its own separate block.
-    <footer className={`relative z-10 ${marginCls} text-white`}>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-12 text-center sm:grid-cols-3 sm:text-left">
-        {/* Far left: identity */}
-        <div className="flex flex-col items-center sm:items-start">
+    <footer className={`relative z-10 ${marginCls} border-t border-white/[0.08] text-white`}>
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-x-6 gap-y-10 px-6 py-14 text-center sm:grid-cols-4 sm:text-left">
+        {/* Brand */}
+        <div className="col-span-2 flex flex-col items-center sm:items-start">
           <img src="/rarezy-logo-dark.png" alt="Rarezy" className="h-9 w-auto" />
-          <p className="mt-4 max-w-[15rem] text-[0.75rem] leading-relaxed text-white/55">
+          <p className="mt-4 max-w-[16rem] text-[0.8rem] leading-relaxed text-white/55">
             The UK marketplace for luxury items — authenticated, insured, and won on skill.
           </p>
-        </div>
-
-        {/* Centre: trust + contact */}
-        <div className="flex flex-col items-center">
-          {/* Placeholder rating/count standing in for a real Trustpilot embed once the business has an account to pull live data from. */}
-          <div className="glass-dark inline-flex items-center gap-1.5 rounded-none px-2.5 py-1">
+          <div className="glass-dark mt-5 inline-flex items-center gap-1.5 rounded-none px-2.5 py-1">
+            {/* Placeholder rating/count standing in for a real Trustpilot embed once the business has an account to pull live data from. */}
             <div className="flex items-center gap-[1px]">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} className="h-2.5 w-2.5 fill-mint text-mint" strokeWidth={0} />
@@ -51,32 +57,39 @@ export function Footer() {
               <span className="font-bold text-white">4.8</span> · Trustpilot
             </p>
           </div>
-          <a href="mailto:help@rarezy.co.uk" className="mt-4 text-[0.78rem] font-medium text-mint hover:underline">
+        </div>
+
+        {/* Quick links — player-relevant navigation only */}
+        <div className="flex flex-col items-center gap-3.5 sm:items-start">
+          <p className={headingCls}>Quick links</p>
+          {QUICK_LINKS.map((l) => (
+            <Link key={l.to} to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
+              {l.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Company + contact */}
+        <div className="flex flex-col items-center gap-3.5 sm:items-start">
+          <p className={headingCls}>Company</p>
+          {COMPANY_LINKS.map((l) => (
+            <Link key={l.to} to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
+              {l.label}
+            </Link>
+          ))}
+          <a href="mailto:help@rarezy.co.uk" className="mt-1.5 text-[0.78rem] font-medium text-mint hover:underline">
             help@rarezy.co.uk
           </a>
           <a
             href="tel:+442079460958"
-            className="mt-1.5 text-[0.78rem] font-medium text-white/55 hover:text-mint hover:underline"
+            className="text-[0.78rem] font-medium text-white/55 hover:text-mint hover:underline"
           >
             020 7946 0958
           </a>
         </div>
-
-        {/* Far right: quick links */}
-        <div className="flex flex-col items-center sm:items-end">
-          <ul className="flex flex-col items-center gap-2.5 sm:items-end">
-            {FOOTER_LINKS.map((l) => (
-              <li key={l.to}>
-                <Link to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
 
-      <div className="mx-auto flex max-w-6xl flex-col-reverse items-center gap-4 px-6 py-6 sm:flex-row sm:justify-between">
+      <div className="mx-auto flex max-w-6xl flex-col-reverse items-center gap-4 border-t border-white/[0.06] px-6 py-6 sm:flex-row sm:justify-between">
         <p className="text-[0.68rem] text-white/45">
           © {new Date().getFullYear()} Rarezy Ltd. Registered in England &amp; Wales.
         </p>

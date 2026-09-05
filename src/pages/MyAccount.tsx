@@ -48,7 +48,7 @@ export function MyAccount() {
     return (
       <AccountRequired
         title="Create an account"
-        body="Sign up to see your listings, entries and payment details in one place."
+        body="Sign up to see your sales, entries and payment details in one place."
       />
     );
   }
@@ -108,10 +108,10 @@ export function MyAccount() {
         </>
       )}
 
-      <h2 className="mt-12 text-[1.3rem] font-semibold tracking-[-0.02em]">My listings</h2>
+      <h2 className="mt-12 text-[1.3rem] font-semibold tracking-[-0.02em]">My sales</h2>
       {mine.length === 0 ? (
         <p className="mt-6 text-[0.85rem] text-muted">
-          Nothing here yet. List a watch and it'll show up the moment you do.
+          Nothing here yet. Sell a watch and it'll show up the moment you do.
         </p>
       ) : (
         <div className="mt-6 flex flex-col gap-4">
@@ -246,13 +246,13 @@ function SubmissionCard({ submission: s }: { submission: Submission }) {
 
       {s.status === "visit_completed_cash" && (
         <p className="mt-4 text-[0.8rem] text-muted">
-          Paid out at the visit — see it under My listings below.
+          Paid out at the visit — see it under My sales below.
         </p>
       )}
 
       {s.status === "visit_completed_consignment" && (
         <p className="mt-4 text-[0.8rem] text-muted">
-          Collected and taken into our vault — see it under My listings below.
+          Collected and taken into our vault — see it under My sales below.
         </p>
       )}
 
