@@ -91,7 +91,7 @@ export function ForBusiness() {
           </div>
         </div>
 
-        <div className="flex items-center justify-center">
+        <div className="mt-6 flex items-center justify-center sm:mt-0">
           <PhoneMockup glow="oklch(0.75 0.19 80)" glow2="oklch(0.82 0.19 148)">
             <CyclingScreens screens={[ListScreen, ValuationScreen, PaidScreen]} intervalMs={3200} />
           </PhoneMockup>

@@ -26,6 +26,17 @@ body,
   height: 100%;
 }
 
+/* Belt-and-suspenders: decorative glow/blob elements are deliberately
+   oversized and meant to bleed past their own container's edges (see the
+   design-language memory) — clip that bleed at the page edge instead of
+   letting it ever create real horizontal scroll, on any page or viewport.
+   Set on `html` (not just `body`) since with a `height: 100%` chain like
+   this one, the browser can pick `<html>` as the actual root scroller —
+   `overflow-x: hidden` on `body` alone doesn't stop that. */
+html {
+  overflow-x: hidden;
+}
+
 /* Page-wide section snap-scrolling, scoped to whichever page opts in (the
    home page toggles this class on <html> for as long as it's mounted) so
    other pages keep normal free scrolling. `proximity`, not `mandatory` —
@@ -53,6 +64,11 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  /* Belt-and-suspenders: decorative glow/blob elements are deliberately
+     oversized and meant to bleed past their own container's edges (see the
+     design-language memory) — clip that bleed at the page edge instead of
+     letting it ever create real horizontal scroll, on any page or viewport. */
+  overflow-x: hidden;
 }
 
 .tabular {

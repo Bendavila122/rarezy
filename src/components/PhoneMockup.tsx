@@ -74,7 +74,7 @@ export function PhoneMockup({
         className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <motion.div
-          className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 blur-[70px]"
+          className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 blur-[70px] sm:h-[30rem] sm:w-[30rem]"
           style={{ background: glow }}
           animate={{
             scale: [1, 1.3, 0.86, 1.2, 0.94, 1.12, 1],
@@ -101,7 +101,7 @@ export function PhoneMockup({
           }}
         />
         <motion.div
-          className="glow-ring absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2"
+          className="glow-ring absolute left-1/2 top-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 sm:h-72 sm:w-72"
           style={{
             background: `radial-gradient(circle at 32% 26%, oklch(1 0 0 / 80%), ${glow} 22%, ${glow2} 55%, transparent 78%)`,
             boxShadow: `inset -14px -14px 44px oklch(0 0 0 / 30%), inset 12px 12px 30px oklch(1 0 0 / 28%), 0 0 70px -8px ${glow}`,

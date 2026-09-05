@@ -95,14 +95,14 @@ export function ScrollStory() {
   return (
     <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
       <div className="grid grid-cols-1 items-start gap-10 sm:grid-cols-2">
-        <div className="order-2 sm:order-1">
+        <div className="order-2 min-w-0 sm:order-1">
           {STOPS.map((stop, i) => (
             <div
               key={stop.eyebrow}
               ref={(el) => {
                 panelRefs.current[i] = el;
               }}
-              className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
+              className="flex snap-start scroll-mt-16 flex-col justify-center py-14 pl-4 sm:min-h-[calc(100vh-4rem)] sm:py-0 sm:pl-12"
             >
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{stop.eyebrow}</p>
               <div className="mt-5">
@@ -129,7 +129,7 @@ export function ScrollStory() {
           ))}
         </div>
 
-        <div className="order-1 flex items-center justify-center pb-6 pt-6 sm:order-2 sm:sticky sm:top-16 sm:h-[calc(100vh-4rem)] sm:pb-0 sm:pt-0">
+        <div className="order-1 flex min-w-0 items-center justify-center pb-6 pt-10 sm:order-2 sm:sticky sm:top-16 sm:h-[calc(100vh-4rem)] sm:pb-0 sm:pt-0">
           <PhoneMockup glow={current.glow} glow2={current.glow2}>
             <AnimatePresence mode="wait">
               <motion.div
