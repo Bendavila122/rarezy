@@ -2,30 +2,14 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { CreditCard, Heart, HelpCircle, LogOut, Settings as SettingsIcon, Ticket, Trophy } from "lucide-react";
-import { DEADLINE_OPTIONS, formatDate, formatTime, money, suggestEntryCount, titleOf } from "@/lib/marketplace";
-import { rarezy, useRarezy, type CashDeal, type CompetitionListing, type GameId, type Submission } from "@/lib/store";
-import { GAMES, DEFAULT_GAME_ID, gameById } from "@/lib/games";
+import { DEADLINE_OPTIONS, formatDate, formatTime, money, titleOf } from "@/lib/marketplace";
+import { rarezy, useRarezy, type CashDeal, type CompetitionListing, type Submission } from "@/lib/store";
+import { gameById } from "@/lib/games";
 import { AccountRequired } from "@/components/AccountRequired";
 import { AccountLinkRow } from "@/components/AccountLinkRow";
 import { auth } from "@/lib/auth";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
-
-const ENTRY_FEE_OPTIONS = [1, 2, 5, 10, 25, 50];
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-none border px-3.5 py-2 text-[0.76rem] tracking-tight transition-all active:scale-[0.97] ${
-        active ? "border-brand/40 bg-brand/15 text-brand" : "border-white/10 bg-white/[0.04] text-muted"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
 
 const STATUS_LABEL: Record<CompetitionListing["status"], string> = {
   authenticating: "In our vault — being inspected",
@@ -188,83 +172,7 @@ const SUBMISSION_STATUS_LABEL: Record<Submission["status"], string> = {
   declined_at_visit: "Declined at visit",
 };
 
-/** The ticketed side of the offer_ready choice — entry price, minimum, deadline and, since every competition is locked to one game for its whole life, which game decides it. */
-function TicketedOfferForm({ submission: s }: { submission: Submission }) {
-  const offer = s.offer!;
-  const [entryFee, setEntryFee] = useState(2);
-  const [minimumPrice, setMinimumPrice] = useState(offer.suggestedMinimum);
-  const [deadlineDays, setDeadlineDays] = useState<number>(30);
-  const [gameId, setGameId] = useState<GameId>(DEFAULT_GAME_ID);
-
-  const entryCount = suggestEntryCount(offer.ceiling, entryFee);
-  const proceed = () => rarezy.chooseSubmissionOffer(s.id, "consignment", { entryFee, minimumPrice, deadlineDays, gameId });
-
-  return (
-    <div className="rounded-none border border-white/10 bg-white/[0.03] p-4">
-      <p className={labelCls}>Ticketed competition</p>
-      <p className="tabular mt-2 text-[1.3rem] font-semibold leading-none tracking-[-0.03em]">
-        Up to {money(offer.ceiling)}
-      </p>
-      <p className="mt-2 text-[0.74rem] text-muted">
-        You keep the watch until it sells out or hits your minimum — then you ship it, insured, to the winner.
-      </p>
-
-      <p className={`${labelCls} mt-4`}>Ticket price</p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {ENTRY_FEE_OPTIONS.map((fee) => (
-          <Chip key={fee} active={entryFee === fee} onClick={() => setEntryFee(fee)}>
-            {money(fee)}
-          </Chip>
-        ))}
-      </div>
-
-      <p className={`${labelCls} mt-4`}>Minimum you'll accept</p>
-      <input
-        type="number"
-        min={0}
-        step={50}
-        value={minimumPrice}
-        onChange={(e) => setMinimumPrice(Math.max(0, Number(e.target.value) || 0))}
-        className="mt-2 w-full rounded-none border border-white/10 bg-white/[0.04] px-4 py-2.5 text-[16px] text-foreground outline-none focus:border-brand/40"
-      />
-
-      <p className={`${labelCls} mt-4`}>Deadline</p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {DEADLINE_OPTIONS.map((d) => (
-          <Chip key={d} active={deadlineDays === d} onClick={() => setDeadlineDays(d)}>
-            {d} days
-          </Chip>
-        ))}
-      </div>
-
-      <p className={`${labelCls} mt-4`}>Game</p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {GAMES.map((g) => (
-          <Chip key={g.id} active={gameId === g.id} onClick={() => setGameId(g.id)}>
-            {g.name}
-          </Chip>
-        ))}
-      </div>
-      <p className="mt-2 text-[0.72rem] leading-relaxed text-muted">{gameById(gameId).description}</p>
-      <p className="mt-1 text-[0.68rem] text-muted/60">Locked in once this competition goes live — it can't be changed later.</p>
-
-      <p className="mt-4 text-[0.74rem] text-muted">
-        {entryCount.toLocaleString("en-GB")} tickets at {money(entryFee)} each, minimum {money(minimumPrice)}.
-      </p>
-
-      <button
-        type="button"
-        onClick={proceed}
-        className="mt-3 w-full rounded-none border border-brand/40 py-2.5 text-[0.8rem] font-medium text-brand"
-      >
-        List as a ticketed competition
-      </button>
-    </div>
-  );
-}
-
 function SubmissionCard({ submission: s }: { submission: Submission }) {
-  const { currentUser } = useRarezy();
   const offer = s.offer;
   const proceedCash = () => rarezy.chooseSubmissionOffer(s.id, "cash");
 
@@ -310,19 +218,6 @@ function SubmissionCard({ submission: s }: { submission: Submission }) {
             </button>
           </div>
 
-          {currentUser?.isSeller ? (
-            <TicketedOfferForm submission={s} />
-          ) : (
-            <p className="text-[0.74rem] leading-relaxed text-muted/70">
-              Want to run this as a ticketed competition instead of a cash sale? That's only available to
-              approved business sellers —{" "}
-              <Link to="/for-business" className="text-brand underline underline-offset-4">
-                apply as a seller
-              </Link>
-              .
-            </p>
-          )}
-
           <button
             type="button"
             onClick={() => rarezy.cancelSubmission(s.id)}
@@ -343,17 +238,9 @@ function SubmissionCard({ submission: s }: { submission: Submission }) {
             </span>{" "}
             to inspect it in person.
           </p>
-          {s.sellerChoice === "cash" ? (
-            <p className="mt-3 text-[0.72rem] text-muted/70">
-              You'll be paid in cash on the spot once they've confirmed it in person.
-            </p>
-          ) : (
-            <p className="mt-3 text-[0.72rem] text-muted/70">
-              If confirmed, it'll go live as a ticketed competition on{" "}
-              <span className="text-foreground">{gameById(s.proposedGameId).name}</span> — that's fixed for the
-              competition once it launches.
-            </p>
-          )}
+          <p className="mt-3 text-[0.72rem] text-muted/70">
+            You'll be paid in cash on the spot once they've confirmed it in person.
+          </p>
         </div>
       )}
 
