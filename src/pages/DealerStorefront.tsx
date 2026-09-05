@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { BadgeCheck, Star } from "lucide-react";
 import { dealerById } from "@/lib/dealers";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
@@ -9,16 +9,22 @@ const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 /** A dealer's public shop — their rating, sold count and every one of their listings currently live, reached by tapping through from any of their product pages. */
 export function DealerStorefront() {
   const { dealerId } = useParams<{ dealerId: string }>();
+  const navigate = useNavigate();
   const { records } = useRarezy();
   const dealer = dealerById(dealerId);
+
+  const goBack = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/browse");
+  };
 
   if (!dealer) {
     return (
       <div className="mx-auto max-w-2xl px-6 py-12">
-        <p className="text-[0.9rem] text-muted">That dealer isn't here any more.</p>
-        <Link to="/browse" className="mt-4 inline-block text-[0.8rem] text-brand underline underline-offset-4">
-          Back to Browse
-        </Link>
+        <button type="button" onClick={goBack} className="text-[0.8rem] text-muted hover:text-foreground">
+          ← Back
+        </button>
+        <p className="mt-6 text-[0.9rem] text-muted">That dealer isn't here any more.</p>
       </div>
     );
   }
@@ -29,7 +35,10 @@ export function DealerStorefront() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <div className="flex items-start gap-5">
+      <button type="button" onClick={goBack} className="text-[0.8rem] text-muted hover:text-foreground">
+        ← Back
+      </button>
+      <div className="mt-6 flex items-start gap-5">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/10 text-[1.3rem] font-semibold tracking-tight">
           {dealer.name.slice(0, 1)}
         </div>

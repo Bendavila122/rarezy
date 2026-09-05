@@ -31,6 +31,16 @@ export type Seller = {
   complianceNotes: string | null;
   adminNotes: string | null;
   createdAt: string;
+  logoUrl: string | null;
+  coverPhotoUrl: string | null;
+  about: string | null;
+  locationLabel: string | null;
+  locationLat: number | null;
+  locationLng: number | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  twitterUrl: string | null;
+  tiktokUrl: string | null;
 };
 
 export type ProductCategory = "watch" | "jewellery" | "handbag" | "clothing" | "electronics" | "other";
@@ -134,6 +144,16 @@ const mapSeller = (row: Record<string, unknown>): Seller => ({
   complianceNotes: (row.compliance_notes as string) ?? null,
   adminNotes: (row.admin_notes as string) ?? null,
   createdAt: row.created_at as string,
+  logoUrl: (row.logo_url as string) ?? null,
+  coverPhotoUrl: (row.cover_photo_url as string) ?? null,
+  about: (row.about as string) ?? null,
+  locationLabel: (row.location_label as string) ?? null,
+  locationLat: (row.location_lat as number) ?? null,
+  locationLng: (row.location_lng as number) ?? null,
+  instagramUrl: (row.instagram_url as string) ?? null,
+  facebookUrl: (row.facebook_url as string) ?? null,
+  twitterUrl: (row.twitter_url as string) ?? null,
+  tiktokUrl: (row.tiktok_url as string) ?? null,
 });
 
 const mapProduct = (row: Record<string, unknown>): Product => ({
@@ -218,6 +238,57 @@ export const marketDb = {
       .single();
     if (error) throw error;
     return mapSeller(data);
+  },
+
+  /** Everything a seller can customise about their public storefront, beyond the application fields set at signup. */
+  async updateSellerProfile(
+    sellerId: string,
+    fields: {
+      about?: string | null;
+      contactPhone?: string | null;
+      website?: string | null;
+      locationLabel?: string | null;
+      locationLat?: number | null;
+      locationLng?: number | null;
+      instagramUrl?: string | null;
+      facebookUrl?: string | null;
+      twitterUrl?: string | null;
+      tiktokUrl?: string | null;
+    },
+  ) {
+    const patch: Record<string, unknown> = {};
+    if (fields.about !== undefined) patch.about = fields.about;
+    if (fields.contactPhone !== undefined) patch.contact_phone = fields.contactPhone;
+    if (fields.website !== undefined) patch.website = fields.website;
+    if (fields.locationLabel !== undefined) patch.location_label = fields.locationLabel;
+    if (fields.locationLat !== undefined) patch.location_lat = fields.locationLat;
+    if (fields.locationLng !== undefined) patch.location_lng = fields.locationLng;
+    if (fields.instagramUrl !== undefined) patch.instagram_url = fields.instagramUrl;
+    if (fields.facebookUrl !== undefined) patch.facebook_url = fields.facebookUrl;
+    if (fields.twitterUrl !== undefined) patch.twitter_url = fields.twitterUrl;
+    if (fields.tiktokUrl !== undefined) patch.tiktok_url = fields.tiktokUrl;
+
+    const { error } = await db().from("sellers").update(patch).eq("id", sellerId);
+    if (error) throw error;
+  },
+
+  /** Uploads a new logo or cover photo, replacing any previous one at the same path, and saves the public URL onto the seller row. */
+  async uploadSellerImage(sellerId: string, kind: "logo" | "cover", file: File) {
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${sellerId}/${kind}.${ext}`;
+    const { error: uploadError } = await db()
+      .storage.from("seller-branding")
+      .upload(path, file, { upsert: true, cacheControl: "3600" });
+    if (uploadError) throw uploadError;
+    const { data: publicUrl } = db().storage.from("seller-branding").getPublicUrl(path);
+    const url = `${publicUrl.publicUrl}?v=${Date.now()}`;
+    const column = kind === "logo" ? "logo_url" : "cover_photo_url";
+    const { error: updateError } = await db()
+      .from("sellers")
+      .update({ [column]: url })
+      .eq("id", sellerId);
+    if (updateError) throw updateError;
+    return url;
   },
 
   // ---- Products ----

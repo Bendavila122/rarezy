@@ -355,12 +355,20 @@ export function SellerDashboard() {
           <p className={labelCls}>Verified seller</p>
           <h1 className="mt-2 text-[1.9rem] font-semibold tracking-[-0.03em]">{seller.businessName}</h1>
         </div>
-        <Link
-          to="/seller/new"
-          className="press shrink-0 rounded-none bg-brand px-4 py-2.5 text-[0.8rem] font-medium tracking-tight text-background"
-        >
-          Create competition
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            to="/seller/shop"
+            className="press rounded-none border border-white/10 px-4 py-2.5 text-[0.8rem] font-medium tracking-tight text-foreground"
+          >
+            Shop settings
+          </Link>
+          <Link
+            to="/seller/new"
+            className="press rounded-none bg-brand px-4 py-2.5 text-[0.8rem] font-medium tracking-tight text-background"
+          >
+            Create competition
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-3 gap-3">

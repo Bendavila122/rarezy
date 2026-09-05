@@ -63,6 +63,10 @@ function SellerNavBar() {
             <Plus className="h-4 w-4" strokeWidth={1.9} />
             New competition
           </NavLink>
+          <NavLink to="/seller/shop" className={({ isActive }) => linkCls(isActive)}>
+            <Store className="h-4 w-4" strokeWidth={1.9} />
+            Shop settings
+          </NavLink>
           <button
             type="button"
             onClick={() => auth.signOut()}

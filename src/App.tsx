@@ -29,6 +29,7 @@ import { Admin } from "@/pages/Admin";
 import { Certificate } from "@/pages/Certificate";
 import { SellerDashboard } from "@/pages/SellerDashboard";
 import { SellerNewCompetition } from "@/pages/SellerNewCompetition";
+import { SellerShopSettings } from "@/pages/SellerShopSettings";
 import { SellerStorefront } from "@/pages/SellerStorefront";
 import { DealerStorefront } from "@/pages/DealerStorefront";
 import { CompetitionDetail } from "@/pages/CompetitionDetail";
@@ -83,6 +84,7 @@ export function App() {
           <Route path="/certificate/:listingId" element={<Certificate />} />
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/new" element={<SellerNewCompetition />} />
+          <Route path="/seller/shop" element={<SellerShopSettings />} />
           <Route path="/seller/:sellerId" element={<SellerStorefront />} />
           <Route path="/dealer/:dealerId" element={<DealerStorefront />} />
           <Route path="/c/:competitionId" element={<CompetitionDetail />} />
