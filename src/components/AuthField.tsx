@@ -85,7 +85,11 @@ export function OtpInput({
   };
 
   return (
-    <div className="flex justify-between gap-2">
+    // Each box is a flex-1 with a max-width cap (not a fixed w-11) so the
+    // row of 6 always shrinks to fit whatever width the card actually has
+    // — a fixed width overflowed the frame on narrower phones where 6
+    // boxes + gaps genuinely don't fit in ~260-280px of card content width.
+    <div className="flex gap-1.5 sm:gap-2">
       {digits.map((d, i) => (
         <input
           key={i}
@@ -98,7 +102,7 @@ export function OtpInput({
           value={d}
           onChange={(e) => setDigit(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className="h-14 w-11 rounded-2xl border border-white/15 bg-white/[0.06] text-center text-[1.3rem] font-semibold text-white outline-none focus:border-mint/60 focus:bg-white/[0.1]"
+          className="h-12 min-w-0 max-w-11 flex-1 rounded-2xl border border-white/15 bg-white/[0.06] text-center text-[1.05rem] font-semibold text-white outline-none focus:border-mint/60 focus:bg-white/[0.1] sm:h-14 sm:text-[1.3rem]"
         />
       ))}
     </div>
