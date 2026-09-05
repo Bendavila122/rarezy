@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { CONDITIONS, money, titleOf } from "@/lib/marketplace";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 import { ListingCard } from "@/components/ListingCard";
-import { FilterDrawer } from "@/components/FilterDrawer";
+import { CATEGORY_LABELS, FilterDrawer } from "@/components/FilterDrawer";
 import { activeFilterCount, EMPTY_FILTERS, matchesFilters, SORTERS, SORTS, type SortId, type WatchFilters } from "@/lib/filters";
 import { browseState } from "@/lib/browseState";
 import { Reveal } from "@/components/Reveal";
@@ -50,6 +50,11 @@ export function BrowseSection() {
   const activeCount = activeFilterCount(filters);
 
   const chips: Chip[] = [
+    ...filters.categories.map((c) => ({
+      key: `cat-${c}`,
+      label: CATEGORY_LABELS[c] ?? c,
+      remove: () => setFilters((f) => ({ ...f, categories: f.categories.filter((v) => v !== c) })),
+    })),
     ...filters.brands.map((b) => ({
       key: `brand-${b}`,
       label: b,

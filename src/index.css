@@ -31,10 +31,19 @@ body,
    design-language memory) — clip that bleed at the page edge instead of
    letting it ever create real horizontal scroll, on any page or viewport.
    Set on `html` (not just `body`) since with a `height: 100%` chain like
-   this one, the browser can pick `<html>` as the actual root scroller —
-   `overflow-x: hidden` on `body` alone doesn't stop that. */
+   this one, the browser can pick `<html>` as the actual root scroller.
+   Uses `clip`, not `hidden`: per the CSS overflow spec, setting overflow-x
+   to anything but `visible` while overflow-y is left `visible` forces
+   overflow-y to compute as `auto` instead — silently turning this element
+   into its OWN independent scroll container (its scrollTop moves instead
+   of window.scrollY / document.documentElement.scrollTop). That broke every
+   window.scrollTo()-based behaviour on this site (scroll-to-top on
+   navigation, scroll restoration on back) since real scrolling was
+   happening on <body>, invisibly to window-level scroll APIs. `clip` is
+   exempt from that pairing rule, so it clips horizontal bleed without
+   turning this element into a scroll container at all. */
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Page-wide section snap-scrolling, scoped to whichever page opts in (the
@@ -67,8 +76,10 @@ body {
   /* Belt-and-suspenders: decorative glow/blob elements are deliberately
      oversized and meant to bleed past their own container's edges (see the
      design-language memory) — clip that bleed at the page edge instead of
-     letting it ever create real horizontal scroll, on any page or viewport. */
-  overflow-x: hidden;
+     letting it ever create real horizontal scroll, on any page or viewport.
+     `clip`, not `hidden` — see the comment on `html` above for why `hidden`
+     here silently turns body into its own independent scroll container. */
+  overflow-x: clip;
 }
 
 .tabular {

@@ -5,7 +5,7 @@ import { categoryOf, CONDITIONS, MOVEMENT_TYPES, movementType, type Condition } 
 import type { CompetitionListing } from "@/lib/store";
 import { activeFilterCount, EMPTY_FILTERS, facetCounts, toggleValue, type WatchFilters } from "@/lib/filters";
 
-const CATEGORY_LABELS: Record<string, string> = {
+export const CATEGORY_LABELS: Record<string, string> = {
   watch: "Watches",
   car: "Cars",
   handbag: "Handbags",
