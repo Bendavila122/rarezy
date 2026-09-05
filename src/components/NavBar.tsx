@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { Building2, Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Store, Ticket, User } from "lucide-react";
-import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { auth } from "@/lib/auth";
 
@@ -14,20 +12,9 @@ const PRIMARY_LINKS = [
 const SELL_LINK = { to: "/sell", label: "Sell", Icon: Plus, end: false } as const;
 
 const linkCls = (isActive: boolean) =>
-  `group relative z-10 flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight transition-colors duration-200 ease-out hover:text-mint ${
+  `group flex h-9 items-center gap-1.5 px-3 text-[0.92rem] font-semibold tracking-tight transition-colors duration-200 ease-out hover:text-mint ${
     isActive ? "text-mint" : "text-white/65"
   }`;
-
-/** Glass pill that slides between whichever tab is currently hovered — shared layoutId means Motion animates its position/size across sibling wrappers automatically. A real `.glass-dark` pane (blur + saturation + inner highlight), not a flat tint, so it reads as an obvious floating piece of glass. */
-function TabGlass() {
-  return (
-    <motion.span
-      layoutId="navTabGlass"
-      className="glass-block absolute inset-0"
-      transition={{ type: "spring", bounce: 0.25, duration: 0.45 }}
-    />
-  );
-}
 
 /**
  * The admin account gets its own header entirely — no search, no basket,
@@ -154,18 +141,12 @@ function ShopperNavBar() {
   const playableCount = records.filter(
     (r) => r.kind === "competition" && r.attemptsRemaining > 0,
   ).length;
-  const [hovered, setHovered] = useState<string | null>(null);
-  const { pathname } = useLocation();
 
   const badgeFor = (to: string) => {
     if (to === "/entries") return playableCount;
     if (to === "/basket") return basketCount;
     return 0;
   };
-
-  const isPathActive = (to: string) => pathname === to || pathname.startsWith(`${to}/`);
-  const activeKey = [...PRIMARY_LINKS, SELL_LINK].find((item) => isPathActive(item.to))?.to ?? null;
-  const highlightKey = hovered ?? activeKey;
 
   return (
     <header className="sticky top-0 z-30">
@@ -177,49 +158,41 @@ function ShopperNavBar() {
           </NavLink>
         </div>
 
-        <nav className="flex h-9 items-center gap-1" onMouseLeave={() => setHovered(null)}>
+        <nav className="flex h-9 items-center gap-1">
           {PRIMARY_LINKS.map((item) => {
             const badge = badgeFor(item.to);
             return (
-              <div key={item.to} className="relative" onMouseEnter={() => setHovered(item.to)}>
-                {highlightKey === item.to && <TabGlass />}
-                <NavLink to={item.to} end={item.end} className={({ isActive }) => linkCls(isActive)}>
-                  <item.Icon
-                    className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110"
-                    strokeWidth={1.9}
-                  />
-                  {item.label}
-                  {badge > 0 && (
-                    <span className="tabular flex h-4 min-w-4 items-center justify-center rounded-none bg-mint px-1 text-[0.58rem] font-medium text-brand-deep">
-                      {badge}
-                    </span>
-                  )}
-                </NavLink>
-              </div>
+              <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => linkCls(isActive)}>
+                <item.Icon
+                  className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110"
+                  strokeWidth={1.9}
+                />
+                {item.label}
+                {badge > 0 && (
+                  <span className="tabular flex h-4 min-w-4 items-center justify-center rounded-none bg-mint px-1 text-[0.58rem] font-medium text-brand-deep">
+                    {badge}
+                  </span>
+                )}
+              </NavLink>
             );
           })}
 
-          <div className="relative" onMouseEnter={() => setHovered(SELL_LINK.to)}>
-            {highlightKey === SELL_LINK.to && <TabGlass />}
-            <NavLink to={SELL_LINK.to} end={SELL_LINK.end} className={({ isActive }) => linkCls(isActive)}>
-              <SELL_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
-              {SELL_LINK.label}
-            </NavLink>
-          </div>
+          <NavLink to={SELL_LINK.to} end={SELL_LINK.end} className={({ isActive }) => linkCls(isActive)}>
+            <SELL_LINK.Icon className="h-4 w-4 transition-transform duration-200 ease-out group-hover:scale-110" strokeWidth={1.9} />
+            {SELL_LINK.label}
+          </NavLink>
 
-          <div className="relative" onMouseEnter={() => setHovered(null)}>
-            <NavLink
-              to="/account"
-              aria-label="Account"
-              className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60 transition-transform duration-200 ease-out hover:scale-110"
-            >
-              {currentUser?.avatarUrl ? (
-                <img src={currentUser.avatarUrl} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <User className="h-4 w-4" strokeWidth={2} />
-              )}
-            </NavLink>
-          </div>
+          <NavLink
+            to="/account"
+            aria-label="Account"
+            className="ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60 transition-transform duration-200 ease-out hover:scale-110"
+          >
+            {currentUser?.avatarUrl ? (
+              <img src={currentUser.avatarUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <User className="h-4 w-4" strokeWidth={2} />
+            )}
+          </NavLink>
         </nav>
       </div>
     </header>
