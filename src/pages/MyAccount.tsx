@@ -1,14 +1,13 @@
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { CreditCard, Heart, HelpCircle, LogOut, Settings as SettingsIcon, Ticket, Trophy } from "lucide-react";
 import { DEADLINE_OPTIONS, formatDate, formatTime, money, suggestEntryCount, titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy, type CashDeal, type CompetitionListing, type GameId, type Submission } from "@/lib/store";
 import { GAMES, DEFAULT_GAME_ID, gameById } from "@/lib/games";
 import { AccountRequired } from "@/components/AccountRequired";
+import { AccountLinkRow } from "@/components/AccountLinkRow";
 import { auth } from "@/lib/auth";
-
-const quickLinkCls =
-  "rounded-none border border-white/10 bg-white/[0.04] px-4 py-2 text-[0.78rem] tracking-tight text-muted transition-all active:scale-[0.97]";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 
@@ -39,6 +38,16 @@ const STATUS_LABEL: Record<CompetitionListing["status"], string> = {
 
 export function MyAccount() {
   const { records, currentUser } = useRarezy();
+  const [email, setEmail] = useState<string | null>(null);
+  const playableCount = records.filter(
+    (r): r is CompetitionListing => r.kind === "competition" && r.attemptsRemaining > 0,
+  ).length;
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    auth.fetchProfileDetails(currentUser.id).then((d) => setEmail(d?.email ?? null));
+  }, [currentUser?.id]);
+
   const submissions = records.filter((r): r is Submission => r.kind === "submission");
   const activeSubmissions = submissions.filter(
     (s) => s.status === "pending_review" || s.status === "offer_ready" || s.status === "visit_scheduled",
@@ -62,46 +71,39 @@ export function MyAccount() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
-      <div className="flex items-start justify-between gap-3">
-        <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em]">Account</h1>
-        <button
-          type="button"
-          onClick={() => auth.signOut()}
-          className="mt-2 text-[0.72rem] text-muted/60 underline underline-offset-4"
-        >
-          Log out
-        </button>
-      </div>
-      <div className="mt-4 flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.06] text-[0.95rem] font-semibold tracking-tight text-foreground">
+      <h1 className="text-[1.9rem] font-semibold tracking-[-0.03em]">Account</h1>
+
+      <Link to="/account/settings" className="glass-dark press mt-5 flex items-center gap-4 rounded-2xl p-5">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.08] text-[1.1rem] font-semibold tracking-tight text-white">
           {currentUser.avatarUrl ? (
             <img src={currentUser.avatarUrl} alt="" className="h-full w-full object-cover" />
           ) : (
             currentUser.username.slice(0, 1).toUpperCase()
           )}
         </div>
-        <p className="text-[0.85rem] text-muted">Signed in as {currentUser.username}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[1rem] font-semibold tracking-tight text-white">{currentUser.username}</p>
+          <p className="mt-0.5 truncate text-[0.78rem] text-white/50">{email ?? "Edit your profile"}</p>
+        </div>
+        <SettingsIcon className="h-4 w-4 shrink-0 text-white/40" strokeWidth={1.9} />
+      </Link>
+
+      <div className="mt-5 divide-y divide-white/10 overflow-hidden rounded-2xl bg-white/[0.06]">
+        <AccountLinkRow to="/entries" icon={Ticket} label="My entries" badge={playableCount} />
+        <AccountLinkRow to="/wins" icon={Trophy} label="My wins" />
+        <AccountLinkRow to="/watchlist" icon={Heart} label="Watchlist" />
+        <AccountLinkRow to="/payments" icon={CreditCard} label="Payments & payouts" />
+        <AccountLinkRow to="/help" icon={HelpCircle} label="Help centre" />
       </div>
-      <div className="mt-5 flex flex-wrap gap-2">
-        <Link to="/account/settings" className={quickLinkCls}>
-          Settings
-        </Link>
-        <Link to="/entries" className={quickLinkCls}>
-          My entries
-        </Link>
-        <Link to="/wins" className={quickLinkCls}>
-          My wins
-        </Link>
-        <Link to="/watchlist" className={quickLinkCls}>
-          Watchlist
-        </Link>
-        <Link to="/payments" className={quickLinkCls}>
-          Payments &amp; payouts
-        </Link>
-        <Link to="/help" className={quickLinkCls}>
-          Help centre
-        </Link>
-      </div>
+
+      <button
+        type="button"
+        onClick={() => auth.signOut()}
+        className="press mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-red-500/25 bg-red-500/[0.08] py-3.5 text-[0.85rem] font-semibold tracking-tight text-red-400"
+      >
+        <LogOut className="h-4 w-4" strokeWidth={2.1} />
+        Log out
+      </button>
 
       {activeSubmissions.length > 0 && (
         <>

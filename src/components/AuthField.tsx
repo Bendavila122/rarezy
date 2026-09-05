@@ -22,7 +22,7 @@ export function FieldRow({
   );
 }
 
-const fieldInputCls =
+export const fieldInputCls =
   "mt-1 w-full border-none bg-transparent p-0 text-[16px] tracking-tight text-white outline-none placeholder:text-white/25";
 
 export function FieldInput(props: InputHTMLAttributes<HTMLInputElement>) {
