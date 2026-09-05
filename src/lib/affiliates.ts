@@ -10,54 +10,37 @@ export type AffiliatePartner = {
   category: string;
   blurb: string;
   cta: string;
+  /** A real, signed partner's live embed — renders instead of the disabled "coming soon" button. */
+  widgetSrc?: string;
 };
 
-export type FeaturedAffiliate = {
+export type LiveTravelAd = {
   id: string;
-  partner: string;
-  category: string;
-  headline: string;
+  name: string;
   blurb: string;
-  cta: string;
-  image: string;
-  href?: string;
+  widgetSrc: string;
 };
 
 /**
- * The three partner relationships big enough to earn their own promo banner
- * on the homepage. Presented as recommended services for a watch owner — not
- * labelled "affiliate" in the UI. Photography sourced from Wikimedia Commons
- * under CC licences.
+ * Real, signed Travelpayouts embeds, rendered via `AffiliateWidgetEmbed`
+ * in the "Before you fly" section at the bottom of the Home page — not
+ * the (no-longer-linked) Partners page. Add another real partner here as
+ * they're signed; each just needs its own widget src.
  */
-export const FEATURED_AFFILIATES: FeaturedAffiliate[] = [
+export const LIVE_TRAVEL_ADS: LiveTravelAd[] = [
   {
-    id: "travel",
-    partner: "Aurea Private Travel",
-    category: "Travel",
-    headline: "Just won? Take it somewhere worth wearing it.",
-    blurb: "Preferential rates on private villas, yachts and first-class travel, arranged by Aurea.",
-    cta: "Coming soon",
-    image: "https://upload.wikimedia.org/wikipedia/commons/4/49/Lady_M_yacht.jpg",
+    id: "esim",
+    name: "Airalo",
+    blurb: "Instant eSIM data plans in 200+ countries — install before you fly, skip the roaming charges.",
+    widgetSrc:
+      "https://tpwgt.com/content?trs=570524&shmarker=773972.rarezy&locale=en&powered_by=true&color_button=%23f2685f&color_focused=%23f2685f&secondary=%23FFFFFF&dark=%2311100f&light=%23FFFFFF&special=%23C4C4C4&border_radius=5&plain=false&no_labels=true&promo_id=8588&campaign_id=541",
   },
   {
-    id: "insurance",
-    partner: "Vault Watch Insurance",
-    category: "Insurance",
-    headline: "Insure it before you wear it",
-    blurb: "Specialist cover for luxury watches, priced on today's market value in minutes, not weeks.",
-    cta: "Get a quote",
-    image: "https://upload.wikimedia.org/wikipedia/commons/3/35/Ocean_National_Bank_vault_door.png",
-    href: "/partners",
-  },
-  {
-    id: "authentication",
-    partner: "Verity Authentication",
-    category: "Authentication",
-    headline: "Get a second opinion, independently",
-    blurb: "Not selling yet? Get a watch certified on its own — no listing required, ever.",
-    cta: "Learn more",
-    image: "https://upload.wikimedia.org/wikipedia/commons/8/88/Benrus_Watch_Balance_Wheel_2.jpg",
-    href: "/authenticate",
+    id: "flights",
+    name: "Kiwi.com",
+    blurb: "Compare flights across hundreds of airlines and book direct.",
+    widgetSrc:
+      "https://tpwgt.com/content?currency=gbp&trs=570524&shmarker=773972.rarezy&locale=en&powered_by=false&limit=4&primary_color=00AE98&results_background_color=FFFFFF&form_background_color=FFFFFF&promo_id=4563&campaign_id=111",
   },
 ];
 

@@ -13,7 +13,7 @@ import { EndingSoonSection } from "@/components/EndingSoonSection";
 import { HowToWinSection } from "@/components/HowToWinSection";
 import { LiveStatsBand } from "@/components/LiveStatsBand";
 import { ReviewsSection } from "@/components/ReviewsSection";
-import { AffiliateStrip } from "@/components/AffiliateStrip";
+import { TravelAdsSection } from "@/components/TravelAdsSection";
 import { ScrollHint } from "@/components/ScrollHint";
 
 export function Home() {
@@ -58,7 +58,7 @@ export function Home() {
       <LiveStatsBand />
       <ReviewsSection />
       <FaqSection />
-      <AffiliateStrip />
+      <TravelAdsSection />
       <ScrollHint />
 
       {playingGame &&
