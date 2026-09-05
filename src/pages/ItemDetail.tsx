@@ -49,6 +49,7 @@ export function ItemDetail() {
   const { records, watchlist, currentUser } = useRarezy();
   const navigate = useNavigate();
   const [activePhoto, setActivePhoto] = useState(0);
+  const [qty, setQty] = useState(1);
   const [lightbox, setLightbox] = useState(false);
 
   const c = records.find((r) => r.id === itemId && r.kind === "competition");
@@ -81,7 +82,7 @@ export function ItemDetail() {
       authGate.request("Create a free account to buy a ticket.");
       return;
     }
-    rarezy.addToBasket(c.id, 1);
+    rarezy.addToBasket(c.id, qty);
   };
 
   const toggleSave = () => {
@@ -207,24 +208,40 @@ export function ItemDetail() {
       )}
 
       {c.status === "live" ? (
-        <div className="mt-5 flex gap-2">
-          <button
-            type="button"
-            onClick={buyTicket}
-            className="flex flex-1 items-center justify-center gap-2 rounded-none bg-brand py-3.5 text-[0.88rem] font-medium tracking-tight text-background"
-          >
-            <ShoppingBag className="h-4 w-4" strokeWidth={2} />
-            Add to basket
-          </button>
-          <button
-            type="button"
-            onClick={toggleSave}
-            aria-pressed={watched}
-            aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
-            className="flex h-[3.1rem] w-[3.1rem] shrink-0 items-center justify-center rounded-none border border-white/10"
-          >
-            <Heart className={watched ? "h-5 w-5 fill-brand text-brand" : "h-5 w-5 text-foreground"} strokeWidth={1.8} />
-          </button>
+        <div className="mt-5 flex flex-col gap-2">
+          <div className="flex gap-2">
+            {[1, 5, 10, 20].map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setQty(v)}
+                className={`flex-1 rounded-none border py-2.5 text-[0.8rem] tracking-tight transition-all active:scale-[0.97] ${
+                  qty === v ? "border-brand/40 bg-brand/15 text-brand" : "border-white/10 bg-white/[0.04] text-muted"
+                }`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={buyTicket}
+              className="flex flex-1 items-center justify-center gap-2 rounded-none bg-brand py-3.5 text-[0.88rem] font-medium tracking-tight text-background"
+            >
+              <ShoppingBag className="h-4 w-4" strokeWidth={2} />
+              Add {qty > 1 ? `${qty} ` : ""}to basket — {money(c.entryFee * qty)}
+            </button>
+            <button
+              type="button"
+              onClick={toggleSave}
+              aria-pressed={watched}
+              aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
+              className="flex h-[3.1rem] w-[3.1rem] shrink-0 items-center justify-center rounded-none border border-white/10"
+            >
+              <Heart className={watched ? "h-5 w-5 fill-brand text-brand" : "h-5 w-5 text-foreground"} strokeWidth={1.8} />
+            </button>
+          </div>
         </div>
       ) : null}
 

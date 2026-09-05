@@ -94,9 +94,9 @@ export function ListingCard({ listing: c }: { listing: CompetitionListing }) {
             rarezy.addToBasket(c.id, 1);
           }}
           aria-label="Add to basket"
-          className="press glass absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-none"
+          className="press absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-brand shadow-lg shadow-black/30"
         >
-          <ShoppingBag className="h-3.5 w-3.5 text-foreground" strokeWidth={1.9} />
+          <ShoppingBag className="h-4 w-4 text-background" strokeWidth={2.1} />
         </button>
       </div>
     </TiltCard>
