@@ -6,14 +6,14 @@ import { STOPS, type Line } from "@/components/tourStops";
 
 const SCREEN_CYCLE_MS = 4200;
 
-/** A plain "keep scrolling" cue — a line into a chevron, no animation or circular chip — reused under both the buyers stop (scrolls to the marketplace stop) and the marketplace stop's own CTA (scrolls to the game section). */
+/** A plain "keep scrolling" cue — a line into a chevron, no animation or circular chip — reused under both the buyers stop (scrolls to the marketplace stop) and the marketplace stop's own CTA (scrolls to the game section). Left-aligned, flush with the start of the text above it, not centred. */
 function ScrollCue({ onClick }: { onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label="Scroll to see more"
-      className="press mt-5 flex flex-col items-center gap-1.5 self-center text-white/80 hover:text-white"
+      className="press mt-5 flex w-fit flex-col items-center gap-1.5 text-white/80 hover:text-white"
     >
       <span className="h-6 w-px bg-white/60" />
       <ChevronDown className="h-4 w-4" strokeWidth={2.2} />
@@ -102,7 +102,7 @@ export function ScrollStory() {
               ref={(el) => {
                 panelRefs.current[i] = el;
               }}
-              className="flex min-h-[calc(100vh-4rem)] w-fit snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
+              className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
             >
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{stop.eyebrow}</p>
               <div className="mt-5">

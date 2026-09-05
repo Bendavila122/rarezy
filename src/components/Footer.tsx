@@ -29,43 +29,51 @@ export function Footer() {
     // fixed mesh on the home page, the plain page background elsewhere) rather than
     // reading as its own separate block.
     <footer className={`relative z-10 ${marginCls} text-white`}>
-      <div className="mx-auto flex max-w-6xl flex-col items-center px-6 py-12 text-center">
-        <img src="/rarezy-logo-dark.png" alt="Rarezy" className="h-9 w-auto" />
-
-        {/* Placeholder rating/count standing in for a real Trustpilot embed once the business has an account to pull live data from. */}
-        <div className="glass-dark mt-4 inline-flex items-center gap-1.5 rounded-none px-2.5 py-1">
-          <div className="flex items-center gap-[1px]">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className="h-2.5 w-2.5 fill-mint text-mint" strokeWidth={0} />
-            ))}
-          </div>
-          <p className="text-[0.62rem] text-white/60">
-            <span className="font-bold text-white">4.8</span> · Trustpilot
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-6 py-12 text-center sm:grid-cols-3 sm:text-left">
+        {/* Far left: identity */}
+        <div className="flex flex-col items-center sm:items-start">
+          <img src="/rarezy-logo-dark.png" alt="Rarezy" className="h-9 w-auto" />
+          <p className="mt-4 max-w-[15rem] text-[0.75rem] leading-relaxed text-white/55">
+            The UK marketplace for luxury items — authenticated, insured, and won on skill.
           </p>
         </div>
 
-        <p className="mt-4 max-w-[15rem] text-[0.75rem] leading-relaxed text-white/55">
-          The UK marketplace for luxury items — authenticated, insured, and won on skill.
-        </p>
-        <a href="mailto:help@rarezy.co.uk" className="mt-4 text-[0.78rem] font-medium text-mint hover:underline">
-          help@rarezy.co.uk
-        </a>
-        <a
-          href="tel:+442079460958"
-          className="mt-1.5 text-[0.78rem] font-medium text-white/55 hover:text-mint hover:underline"
-        >
-          020 7946 0958
-        </a>
+        {/* Centre: trust + contact */}
+        <div className="flex flex-col items-center">
+          {/* Placeholder rating/count standing in for a real Trustpilot embed once the business has an account to pull live data from. */}
+          <div className="glass-dark inline-flex items-center gap-1.5 rounded-none px-2.5 py-1">
+            <div className="flex items-center gap-[1px]">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Star key={i} className="h-2.5 w-2.5 fill-mint text-mint" strokeWidth={0} />
+              ))}
+            </div>
+            <p className="text-[0.62rem] text-white/60">
+              <span className="font-bold text-white">4.8</span> · Trustpilot
+            </p>
+          </div>
+          <a href="mailto:help@rarezy.co.uk" className="mt-4 text-[0.78rem] font-medium text-mint hover:underline">
+            help@rarezy.co.uk
+          </a>
+          <a
+            href="tel:+442079460958"
+            className="mt-1.5 text-[0.78rem] font-medium text-white/55 hover:text-mint hover:underline"
+          >
+            020 7946 0958
+          </a>
+        </div>
 
-        <ul className="mt-4 flex flex-col items-center gap-2.5">
-          {FOOTER_LINKS.map((l) => (
-            <li key={l.to}>
-              <Link to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
-                {l.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {/* Far right: quick links */}
+        <div className="flex flex-col items-center sm:items-end">
+          <ul className="flex flex-col items-center gap-2.5 sm:items-end">
+            {FOOTER_LINKS.map((l) => (
+              <li key={l.to}>
+                <Link to={l.to} className="text-[0.82rem] tracking-tight text-white/75 hover:text-mint">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <div className="mx-auto flex max-w-6xl flex-col-reverse items-center gap-4 px-6 py-6 sm:flex-row sm:justify-between">
