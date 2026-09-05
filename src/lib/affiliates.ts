@@ -29,18 +29,11 @@ export type LiveTravelAd = {
  */
 export const LIVE_TRAVEL_ADS: LiveTravelAd[] = [
   {
-    id: "esim",
-    name: "Airalo",
-    blurb: "Instant eSIM data plans in 200+ countries — install before you fly, skip the roaming charges.",
-    widgetSrc:
-      "https://tpwgt.com/content?trs=570524&shmarker=773972.rarezy&locale=en&powered_by=true&color_button=%23f2685f&color_focused=%23f2685f&secondary=%23FFFFFF&dark=%2311100f&light=%23FFFFFF&special=%23C4C4C4&border_radius=5&plain=false&no_labels=true&promo_id=8588&campaign_id=541",
-  },
-  {
     id: "flights",
     name: "Kiwi.com",
     blurb: "Compare flights across hundreds of airlines and book direct.",
     widgetSrc:
-      "https://tpwgt.com/content?currency=gbp&trs=570524&shmarker=773972.rarezy&locale=en&powered_by=false&limit=4&primary_color=00AE98&results_background_color=FFFFFF&form_background_color=FFFFFF&promo_id=4563&campaign_id=111",
+      "https://tpwgt.com/content?currency=gbp&trs=570524&shmarker=773972.rarezy&locale=en&powered_by=false&limit=4&primary_color=00AE98&results_background_color=F5F3F3ff&form_background_color=060606ff&promo_id=4563&campaign_id=111",
   },
 ];
 
