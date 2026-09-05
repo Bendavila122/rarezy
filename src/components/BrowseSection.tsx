@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { Search, SlidersHorizontal, X } from "lucide-react";
-import { CONDITIONS, money, titleOf } from "@/lib/marketplace";
+import { categoryOf, CONDITIONS, money, titleOf, type ItemCategory } from "@/lib/marketplace";
+import { useTypewriterCycle } from "@/lib/useTypewriterCycle";
 import { useRarezy, type CompetitionListing } from "@/lib/store";
 import { ListingCard } from "@/components/ListingCard";
 import { CATEGORY_LABELS, FilterDrawer } from "@/components/FilterDrawer";
@@ -33,6 +34,22 @@ export function BrowseSection() {
   const live = records.filter(
     (r): r is CompetitionListing => r.kind === "competition" && r.status === "live",
   );
+
+  const countOf = (category: ItemCategory) => live.filter((r) => categoryOf(r.item) === category).length;
+  // Every count here is real, live stock — filtered out entirely if a
+  // category happens to have nothing live, rather than ever showing "0".
+  const placeholderPhrases = [
+    { count: countOf("watch"), text: (n: number) => `Search from ${n} watch${n === 1 ? "" : "es"}` },
+    { count: countOf("electronics"), text: (n: number) => `Search from ${n} electronics` },
+    { count: countOf("cash"), text: (n: number) => `Search from ${n} cash prize${n === 1 ? "" : "s"}` },
+    { count: countOf("handbag"), text: (n: number) => `Search from ${n} handbag${n === 1 ? "" : "s"}` },
+    { count: countOf("clothing"), text: (n: number) => `Search from ${n} clothing item${n === 1 ? "" : "s"}` },
+    { count: countOf("jewellery"), text: (n: number) => `Search from ${n} jewellery item${n === 1 ? "" : "s"}` },
+    { count: countOf("car"), text: (n: number) => `Search from ${n} car${n === 1 ? "" : "s"}` },
+  ]
+    .filter((p) => p.count > 0)
+    .map((p) => p.text(p.count));
+  const typedPlaceholder = useTypewriterCycle(placeholderPhrases);
 
   const filteredForCount = useMemo(() => live.filter((c) => matchesFilters(c, filters)), [live, filters]);
 
@@ -144,14 +161,20 @@ export function BrowseSection() {
         </p>
       </Reveal>
 
-      <div className="relative mt-5">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" strokeWidth={2} />
+      <div className="glass-dark relative mt-5 flex h-12 items-center rounded-full">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" strokeWidth={2} />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search Rolex, Patek Philippe, Nautilus…"
-          className="w-full rounded-none border-none bg-white/[0.06] py-3 pl-10 pr-4 text-[16px] tracking-tight text-foreground outline-none placeholder:text-muted/70 focus:bg-white/[0.1]"
+          aria-label="Search competitions"
+          className="w-full rounded-full border-none bg-transparent py-3 pl-11 pr-4 text-[16px] tracking-tight text-white outline-none"
         />
+        {query.length === 0 && (
+          <span className="pointer-events-none absolute left-11 top-1/2 flex -translate-y-1/2 items-center overflow-hidden text-[0.9rem] tracking-tight text-white/40">
+            {typedPlaceholder}
+            <span className="ml-0.5 animate-pulse">▌</span>
+          </span>
+        )}
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">

@@ -4,7 +4,6 @@ import { Building2, Compass, LogOut, Plus, ShieldCheck, ShoppingBag, Store, Tick
 import { motion } from "motion/react";
 import { useRarezy } from "@/lib/store";
 import { auth } from "@/lib/auth";
-import { SearchHero } from "@/components/SearchHero";
 
 const PRIMARY_LINKS = [
   { to: "/browse", label: "Browse", Icon: Compass, end: false },
@@ -176,7 +175,6 @@ function ShopperNavBar() {
             <img src="/rarezy-icon.png" alt="Rarezy" className="h-9 w-auto sm:hidden" />
             <img src="/rarezy-logo-dark.png" alt="Rarezy" className="hidden h-9 w-auto sm:block" />
           </NavLink>
-          <SearchHero />
         </div>
 
         <nav className="flex h-9 items-center gap-1" onMouseLeave={() => setHovered(null)}>

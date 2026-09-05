@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, X } from "lucide-react";
 import { categoryOf, CONDITIONS, MOVEMENT_TYPES, movementType, type Condition } from "@/lib/marketplace";
 import type { CompetitionListing } from "@/lib/store";
 import { activeFilterCount, EMPTY_FILTERS, facetCounts, toggleValue, type WatchFilters } from "@/lib/filters";
@@ -89,19 +89,36 @@ function CheckRow({
   );
 }
 
-/** A full-width row for picking a category, distinct from CheckRow's checkbox style — this is a "go to the next stage" tap, not a toggle. */
-function CategoryRow({ label, count, onClick }: { label: string; count: number; onClick: () => void }) {
+/** An image tile for picking a category — a real product photo from a live listing, not a text row, so the choice reads visually rather than as a plain list. */
+function CategoryTile({
+  label,
+  count,
+  photo,
+  onClick,
+}: {
+  label: string;
+  count: number;
+  photo?: string | undefined;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="press flex w-full items-center justify-between gap-2 border-b border-white/[0.06] py-3.5 text-left"
+      className="press group relative aspect-[4/3] overflow-hidden rounded-none border border-white/[0.08] bg-white/[0.05] text-left"
     >
-      <span className="text-[0.9rem] font-medium tracking-tight text-foreground">{label}</span>
-      <span className="flex items-center gap-2">
-        <span className="tabular text-[0.75rem] text-muted">{count}</span>
-        <ChevronRight className="h-4 w-4 text-muted" strokeWidth={2} />
-      </span>
+      {photo && (
+        <img
+          src={photo}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-active:scale-105"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3">
+        <span className="text-[0.85rem] font-semibold leading-tight tracking-tight text-white">{label}</span>
+        <span className="tabular shrink-0 text-[0.68rem] text-white/70">{count}</span>
+      </div>
     </button>
   );
 }
@@ -261,15 +278,18 @@ export function FilterDrawer({
             <div className="flex-1 overflow-y-auto px-5">
               {!selectedCategory ? (
                 <div className="pt-2">
-                  <p className="pb-1 text-[0.72rem] uppercase tracking-[0.16em] text-muted">Choose a category</p>
-                  {categoryFacets.map((f) => (
-                    <CategoryRow
-                      key={f.value}
-                      label={CATEGORY_LABELS[f.value] ?? f.value}
-                      count={f.count}
-                      onClick={() => patch({ categories: [f.value] })}
-                    />
-                  ))}
+                  <p className="pb-3 text-[0.72rem] uppercase tracking-[0.16em] text-muted">Choose a category</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {categoryFacets.map((f) => (
+                      <CategoryTile
+                        key={f.value}
+                        label={CATEGORY_LABELS[f.value] ?? f.value}
+                        count={f.count}
+                        photo={listings.find((c) => categoryOf(c.item) === f.value && c.item.photos?.[0])?.item.photos?.[0]}
+                        onClick={() => patch({ categories: [f.value] })}
+                      />
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <>
