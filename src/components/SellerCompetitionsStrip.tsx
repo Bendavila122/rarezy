@@ -1,7 +1,33 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, Sparkles, TimerReset } from "lucide-react";
 import { marketDb, moneyFromPence, type MarketCompetition } from "@/lib/db";
+
+const DAY_MS = 86_400_000;
+
+/** Same "Ending today" / "Listed today" tags used everywhere else a listing appears. */
+function TodayTags({ c }: { c: MarketCompetition }) {
+  const listedToday = Date.now() - new Date(c.createdAt).getTime() < DAY_MS;
+  const endingToday = c.status === "live" && new Date(c.endsAt).getTime() - Date.now() < DAY_MS;
+  if (!endingToday && !listedToday) return null;
+
+  return (
+    <div className="absolute left-2 top-2 flex flex-col items-start gap-1.5">
+      {endingToday && (
+        <span className="flex items-center gap-1 rounded-none bg-red-500 px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-wide text-white">
+          <TimerReset className="h-2.5 w-2.5" strokeWidth={2.4} />
+          Ending today
+        </span>
+      )}
+      {listedToday && (
+        <span className="glass-dark flex items-center gap-1 rounded-none px-2 py-0.5 text-[0.58rem] font-semibold uppercase tracking-wide">
+          <Sparkles className="h-2.5 w-2.5 text-mint" strokeWidth={2.4} />
+          Listed today
+        </span>
+      )}
+    </div>
+  );
+}
 
 /**
  * Real, database-backed competitions from approved third-party sellers —
@@ -32,7 +58,10 @@ export function SellerCompetitionsStrip() {
           return (
             <Link key={c.id} to={`/c/${c.id}`} className="press card overflow-hidden">
               {c.product.images[0] && (
-                <img src={c.product.images[0].url} alt="" className="aspect-square w-full object-cover" />
+                <div className="relative aspect-square w-full overflow-hidden bg-white/[0.04]">
+                  <img src={c.product.images[0].url} alt="" className="h-full w-full object-cover" />
+                  <TodayTags c={c} />
+                </div>
               )}
               <div className="p-3">
                 <p className="flex items-center gap-1 text-[0.6rem] uppercase tracking-[0.16em] text-muted">
