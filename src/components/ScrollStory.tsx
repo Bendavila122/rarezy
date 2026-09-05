@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Link } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import { PhoneMockup } from "@/components/PhoneMockup";
 import { STOPS, type Line } from "@/components/tourStops";
 
@@ -94,12 +94,20 @@ export function ScrollStory() {
                 <StopLines lines={stop.lines} />
               </div>
               {i === 0 && (
-                <Link
-                  to="/browse"
-                  className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
+                <button
+                  type="button"
+                  onClick={() => panelRefs.current[1]?.scrollIntoView({ behavior: "smooth" })}
+                  aria-label="Scroll to see more"
+                  className="press mt-7 flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06]"
                 >
-                  Browse competitions
-                </Link>
+                  <motion.span
+                    animate={{ y: [0, 8, 0] }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                    className="flex"
+                  >
+                    <ChevronDown className="h-4 w-4 text-white/40" strokeWidth={2} />
+                  </motion.span>
+                </button>
               )}
               {i === STOPS.length - 1 && (
                 <button
