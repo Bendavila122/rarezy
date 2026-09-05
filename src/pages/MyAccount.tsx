@@ -40,6 +40,12 @@ const STATUS_LABEL: Record<CompetitionListing["status"], string> = {
 export function MyAccount() {
   const { records, currentUser } = useRarezy();
   const submissions = records.filter((r): r is Submission => r.kind === "submission");
+  const activeSubmissions = submissions.filter(
+    (s) => s.status === "pending_review" || s.status === "offer_ready" || s.status === "visit_scheduled",
+  );
+  const historySubmissions = submissions
+    .filter((s) => !activeSubmissions.includes(s))
+    .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
   const mine = records.filter(
     (r): r is CashDeal | CompetitionListing =>
       (r.kind === "cash" || r.kind === "competition") && (r.kind === "cash" || !r.isHouseStock),
@@ -85,11 +91,11 @@ export function MyAccount() {
         </Link>
       </div>
 
-      {submissions.length > 0 && (
+      {activeSubmissions.length > 0 && (
         <>
           <h2 className="mt-12 text-[1.3rem] font-semibold tracking-[-0.02em]">My submissions</h2>
           <div className="mt-6 flex flex-col gap-4">
-            {submissions.map((s, i) => (
+            {activeSubmissions.map((s, i) => (
               <motion.div
                 key={s.id}
                 initial={{ opacity: 0, y: 12 }}
@@ -133,6 +139,25 @@ export function MyAccount() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {historySubmissions.length > 0 && (
+        <>
+          <h2 className="mt-12 text-[1.3rem] font-semibold tracking-[-0.02em]">Offer history</h2>
+          <div className="mt-6 flex flex-col gap-4">
+            {historySubmissions.map((s, i) => (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="card p-6 opacity-80"
+              >
+                <SubmissionCard submission={s} />
+              </motion.div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

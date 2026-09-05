@@ -154,8 +154,10 @@ export type Valuation = {
 export function estimateValue(item: Pick<LuxuryItem, "brand" | "purchasePrice" | "condition">): Valuation {
   const base = item.purchasePrice * prestigeOf(item.brand) * conditionMultiplier(item.condition);
   return {
-    cashLow: roundTo(base * 1.006),
-    cashHigh: roundTo(base * 1.18),
+    // Cash offer range kept tight — about a 10% spread — so it reads as a
+    // real, confident valuation rather than a wide guess.
+    cashLow: roundTo(base * 1.0),
+    cashHigh: roundTo(base * 1.1),
     ceiling: roundTo(base * 1.3),
     suggestedMinimum: roundTo(base * 1.18),
   };
