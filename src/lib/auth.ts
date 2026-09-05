@@ -30,7 +30,7 @@ async function hydrateFromUserId(userId: string, fallbackUsername: string) {
   // themselves, so trusting whatever the row says here is safe.
   const { data: profile } = await supabase!
     .from("profiles")
-    .select("username, is_admin")
+    .select("username, is_admin, avatar_url")
     .eq("id", userId)
     .maybeSingle();
   // Owning a `sellers` row at all (any application status) is what routes
@@ -41,8 +41,21 @@ async function hydrateFromUserId(userId: string, fallbackUsername: string) {
     isAdmin: profile?.is_admin ?? false,
     isSeller: !!sellerRow,
     id: userId,
+    avatarUrl: profile?.avatar_url ?? undefined,
   });
 }
+
+/** Everything the account settings page can show/edit, beyond what's already in `AccountUser`. */
+export type ProfileDetails = {
+  email: string;
+  phone: string | null;
+  dateOfBirth: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  postcode: string | null;
+  country: string | null;
+};
 
 export const auth = {
   async sendVerificationCode(email: string) {
@@ -143,5 +156,90 @@ export const auth = {
   async signOut() {
     if (!AUTH_DEMO_MODE) await supabase!.auth.signOut();
     rarezy.logOut();
+  },
+
+  async fetchProfileDetails(userId: string): Promise<ProfileDetails | null> {
+    if (AUTH_DEMO_MODE) return null;
+    const { data, error } = await supabase!
+      .from("profiles")
+      .select("email, phone, date_of_birth, address_line1, address_line2, city, postcode, country")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
+    return {
+      email: data.email,
+      phone: data.phone,
+      dateOfBirth: data.date_of_birth,
+      addressLine1: data.address_line1,
+      addressLine2: data.address_line2,
+      city: data.city,
+      postcode: data.postcode,
+      country: data.country,
+    };
+  },
+
+  /** Username, phone, date of birth and address — everything editable that isn't email or password (those go through Supabase Auth directly, below). */
+  async updateProfileFields(
+    userId: string,
+    fields: {
+      username?: string;
+      phone?: string | null;
+      dateOfBirth?: string | null;
+      addressLine1?: string | null;
+      addressLine2?: string | null;
+      city?: string | null;
+      postcode?: string | null;
+      country?: string | null;
+    },
+  ) {
+    if (AUTH_DEMO_MODE) {
+      if (fields.username) rarezy.updateCurrentUser({ username: fields.username });
+      return;
+    }
+    const patch: Record<string, unknown> = {};
+    if (fields.username !== undefined) patch.username = fields.username;
+    if (fields.phone !== undefined) patch.phone = fields.phone;
+    if (fields.dateOfBirth !== undefined) patch.date_of_birth = fields.dateOfBirth;
+    if (fields.addressLine1 !== undefined) patch.address_line1 = fields.addressLine1;
+    if (fields.addressLine2 !== undefined) patch.address_line2 = fields.addressLine2;
+    if (fields.city !== undefined) patch.city = fields.city;
+    if (fields.postcode !== undefined) patch.postcode = fields.postcode;
+    if (fields.country !== undefined) patch.country = fields.country;
+
+    const { error } = await supabase!.from("profiles").update(patch).eq("id", userId);
+    if (error) throw error;
+    if (fields.username) rarezy.updateCurrentUser({ username: fields.username });
+  },
+
+  /** Uploads a new profile picture, replacing any previous one at the same path, and saves the public URL onto the profile row. */
+  async uploadAvatar(userId: string, file: File) {
+    if (AUTH_DEMO_MODE) return null;
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${userId}/avatar.${ext}`;
+    const { error: uploadError } = await supabase!.storage
+      .from("avatars")
+      .upload(path, file, { upsert: true, cacheControl: "3600" });
+    if (uploadError) throw uploadError;
+    const { data: publicUrl } = supabase!.storage.from("avatars").getPublicUrl(path);
+    // Cache-bust so the new picture shows immediately — same path, new content.
+    const url = `${publicUrl.publicUrl}?v=${Date.now()}`;
+    const { error: updateError } = await supabase!.from("profiles").update({ avatar_url: url }).eq("id", userId);
+    if (updateError) throw updateError;
+    rarezy.updateCurrentUser({ avatarUrl: url });
+    return url;
+  },
+
+  /** Starts Supabase's double-opt-in email change — the address only actually changes once the confirmation link is clicked, at which point `profiles.email` syncs automatically (see the `sync_profile_email` trigger). */
+  async updateEmail(newEmail: string) {
+    if (AUTH_DEMO_MODE) return;
+    const { error } = await supabase!.auth.updateUser({ email: newEmail });
+    if (error) throw error;
+  },
+
+  async updatePassword(newPassword: string) {
+    if (AUTH_DEMO_MODE) return;
+    const { error } = await supabase!.auth.updateUser({ password: newPassword });
+    if (error) throw error;
   },
 };

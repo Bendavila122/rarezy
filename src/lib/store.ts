@@ -112,6 +112,7 @@ export type AccountUser = {
   /** True once this account owns a row in the real `sellers` table (any application status) — drives the separate seller-only nav/dashboard, distinct from a shopper who's just used the instant-cash `/sell` route. */
   isSeller?: boolean | undefined;
   id?: string | undefined;
+  avatarUrl?: string | undefined;
 };
 
 type State = {
@@ -1700,7 +1701,7 @@ export const rarezy = {
    * it from anything the client typed, or any signed-in user could grant
    * themselves the admin dashboard.
    */
-  signUp(username: string, opts?: { isAdmin?: boolean; isSeller?: boolean; id?: string }) {
+  signUp(username: string, opts?: { isAdmin?: boolean; isSeller?: boolean; id?: string; avatarUrl?: string }) {
     const trimmed = username.trim();
     if (!trimmed) return;
     set({
@@ -1709,6 +1710,7 @@ export const rarezy = {
         isAdmin: opts?.isAdmin ?? false,
         isSeller: opts?.isSeller ?? false,
         id: opts?.id,
+        avatarUrl: opts?.avatarUrl,
       },
     });
   },
@@ -1721,6 +1723,12 @@ export const rarezy = {
   setIsSeller(isSeller: boolean) {
     if (!state.currentUser) return;
     set({ currentUser: { ...state.currentUser, isSeller } });
+  },
+
+  /** Reflects a settings-page edit (username, avatar) into the signed-in session immediately, without needing a fresh login to see it. */
+  updateCurrentUser(patch: Partial<Pick<AccountUser, "username" | "avatarUrl">>) {
+    if (!state.currentUser) return;
+    set({ currentUser: { ...state.currentUser, ...patch } });
   },
 
   /** Kicks off the review pipeline — nothing is paid or listed until an admin approves it and a rep visit confirms it in person. */

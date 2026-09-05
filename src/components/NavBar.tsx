@@ -149,7 +149,7 @@ export function NavBar() {
 }
 
 function ShopperNavBar() {
-  const { basket, records } = useRarezy();
+  const { basket, records, currentUser } = useRarezy();
   const basketCount = basket.reduce((sum, b) => sum + b.qty, 0);
   const playableCount = records.filter(
     (r) => r.kind === "competition" && r.attemptsRemaining > 0,
@@ -213,7 +213,11 @@ function ShopperNavBar() {
               aria-label="Account"
               className="relative z-10 ml-1 flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/15 bg-white/10 text-white/60 transition-transform duration-200 ease-out hover:scale-110"
             >
-              <User className="h-4 w-4" strokeWidth={2} />
+              {currentUser?.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-4 w-4" strokeWidth={2} />
+              )}
             </NavLink>
           </div>
         </nav>

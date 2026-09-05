@@ -72,8 +72,20 @@ export function MyAccount() {
           Log out
         </button>
       </div>
-      <p className="mt-1 text-[0.85rem] text-muted">Signed in as {currentUser.username}</p>
+      <div className="mt-4 flex items-center gap-3">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/[0.06] text-[0.95rem] font-semibold tracking-tight text-foreground">
+          {currentUser.avatarUrl ? (
+            <img src={currentUser.avatarUrl} alt="" className="h-full w-full object-cover" />
+          ) : (
+            currentUser.username.slice(0, 1).toUpperCase()
+          )}
+        </div>
+        <p className="text-[0.85rem] text-muted">Signed in as {currentUser.username}</p>
+      </div>
       <div className="mt-5 flex flex-wrap gap-2">
+        <Link to="/account/settings" className={quickLinkCls}>
+          Settings
+        </Link>
         <Link to="/entries" className={quickLinkCls}>
           My entries
         </Link>

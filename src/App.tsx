@@ -24,6 +24,7 @@ import { Partners } from "@/pages/Partners";
 import { Authenticate } from "@/pages/Authenticate";
 import { Sell } from "@/pages/Sell";
 import { MyAccount } from "@/pages/MyAccount";
+import { Settings } from "@/pages/Settings";
 import { Admin } from "@/pages/Admin";
 import { Certificate } from "@/pages/Certificate";
 import { SellerDashboard } from "@/pages/SellerDashboard";
@@ -76,6 +77,7 @@ export function App() {
           <Route path="/authenticate" element={<Authenticate />} />
           <Route path="/sell" element={<Sell />} />
           <Route path="/account" element={<MyAccount />} />
+          <Route path="/account/settings" element={<Settings />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/certificate/:listingId" element={<Certificate />} />
           <Route path="/seller" element={<SellerDashboard />} />
