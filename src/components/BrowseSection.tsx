@@ -9,7 +9,6 @@ import { CATEGORY_LABELS, FilterDrawer } from "@/components/FilterDrawer";
 import { activeFilterCount, EMPTY_FILTERS, matchesFilters, SORTERS, SORTS, type SortId, type WatchFilters } from "@/lib/filters";
 import { browseState } from "@/lib/browseState";
 import { Reveal } from "@/components/Reveal";
-import { SellerCompetitionsStrip } from "@/components/SellerCompetitionsStrip";
 
 type Chip = { key: string; label: string; remove: () => void };
 
@@ -152,8 +151,6 @@ export function BrowseSection() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-6 pt-10">
-      <SellerCompetitionsStrip />
-
       <Reveal amount={0.5}>
         <h1 className="text-[1.4rem] font-semibold tracking-[-0.02em]">All competitions</h1>
         <p className="mt-1 text-[0.78rem] text-muted">
