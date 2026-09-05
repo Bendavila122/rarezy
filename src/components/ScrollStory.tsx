@@ -6,6 +6,21 @@ import { STOPS, type Line } from "@/components/tourStops";
 
 const SCREEN_CYCLE_MS = 4200;
 
+/** A plain "keep scrolling" cue — a line into a chevron, no animation or circular chip — reused under both the buyers stop (scrolls to the marketplace stop) and the marketplace stop's own CTA (scrolls to the game section). */
+function ScrollCue({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Scroll to see more"
+      className="press mt-5 flex flex-col items-center gap-1.5 self-center text-white/80 hover:text-white"
+    >
+      <span className="h-6 w-px bg-white/60" />
+      <ChevronDown className="h-4 w-4" strokeWidth={2.2} />
+    </button>
+  );
+}
+
 /** Same "Instagram lyric" copy and styles as the About tour used to show — replayed via whileInView (once: false) each time a stop scrolls into view, since every stop stays mounted in the DOM (this is real page scroll, not a simulation). */
 function StopLines({ lines }: { lines: Line[] }) {
   return (
@@ -94,24 +109,21 @@ export function ScrollStory() {
                 <StopLines lines={stop.lines} />
               </div>
               {i === 0 && (
-                <button
-                  type="button"
-                  onClick={() => panelRefs.current[1]?.scrollIntoView({ behavior: "smooth" })}
-                  aria-label="Scroll to see more"
-                  className="press mt-7 flex flex-col items-center gap-1.5 self-center text-white/60 hover:text-white/90"
-                >
-                  <span className="h-6 w-px bg-white/30" />
-                  <ChevronDown className="h-4 w-4" strokeWidth={2} />
-                </button>
+                <ScrollCue onClick={() => panelRefs.current[1]?.scrollIntoView({ behavior: "smooth" })} />
               )}
               {i === STOPS.length - 1 && (
-                <button
-                  type="button"
-                  onClick={() => document.getElementById("game-section")?.scrollIntoView({ behavior: "smooth" })}
-                  className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
-                >
-                  Try out the game
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("game-section")?.scrollIntoView({ behavior: "smooth" })}
+                    className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
+                  >
+                    Try out the game
+                  </button>
+                  <ScrollCue
+                    onClick={() => document.getElementById("game-section")?.scrollIntoView({ behavior: "smooth" })}
+                  />
+                </>
               )}
             </div>
           ))}
