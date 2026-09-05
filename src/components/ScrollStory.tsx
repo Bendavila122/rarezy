@@ -87,7 +87,7 @@ export function ScrollStory() {
               ref={(el) => {
                 panelRefs.current[i] = el;
               }}
-              className="flex min-h-[calc(100vh-4rem)] snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
+              className="flex min-h-[calc(100vh-4rem)] w-fit snap-start scroll-mt-16 flex-col justify-center pl-4 sm:pl-12"
             >
               <p className="text-[0.72rem] font-bold uppercase tracking-[0.32em] text-mint">{stop.eyebrow}</p>
               <div className="mt-5">
@@ -98,15 +98,10 @@ export function ScrollStory() {
                   type="button"
                   onClick={() => panelRefs.current[1]?.scrollIntoView({ behavior: "smooth" })}
                   aria-label="Scroll to see more"
-                  className="press mt-7 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full bg-white/20"
+                  className="press mt-7 flex flex-col items-center gap-1.5 self-center text-white/60 hover:text-white/90"
                 >
-                  <motion.span
-                    animate={{ y: [0, 8, 0] }}
-                    transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-                    className="flex"
-                  >
-                    <ChevronDown className="h-4 w-4 text-white/80" strokeWidth={2} />
-                  </motion.span>
+                  <span className="h-6 w-px bg-white/30" />
+                  <ChevronDown className="h-4 w-4" strokeWidth={2} />
                 </button>
               )}
               {i === STOPS.length - 1 && (

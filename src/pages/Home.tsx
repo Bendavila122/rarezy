@@ -13,7 +13,6 @@ import { EndingSoonSection } from "@/components/EndingSoonSection";
 import { HowToWinSection } from "@/components/HowToWinSection";
 import { LiveStatsBand } from "@/components/LiveStatsBand";
 import { ReviewsSection } from "@/components/ReviewsSection";
-import { TravelAdsSection } from "@/components/TravelAdsSection";
 
 export function Home() {
   const { currentUser } = useRarezy();
@@ -57,7 +56,6 @@ export function Home() {
       <LiveStatsBand />
       <ReviewsSection />
       <FaqSection />
-      <TravelAdsSection />
 
       {playingGame &&
         createPortal(
