@@ -13,6 +13,11 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
   --font-display:
     "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  /* Used sparingly for headline variety (e.g. the "for Businesses" page's
+     cycling hero title) rather than site-wide body text. */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-grotesk: "Space Grotesk", var(--font-sans);
+  --font-mono: "Space Mono", "SF Mono", ui-monospace, monospace;
 }
 
 html,

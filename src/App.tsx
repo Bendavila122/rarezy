@@ -12,6 +12,7 @@ import { AdminGate } from "@/components/AdminGate";
 import { SellerGate } from "@/components/SellerGate";
 import { useRarezy } from "@/lib/store";
 import { Home } from "@/pages/Home";
+import { ForBusiness } from "@/pages/ForBusiness";
 import { Browse } from "@/pages/Browse";
 import { ItemDetail } from "@/pages/ItemDetail";
 import { Watchlist } from "@/pages/Watchlist";
@@ -85,6 +86,7 @@ export function App() {
           <Route path="/seller/marketing/:competitionId" element={<MarketingCentre />} />
           <Route path="/payments" element={<Payments />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/for-business" element={<ForBusiness />} />
           <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />

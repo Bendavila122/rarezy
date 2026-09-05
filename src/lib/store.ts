@@ -8,6 +8,9 @@ import {
   type LuxuryItem,
   type Valuation,
 } from "./marketplace";
+import { GAMES, DEFAULT_GAME_ID, type GameId } from "./games";
+
+export type { GameId };
 
 export type CashDeal = {
   id: string;
@@ -44,6 +47,8 @@ export type CompetitionListing = {
   deadlineAt: string;
   createdAt: string;
   status: CompetitionStatus;
+  /** Which skill game decides this listing — set once, at creation, and fixed for its whole lifetime, however it's later relisted or extended. */
+  gameId: GameId;
   certificateId?: string | undefined;
   /** The full in-person inspection writeup — set once an admin publishes it, which is also what flips a consigned item from "authenticating" to "live". */
   analysisReport?: AnalysisReport | undefined;
@@ -90,6 +95,8 @@ export type Submission = {
   proposedEntryFee?: number | undefined;
   proposedMinimumPrice?: number | undefined;
   proposedDeadlineDays?: number | undefined;
+  /** Which game the seller picked for the ticketed option — carried through to the listing itself once the visit confirms it. */
+  proposedGameId?: GameId | undefined;
   visit?: { scheduledAt: string; repName: string } | undefined;
   /** The `CashDeal` or `CompetitionListing` this became, once the visit resolves it. */
   resultRecordId?: string | undefined;
@@ -121,6 +128,12 @@ const now = () => new Date().toISOString();
 const raisedOf = (c: CompetitionListing) => c.entriesSold * c.entryFee;
 const topOf = (board: LeaderboardEntry[]) => board[0]?.name ?? randomPlayerName();
 
+/** Gives seed listings a real spread of games rather than defaulting every one to the same catalog entry. */
+let seedGameCounter = 0;
+function nextSeedGameId(): GameId {
+  return GAMES[seedGameCounter++ % GAMES.length]!.id;
+}
+
 function seedListing(
   item: LuxuryItem,
   config: {
@@ -132,6 +145,7 @@ function seedListing(
     daysElapsed: number;
     leaderboard: LeaderboardEntry[];
     isHouseStock?: boolean;
+    gameId?: GameId;
   },
 ): CompetitionListing {
   const offer = estimateValue(item);
@@ -153,6 +167,7 @@ function seedListing(
     deadlineAt,
     createdAt,
     status: "live",
+    gameId: config.gameId ?? nextSeedGameId(),
     certificateId: certId(),
     myEntries: 0,
     attemptsRemaining: 0,
@@ -252,6 +267,7 @@ function closedListing(
     deadlineAt,
     createdAt,
     status: "closed",
+    gameId: nextSeedGameId(),
     certificateId: certId(),
     myEntries: 0,
     attemptsRemaining: 0,
@@ -1536,7 +1552,7 @@ function seedRecords(): SellRecord[] {
   return [...listings, ...otherCategoryListings, ...wonListings];
 }
 
-const STORAGE_KEY = "rarezy.state.v15";
+const STORAGE_KEY = "rarezy.state.v16";
 
 function load(): State {
   try {
@@ -1637,7 +1653,7 @@ function buildCashDeal(item: LuxuryItem, offer: Valuation, amount: number): Cash
 function buildConsignmentListing(
   item: LuxuryItem,
   offer: Valuation,
-  config: { entryFee: number; minimumPrice: number; deadlineDays: number },
+  config: { entryFee: number; minimumPrice: number; deadlineDays: number; gameId: GameId },
 ): CompetitionListing {
   const entriesTotal = suggestEntryCount(offer.ceiling, config.entryFee);
   const createdAt = now();
@@ -1655,6 +1671,7 @@ function buildConsignmentListing(
     deadlineAt: new Date(Date.now() + config.deadlineDays * 86_400_000).toISOString(),
     createdAt,
     status: "authenticating",
+    gameId: config.gameId,
     myEntries: 0,
     attemptsRemaining: 0,
     leaderboard: [],
@@ -1756,7 +1773,7 @@ export const rarezy = {
   chooseSubmissionOffer(
     submissionId: string,
     choice: "cash" | "consignment",
-    ticketTerms?: { entryFee: number; minimumPrice: number; deadlineDays: number },
+    ticketTerms?: { entryFee: number; minimumPrice: number; deadlineDays: number; gameId: GameId },
   ) {
     const s = requireSubmission(submissionId);
     if (!s || s.status !== "offer_ready" || !s.offer) return;
@@ -1768,6 +1785,7 @@ export const rarezy = {
       proposedEntryFee: choice === "consignment" ? ticketTerms?.entryFee : undefined,
       proposedMinimumPrice: choice === "consignment" ? ticketTerms?.minimumPrice : undefined,
       proposedDeadlineDays: choice === "consignment" ? ticketTerms?.deadlineDays : undefined,
+      proposedGameId: choice === "consignment" ? ticketTerms?.gameId : undefined,
       visit: { scheduledAt, repName },
       history: [
         ...s.history,
@@ -1833,6 +1851,7 @@ export const rarezy = {
       entryFee: opts.finalEntryFee ?? s.proposedEntryFee ?? 2,
       minimumPrice: opts.finalMinimumPrice ?? s.proposedMinimumPrice ?? s.offer.suggestedMinimum,
       deadlineDays: opts.finalDeadlineDays ?? s.proposedDeadlineDays ?? 30,
+      gameId: s.proposedGameId ?? DEFAULT_GAME_ID,
     });
     set({ records: [listing, ...state.records] });
     updateSubmission(submissionId, {
@@ -1942,22 +1961,27 @@ export const rarezy = {
   },
 
   /**
-   * One play of the skill game, spending one owed attempt. Every merge
-   * gain is a power of two of 4 or more (two 2s make a 4, two 4s make an 8,
-   * and so on), so a legitimate score is always a non-negative multiple of
-   * 4 — real gameplay can never produce anything else. This is a client-only
-   * app with no backend to validate moves server-side, so it can't stop a
-   * determined attacker from calling this directly, but rejecting scores
-   * that couldn't come from real merges at all closes off the most trivial
-   * tampering (typing an arbitrary number into the console) for free.
+   * One play of the skill game, spending one owed attempt. This is a
+   * client-only app with no backend to validate moves server-side, so it
+   * can't stop a determined attacker from calling this directly — but each
+   * game has its own cheap, real sanity check that closes off the most
+   * trivial tampering (typing an arbitrary number into the console) for
+   * free. Rarezy Merge: every merge gain is a power of two of 4 or more, so
+   * a legitimate score is always a non-negative multiple of 4. Rarezy
+   * Reflex: score isn't quantised the same way, so it's just checked
+   * against the highest total realistically reachable in one 45-second run.
    */
   recordScore(listingId: string, score: number) {
-    if (!Number.isInteger(score) || score < 0 || score % 4 !== 0) return;
-
     const c = state.records.find((r) => r.id === listingId && r.kind === "competition") as
       | CompetitionListing
       | undefined;
     if (!c || c.attemptsRemaining < 1) return;
+    if (!Number.isInteger(score) || score < 0) return;
+    if (c.gameId === "merge" && score % 4 !== 0) return;
+    if (c.gameId === "reflex" && score > 30_000) return;
+    if (c.gameId === "precision" && score > 120_000) return;
+    if (c.gameId === "memory" && score > 900) return;
+    if (c.gameId === "hunt" && score > 20_000) return;
 
     const best = Math.max(c.myBestScore ?? 0, score);
     const others = c.leaderboard.filter((e) => !e.isYou);

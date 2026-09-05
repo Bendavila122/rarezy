@@ -2,14 +2,20 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown } from "lucide-react";
 
-/** A running "keep scrolling" cue that stays up through every section — fades out only once the visitor reaches the true bottom of the page. */
+/**
+ * A "keep scrolling" cue for the snap-scrolling hero only (the buyers and
+ * marketplace stops) — it fades out as soon as the visitor scrolls past
+ * that section into the rest of the ordinary, non-snapping page, rather
+ * than following them all the way down.
+ */
 export function ScrollHint() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const onScroll = () => {
-      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 40;
-      setVisible(!atBottom);
+      const story = document.getElementById("scroll-story");
+      const bottom = story ? story.offsetTop + story.offsetHeight : 0;
+      setVisible(window.scrollY < bottom - window.innerHeight * 0.5);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

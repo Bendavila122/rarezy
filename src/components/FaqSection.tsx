@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { FAQS } from "@/lib/faqs";
+import { FAQS, type Faq } from "@/lib/faqs";
 import { Reveal } from "@/components/Reveal";
 
 /** Reveals `text` one character at a time while `enabled`, resetting whenever `text` itself changes. */
@@ -28,22 +28,24 @@ function useTypewriter(text: string, enabled: boolean, speed: number) {
  * prev/next arrows (it "is" a slide-through, it just doesn't announce
  * itself as one with a heading or a progress bar).
  */
-export function FaqSection() {
+export function FaqSection({ faqs = FAQS }: { faqs?: Faq[] }) {
   const [index, setIndex] = useState(0);
-  const faq = FAQS[index]!;
+  const faq = faqs[index % faqs.length]!;
 
   const q = useTypewriter(faq.q, true, 52);
   const a = useTypewriter(faq.a, q.done, 11);
 
-  const go = (next: number) => setIndex((next + FAQS.length) % FAQS.length);
+  const go = (next: number) => setIndex((next + faqs.length) % faqs.length);
 
   // Once the answer finishes typing, move on to the next question by itself
   // after a beat — the arrows are just there for whoever doesn't want to wait.
+  // Uses a functional update rather than closing over `index`/`go` so the
+  // effect's own deps don't need to include either.
   useEffect(() => {
     if (!a.done) return;
-    const id = setTimeout(() => go(index + 1), 5200);
+    const id = setTimeout(() => setIndex((i) => (i + 1) % faqs.length), 5200);
     return () => clearTimeout(id);
-  }, [a.done, index]);
+  }, [a.done, faqs.length]);
 
   return (
     <div className="relative z-10 mx-auto max-w-2xl px-6 py-16">
@@ -82,7 +84,7 @@ export function FaqSection() {
             <ChevronLeft className="h-4 w-4" strokeWidth={2.2} />
           </button>
           <p className="tabular w-10 text-center text-[0.78rem] text-muted">
-            {index + 1}/{FAQS.length}
+            {index + 1}/{faqs.length}
           </p>
           <button
             type="button"

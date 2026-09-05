@@ -106,6 +106,12 @@ function GuestNavBar() {
         </NavLink>
         <div className="flex items-center gap-2">
           <NavLink
+            to="/for-business"
+            className="press hidden h-9 items-center px-4 text-[0.85rem] font-medium tracking-tight text-white/75 hover:text-mint sm:flex"
+          >
+            Rarezy for Businesses
+          </NavLink>
+          <NavLink
             to="/login"
             className="press flex h-9 items-center px-4 text-[0.85rem] font-medium tracking-tight text-white/75 hover:text-mint"
           >
@@ -113,6 +119,7 @@ function GuestNavBar() {
           </NavLink>
           <NavLink
             to="/signup"
+            state={{ accountType: "competitor" }}
             className="press flex h-9 items-center rounded-full bg-mint px-4 text-[0.85rem] font-semibold tracking-tight text-brand-deep"
           >
             Sign up

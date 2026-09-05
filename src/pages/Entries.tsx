@@ -4,7 +4,8 @@ import { useState } from "react";
 import { AlertTriangle, Ticket, Trophy } from "lucide-react";
 import { titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy, type CompetitionListing } from "@/lib/store";
-import { SkillGame } from "@/components/SkillGame";
+import { gameById } from "@/lib/games";
+import { gameModule } from "@/components/GameRegistry";
 import { FullscreenGame } from "@/components/FullscreenGame";
 import { LeaderboardView } from "@/components/LeaderboardView";
 import { AccountRequired } from "@/components/AccountRequired";
@@ -91,6 +92,7 @@ function EntryCard({ listing: c }: { listing: CompetitionListing }) {
               {c.myEntries} ticket{c.myEntries > 1 ? "s" : ""} bought
               {c.myBestScore !== undefined && <> · best score {c.myBestScore}</>}
             </p>
+            <p className="mt-0.5 text-[0.68rem] text-muted/70">Game: {gameById(c.gameId).name}</p>
           </div>
         </div>
 
@@ -174,11 +176,15 @@ function EntryCard({ listing: c }: { listing: CompetitionListing }) {
         )}
       </AnimatePresence>
 
-      {playing && (
-        <FullscreenGame title={`Playing for the ${c.item.brand} ${c.item.model}`}>
-          <SkillGame onComplete={finishPlay} />
-        </FullscreenGame>
-      )}
+      {playing &&
+        (() => {
+          const { Play } = gameModule(c.gameId);
+          return (
+            <FullscreenGame title={`Playing for the ${c.item.brand} ${c.item.model}`}>
+              <Play onComplete={finishPlay} />
+            </FullscreenGame>
+          );
+        })()}
 
       {!playing && !confirming && (
         <div className="mt-4 flex flex-wrap items-center gap-3">

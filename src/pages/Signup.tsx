@@ -60,10 +60,15 @@ export function Signup() {
   const location = useLocation();
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const state = location.state as { reason?: string; next?: string } | null;
+  const state = location.state as { reason?: string; next?: string; accountType?: AccountType } | null;
+  // A caller that already knows which account is wanted — the home nav's
+  // "Sign up" (always competitor) or the business page's "Apply to become a
+  // seller" (always dealer) — passes it via router state, skipping straight
+  // past the type-picker step instead of asking again.
+  const preselectedType = state?.accountType ?? null;
 
-  const [step, setStep] = useState(0);
-  const [accountType, setAccountType] = useState<AccountType | null>(null);
+  const [step, setStep] = useState(preselectedType ? 1 : 0);
+  const [accountType, setAccountType] = useState<AccountType | null>(preselectedType);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");

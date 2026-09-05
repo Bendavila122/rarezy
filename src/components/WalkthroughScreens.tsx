@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { Check, Search, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { SIZE } from "@/lib/game2048";
+import { useElementSize } from "@/lib/useElementSize";
+import { useMergeSim } from "@/lib/useMergeSim";
 import { themeFor } from "@/lib/watchTiles";
 
 export const gbp = (n: number) => `£${n.toLocaleString("en-GB")}`;
@@ -67,38 +70,50 @@ export function BrowseScreen() {
   );
 }
 
+const PLAY_GAP_PX = 4;
+const PLAY_PAD_PX = 6;
+const PLAY_TILE_TRANSITION = { type: "tween", duration: 0.14, ease: [0.22, 1, 0.36, 1] } as const;
+
+/** The real Rarezy Merge engine (via `useMergeSim`), not a hand-staged grid — this shows genuine live gameplay rather than a one-time faked reveal. */
 export function PlayScreen() {
-  const grid = [2, 4, 8, 2, 16, 4, 2, 2, 8];
+  const [boardRef, boardSize] = useElementSize<HTMLDivElement>();
+  const { tiles, score } = useMergeSim();
+  const cellSize = boardSize > 0 ? (boardSize - PLAY_PAD_PX * 2 - PLAY_GAP_PX * (SIZE - 1)) / SIZE : 0;
+  const posFor = (i: number) => PLAY_PAD_PX + i * (cellSize + PLAY_GAP_PX);
+
   return (
     <ScreenChrome>
       <div className="flex items-center justify-between">
         <p className="text-[0.48rem] uppercase tracking-[0.2em] text-white/45">Your move</p>
-        <p className="tabular text-[0.62rem] font-bold text-white">
-          <CountUp to={640} />
-        </p>
+        <p className="tabular text-[0.62rem] font-bold text-white">{score}</p>
       </div>
-      <div className="mt-2 grid grid-cols-3 gap-1 rounded-lg bg-white/[0.04] p-1.5">
-        {grid.map((v, i) => {
-          const theme = themeFor(v);
-          return (
-            <motion.div
-              key={i}
-              initial={{ scale: 0.4, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: i * 0.05, type: "spring", stiffness: 300, damping: 18 }}
-              className="flex aspect-square items-center justify-center rounded-md"
-              style={{ background: theme.bg }}
-            >
-              {theme.logo ? (
-                <div className="flex h-[62%] w-[72%] items-center justify-center rounded-sm bg-white p-[2px]">
-                  <img src={theme.logo} alt="" className="max-h-full max-w-full object-contain" />
-                </div>
-              ) : (
-                <Sparkles className="h-2.5 w-2.5" style={{ color: theme.badge }} />
-              )}
-            </motion.div>
-          );
-        })}
+      <div ref={boardRef} className="relative mt-2 aspect-square w-full rounded-lg bg-white/[0.04]">
+        {cellSize > 0 && (
+          <AnimatePresence>
+            {tiles.map((t) => {
+              const theme = themeFor(t.value);
+              return (
+                <motion.div
+                  key={t.id}
+                  initial={{ x: posFor(t.c), y: posFor(t.r), scale: 0.4, opacity: 0 }}
+                  animate={{ x: posFor(t.c), y: posFor(t.r), scale: 1, opacity: 1 }}
+                  exit={{ transition: { duration: 0 } }}
+                  transition={PLAY_TILE_TRANSITION}
+                  className="absolute left-0 top-0 flex items-center justify-center rounded-md"
+                  style={{ width: cellSize, height: cellSize, background: theme.bg }}
+                >
+                  {theme.logo ? (
+                    <div className="flex h-[62%] w-[72%] items-center justify-center rounded-sm bg-white p-[2px]">
+                      <img src={theme.logo} alt="" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  ) : (
+                    <Sparkles className="h-2.5 w-2.5" style={{ color: theme.badge }} />
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
       </div>
       <p className="mt-2 text-center text-[0.48rem] text-white/40">Merge your way to the top of the board</p>
     </ScreenChrome>

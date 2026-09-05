@@ -27,13 +27,14 @@ function StopLines({ lines }: { lines: Line[] }) {
 }
 
 /**
- * Three narrative stops (buyers, sellers, marketplace), each a real,
- * full-height block in normal page flow — no scroll-jacking, no JS
- * gating. Scrolling down moves through each stop in turn, exactly like
- * scrolling down any ordinary page (each stop is a `snap-start` point in
- * the home page's shared scroll-snap set); scrolling up reverses through
- * the exact same stops. You can only continue on into "Why Rarezy" once
- * you've scrolled past the last stop (marketplace).
+ * Two narrative stops (buyers, marketplace) — this page is buyer-facing
+ * only, so the old seller stop moved to its own "Rarezy for Businesses"
+ * page. Each stop is a real, full-height block in normal page flow — no
+ * scroll-jacking, no JS gating. Scrolling down moves through each stop in
+ * turn, exactly like scrolling down any ordinary page (each stop is a
+ * `snap-start` point in the home page's shared scroll-snap set); scrolling
+ * up reverses through the exact same stops. You can only continue on into
+ * the game section once you've scrolled past the last stop (marketplace).
  *
  * The one deliberately special thing: on larger screens the phone is
  * `position: sticky` within this whole block, so it stays visually still
@@ -98,14 +99,6 @@ export function ScrollStory() {
                   className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
                 >
                   Browse competitions
-                </Link>
-              )}
-              {i === 1 && (
-                <Link
-                  to="/sell"
-                  className="press mt-7 inline-block w-fit bg-mint px-7 py-3.5 text-[0.85rem] font-bold text-brand-deep"
-                >
-                  Instant valuation
                 </Link>
               )}
               {i === STOPS.length - 1 && (

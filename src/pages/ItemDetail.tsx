@@ -3,6 +3,7 @@ import { useState } from "react";
 import { BadgeCheck, Heart, ShoppingBag, Ticket, X } from "lucide-react";
 import { formatDate, money, titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy } from "@/lib/store";
+import { gameById } from "@/lib/games";
 import { authGate } from "@/lib/authGate";
 import { LeaderboardView } from "@/components/LeaderboardView";
 import { CountdownBar } from "@/components/Countdown";
@@ -167,7 +168,10 @@ export function ItemDetail() {
             {money(c.entryFee)}
           </p>
         </div>
-        {c.status === "live" && <p className="text-[0.78rem] text-muted">Ends {formatDate(c.deadlineAt)}</p>}
+        <div className="text-right">
+          {c.status === "live" && <p className="text-[0.78rem] text-muted">Ends {formatDate(c.deadlineAt)}</p>}
+          <p className="mt-1 text-[0.68rem] text-muted/60">Played on {gameById(c.gameId).name}</p>
+        </div>
       </div>
 
       {c.status === "live" && (
