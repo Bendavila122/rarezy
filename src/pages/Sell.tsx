@@ -106,7 +106,7 @@ export function Sell() {
               What watch are you selling?
             </h1>
             <Link to="/account" className="mt-3 inline-block text-[0.72rem] text-muted underline underline-offset-4">
-              My listings
+              My sell requests
             </Link>
 
             <p className={`${labelCls} mt-9`}>Brand</p>

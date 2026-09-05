@@ -1,17 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  DEADLINE_OPTIONS,
-  estimateValue,
-  formatDate,
-  formatTime,
-  money,
-  roundTo,
-  titleOf,
-  type AnalysisFinding,
-} from "@/lib/marketplace";
-import { rarezy, useRarezy, type CompetitionListing, type SellRecord, type Submission } from "@/lib/store";
-import { CertificateOfAuthenticity } from "@/components/CertificateOfAuthenticity";
+import { estimateValue, formatDate, formatTime, money, roundTo, titleOf } from "@/lib/marketplace";
+import { rarezy, useRarezy, type SellRecord, type Submission } from "@/lib/store";
 import { marketDb, moneyFromPence, type Dispute, type MarketCompetition, type Seller } from "@/lib/db";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
@@ -25,19 +14,8 @@ const SUBMISSION_STATUS_LABEL: Record<Submission["status"], string> = {
   visit_scheduled: "Visit scheduled",
   declined_by_seller: "Declined by seller",
   visit_completed_cash: "Paid out",
-  visit_completed_consignment: "Consigned",
   declined_at_visit: "Declined at visit",
 };
-
-const CHECKLIST_LABELS = [
-  "Case & crystal",
-  "Bezel",
-  "Dial & hands",
-  "Movement & timekeeping",
-  "Bracelet / strap",
-  "Engraving & serial match",
-  "Box & papers",
-];
 
 function StatTile({ label, value }: { label: string; value: number }) {
   return (
@@ -179,25 +157,19 @@ function PersonalSalesTab({
   const submissions = records
     .filter((r): r is Submission => r.kind === "submission")
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-  const listings = records.filter((r): r is CompetitionListing => r.kind === "competition");
 
   const pendingCount = submissions.filter((s) => s.status === "pending_review").length;
   const offerReadyCount = submissions.filter((s) => s.status === "offer_ready").length;
   const visitScheduledCount = submissions.filter((s) => s.status === "visit_scheduled").length;
-  const vaultCount = listings.filter((c) => c.status === "authenticating").length;
 
   const selected = submissions.find((s) => s.id === selectedId) ?? submissions[0] ?? null;
-  const selectedListing = selected?.resultRecordId
-    ? listings.find((c) => c.id === selected.resultRecordId)
-    : undefined;
 
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-3 gap-3">
         <StatTile label="Pending review" value={pendingCount} />
         <StatTile label="Offers awaiting seller" value={offerReadyCount} />
         <StatTile label="Visits scheduled" value={visitScheduledCount} />
-        <StatTile label="Vault — needs certificate" value={vaultCount} />
       </div>
 
       {submissions.length === 0 ? (
@@ -224,7 +196,7 @@ function PersonalSalesTab({
           </div>
 
           <div className="card p-6">
-            {selected && <SubmissionDetail key={selected.id} submission={selected} listing={selectedListing} />}
+            {selected && <SubmissionDetail key={selected.id} submission={selected} />}
           </div>
         </div>
       )}
@@ -232,13 +204,7 @@ function PersonalSalesTab({
   );
 }
 
-function SubmissionDetail({
-  submission: s,
-  listing,
-}: {
-  submission: Submission;
-  listing?: CompetitionListing | undefined;
-}) {
+function SubmissionDetail({ submission: s }: { submission: Submission }) {
   const item = s.item;
   const photos = item.photos ?? [];
 
@@ -273,20 +239,6 @@ function SubmissionDetail({
 
       {s.status === "pending_review" && <ReviewForm submission={s} />}
       {s.status === "visit_scheduled" && <CompleteVisitForm submission={s} />}
-      {s.status === "visit_completed_consignment" && listing && !listing.analysisReport && (
-        <CertificateForm submission={s} listing={listing} />
-      )}
-      {s.status === "visit_completed_consignment" && listing?.analysisReport && (
-        <div className="mt-8">
-          <p className={labelCls}>Certificate published</p>
-          <Link
-            to={`/certificate/${listing.id}`}
-            className="mt-2 inline-block text-[0.8rem] text-brand underline underline-offset-4"
-          >
-            View certificate
-          </Link>
-        </div>
-      )}
 
       {(s.status === "rejected" ||
         s.status === "declined_by_seller" ||
@@ -423,20 +375,12 @@ function ReviewForm({ submission: s }: { submission: Submission }) {
 
 function CompleteVisitForm({ submission: s }: { submission: Submission }) {
   const offer = s.offer!;
-  const [outcome, setOutcome] = useState<"cash" | "consignment" | "declined">(s.sellerChoice ?? "cash");
+  const [outcome, setOutcome] = useState<"cash" | "declined">("cash");
   const [finalCashAmount, setFinalCashAmount] = useState(String(offer.cashHigh));
-  const [finalEntryFee, setFinalEntryFee] = useState(s.proposedEntryFee ?? 2);
-  const [finalMinimumPrice, setFinalMinimumPrice] = useState(
-    String(s.proposedMinimumPrice ?? offer.suggestedMinimum),
-  );
-  const [finalDeadlineDays, setFinalDeadlineDays] = useState(s.proposedDeadlineDays ?? 30);
 
   const complete = () => {
     rarezy.adminCompleteVisit(s.id, outcome, {
       finalCashAmount: Number(finalCashAmount) || undefined,
-      finalEntryFee,
-      finalMinimumPrice: Number(finalMinimumPrice) || undefined,
-      finalDeadlineDays,
     });
   };
 
@@ -445,14 +389,13 @@ function CompleteVisitForm({ submission: s }: { submission: Submission }) {
       <p className={labelCls}>Visit</p>
       {s.visit && (
         <p className="mt-2 text-[0.8rem] text-muted">
-          {s.visit.repName} · {formatDate(s.visit.scheduledAt)} at {formatTime(s.visit.scheduledAt)} · seller
-          leaned toward <span className="text-foreground">{s.sellerChoice}</span>
+          {s.visit.repName} · {formatDate(s.visit.scheduledAt)} at {formatTime(s.visit.scheduledAt)}
         </p>
       )}
 
       <p className={`${labelCls} mt-5`}>Outcome — decided on the spot</p>
       <div className="mt-2 flex flex-wrap gap-2">
-        {(["cash", "consignment", "declined"] as const).map((o) => (
+        {(["cash", "declined"] as const).map((o) => (
           <button
             key={o}
             type="button"
@@ -461,7 +404,7 @@ function CompleteVisitForm({ submission: s }: { submission: Submission }) {
               outcome === o ? "border-brand/40 bg-brand/15 text-brand" : "border-white/10 bg-white/[0.04] text-muted"
             }`}
           >
-            {o === "cash" ? "Instant cash" : o === "consignment" ? "Consign" : "Declined"}
+            {o === "cash" ? "Instant cash" : "Declined"}
           </button>
         ))}
       </div>
@@ -472,49 +415,9 @@ function CompleteVisitForm({ submission: s }: { submission: Submission }) {
         </div>
       )}
 
-      {outcome === "consignment" && (
-        <div className="mt-4 flex flex-col gap-4">
-          <div>
-            <p className={labelCls}>Ticket price</p>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {[1, 2, 5, 10, 25, 50].map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setFinalEntryFee(v)}
-                  className={`rounded-none border px-3.5 py-2 text-[0.76rem] tracking-tight transition-all active:scale-[0.97] ${
-                    finalEntryFee === v ? "border-brand/40 bg-brand/15 text-brand" : "border-white/10 bg-white/[0.04] text-muted"
-                  }`}
-                >
-                  {money(v)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <NumberField label="Minimum accepted" value={finalMinimumPrice} onChange={setFinalMinimumPrice} />
-          <div>
-            <p className={labelCls}>Deadline</p>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {DEADLINE_OPTIONS.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setFinalDeadlineDays(d)}
-                  className={`rounded-none border px-3.5 py-2 text-[0.76rem] tracking-tight transition-all active:scale-[0.97] ${
-                    finalDeadlineDays === d ? "border-brand/40 bg-brand/15 text-brand" : "border-white/10 bg-white/[0.04] text-muted"
-                  }`}
-                >
-                  {d} days
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {outcome === "declined" && (
         <p className="mt-4 text-[0.78rem] text-muted">
-          Rep leaves — nothing paid, nothing listed. Void; the seller would need to resubmit.
+          Rep leaves — nothing paid. Void; the seller would need to resubmit.
         </p>
       )}
 
@@ -525,92 +428,6 @@ function CompleteVisitForm({ submission: s }: { submission: Submission }) {
           className="w-full rounded-none bg-brand py-3 text-[0.85rem] font-medium tracking-tight text-background"
         >
           Complete visit
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function CertificateForm({ submission: s, listing }: { submission: Submission; listing: CompetitionListing }) {
-  const [inspectorName] = useState(() => s.visit?.repName ?? "Rarezy specialist");
-  const [summary, setSummary] = useState(
-    `${titleOf(s.item)} was inspected in person and found consistent with a genuine example — see the checklist below.`,
-  );
-  const [findings, setFindings] = useState<AnalysisFinding[]>(() =>
-    CHECKLIST_LABELS.map((label) => ({ label, note: "No issues found", flagged: false })),
-  );
-
-  const toggleFlag = (label: string) =>
-    setFindings((prev) => prev.map((f) => (f.label === label ? { ...f, flagged: !f.flagged } : f)));
-  const setNote = (label: string, note: string) =>
-    setFindings((prev) => prev.map((f) => (f.label === label ? { ...f, note } : f)));
-
-  const publish = () => rarezy.adminPublishAnalysisReport(listing.id, { inspectorName, summary, findings });
-
-  return (
-    <div className="mt-8 border-t border-white/[0.08] pt-6">
-      <p className={labelCls}>Certificate of authenticity</p>
-
-      <p className={`${labelCls} mt-4`}>Inspector</p>
-      <p className="mt-1.5 text-[0.85rem] text-foreground">{inspectorName}</p>
-
-      <p className={`${labelCls} mt-4`}>Summary</p>
-      <textarea
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-        rows={3}
-        className={`${fieldCls} resize-none`}
-      />
-
-      <p className={`${labelCls} mt-5`}>Inspection checklist</p>
-      <div className="mt-2 flex flex-col gap-2">
-        {findings.map((f) => (
-          <div key={f.label} className="rounded-none border border-white/10 bg-white/[0.03] p-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-[0.8rem] text-foreground">{f.label}</p>
-              <button
-                type="button"
-                onClick={() => toggleFlag(f.label)}
-                className={`shrink-0 rounded-none border px-2.5 py-1 text-[0.68rem] font-medium tracking-tight ${
-                  f.flagged ? "border-red-500/40 bg-red-500/10 text-red-400" : "border-brand/40 bg-brand/10 text-brand"
-                }`}
-              >
-                {f.flagged ? "Flagged" : "Pass"}
-              </button>
-            </div>
-            <input
-              value={f.note}
-              onChange={(e) => setNote(f.label, e.target.value)}
-              className="mt-2 w-full rounded-none border-none bg-transparent text-[0.76rem] text-muted outline-none"
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-8">
-        <p className={labelCls}>Preview</p>
-        <div className="mt-3">
-          <CertificateOfAuthenticity
-            item={s.item}
-            report={{
-              certificateId: "PREVIEW",
-              generatedAt: new Date().toISOString(),
-              inspectorName,
-              summary,
-              findings,
-            }}
-            compact
-          />
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <button
-          type="button"
-          onClick={publish}
-          className="w-full rounded-none bg-brand py-3 text-[0.85rem] font-medium tracking-tight text-background"
-        >
-          Publish certificate — go live
         </button>
       </div>
     </div>

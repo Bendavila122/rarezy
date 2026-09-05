@@ -8,7 +8,7 @@ import {
   type LuxuryItem,
   type Valuation,
 } from "./marketplace";
-import { GAMES, DEFAULT_GAME_ID, type GameId } from "./games";
+import { GAMES, type GameId } from "./games";
 import { DEALERS } from "./dealers";
 
 export type { GameId };
@@ -75,12 +75,13 @@ export type SubmissionStatus =
   | "visit_scheduled"
   | "declined_by_seller"
   | "visit_completed_cash"
-  | "visit_completed_consignment"
   | "declined_at_visit";
 
 /**
  * A sell request working its way through admin review, before it becomes a
- * real `CashDeal` or `CompetitionListing`. Nothing is paid out or listed
+ * real `CashDeal`. Selling on Rarezy is purely an instant-cash route for
+ * players — a submission here can never become a live competition, only a
+ * paid-out cash deal or a declined/rejected dead end. Nothing is paid out
  * until a rep has physically inspected the item at the collection visit.
  */
 export type Submission = {
@@ -91,17 +92,10 @@ export type Submission = {
   status: SubmissionStatus;
   /** Set by the admin on approval or rejection. */
   adminNotes?: string | undefined;
-  /** The admin's rough cash range + ticket ceiling, shown to the seller once approved. */
+  /** The admin's rough cash range, shown to the seller once approved. */
   offer?: Valuation | undefined;
-  /** Which of the two offers the seller chose to proceed with, before the visit confirms it. */
-  sellerChoice?: "cash" | "consignment" | undefined;
-  proposedEntryFee?: number | undefined;
-  proposedMinimumPrice?: number | undefined;
-  proposedDeadlineDays?: number | undefined;
-  /** Which game the seller picked for the ticketed option — carried through to the listing itself once the visit confirms it. */
-  proposedGameId?: GameId | undefined;
   visit?: { scheduledAt: string; repName: string } | undefined;
-  /** The `CashDeal` or `CompetitionListing` this became, once the visit resolves it. */
+  /** The `CashDeal` this became, once the visit resolves it. */
   resultRecordId?: string | undefined;
   history: HistoryEntry[];
 };
@@ -120,7 +114,6 @@ export type AccountUser = {
 
 type State = {
   records: SellRecord[];
-  watchlist: string[];
   basket: BasketEntry[];
   /** Guests can browse everything; this is null until they create a free account. */
   currentUser: AccountUser | null;
@@ -1586,7 +1579,7 @@ function load(): State {
   } catch {
     /* fall through to a fresh seed */
   }
-  return { records: seedRecords(), watchlist: [], basket: [], currentUser: null };
+  return { records: seedRecords(), basket: [], currentUser: null };
 }
 
 let state: State = load();
@@ -1672,35 +1665,6 @@ function buildCashDeal(item: LuxuryItem, offer: Valuation, amount: number): Cash
     offer,
     acceptedAmount: amount,
     acceptedAt: now(),
-  };
-}
-
-function buildConsignmentListing(
-  item: LuxuryItem,
-  offer: Valuation,
-  config: { entryFee: number; minimumPrice: number; deadlineDays: number; gameId: GameId },
-): CompetitionListing {
-  const entriesTotal = suggestEntryCount(offer.ceiling, config.entryFee);
-  const createdAt = now();
-  return {
-    id: id(),
-    kind: "competition",
-    item,
-    offer,
-    entryFee: config.entryFee,
-    entriesTotal,
-    entriesSold: 0,
-    minimumPrice: config.minimumPrice,
-    targetMax: config.entryFee * entriesTotal,
-    deadlineDays: config.deadlineDays,
-    deadlineAt: new Date(Date.now() + config.deadlineDays * 86_400_000).toISOString(),
-    createdAt,
-    status: "authenticating",
-    gameId: config.gameId,
-    myEntries: 0,
-    attemptsRemaining: 0,
-    leaderboard: [],
-    history: [{ at: createdAt, label: "Collected and taken into our safe deposit vault for inspection" }],
   };
 }
 
@@ -1801,31 +1765,16 @@ export const rarezy = {
     });
   },
 
-  /** Seller: picks a direction from their dashboard — this books the collection visit, but nothing is final until it happens. */
-  chooseSubmissionOffer(
-    submissionId: string,
-    choice: "cash" | "consignment",
-    ticketTerms?: { entryFee: number; minimumPrice: number; deadlineDays: number; gameId: GameId },
-  ) {
+  /** Seller: accepts the cash offer from their dashboard — this books the collection visit, but nothing is paid until it happens. */
+  chooseSubmissionOffer(submissionId: string) {
     const s = requireSubmission(submissionId);
     if (!s || s.status !== "offer_ready" || !s.offer) return;
     const scheduledAt = new Date(Date.now() + 2 * 86_400_000 + 10 * 3_600_000).toISOString();
     const repName = randomRepName();
     updateSubmission(submissionId, {
       status: "visit_scheduled",
-      sellerChoice: choice,
-      proposedEntryFee: choice === "consignment" ? ticketTerms?.entryFee : undefined,
-      proposedMinimumPrice: choice === "consignment" ? ticketTerms?.minimumPrice : undefined,
-      proposedDeadlineDays: choice === "consignment" ? ticketTerms?.deadlineDays : undefined,
-      proposedGameId: choice === "consignment" ? ticketTerms?.gameId : undefined,
       visit: { scheduledAt, repName },
-      history: [
-        ...s.history,
-        {
-          at: now(),
-          label: `Chose to proceed with the ${choice === "cash" ? "cash" : "ticketed"} offer — visit booked with ${repName}`,
-        },
-      ],
+      history: [...s.history, { at: now(), label: `Accepted the cash offer — visit booked with ${repName}` }],
     });
   },
 
@@ -1841,21 +1790,13 @@ export const rarezy = {
 
   /**
    * Admin: the one-shot decision made at the visit itself. Cash pays out
-   * immediately; consignment takes the item into the vault as a new listing
-   * (still "authenticating" until the certificate is published); declining
-   * voids the submission — the seller would need to resubmit for a fresh
-   * approval, since a rep is only sent out once.
+   * immediately; declining voids the submission — the seller would need to
+   * resubmit for a fresh approval, since a rep is only sent out once.
+   * Selling on Rarezy is purely an instant-cash route: there is no path
+   * from here (or anywhere else) that turns a player's item into a live
+   * competition.
    */
-  adminCompleteVisit(
-    submissionId: string,
-    outcome: "cash" | "consignment" | "declined",
-    opts: {
-      finalCashAmount?: number | undefined;
-      finalEntryFee?: number | undefined;
-      finalMinimumPrice?: number | undefined;
-      finalDeadlineDays?: number | undefined;
-    },
-  ) {
+  adminCompleteVisit(submissionId: string, outcome: "cash" | "declined", opts: { finalCashAmount?: number | undefined }) {
     const s = requireSubmission(submissionId);
     if (!s || s.status !== "visit_scheduled" || !s.offer) return;
 
@@ -1867,67 +1808,13 @@ export const rarezy = {
       return;
     }
 
-    if (outcome === "cash") {
-      const amount = opts.finalCashAmount ?? s.offer.cashHigh;
-      const deal = buildCashDeal(s.item, s.offer, amount);
-      set({ records: [deal, ...state.records] });
-      updateSubmission(submissionId, {
-        status: "visit_completed_cash",
-        resultRecordId: deal.id,
-        history: [...s.history, { at: now(), label: `Took the instant cash offer — ${amount.toLocaleString("en-GB")}` }],
-      });
-      return;
-    }
-
-    const listing = buildConsignmentListing(s.item, s.offer, {
-      entryFee: opts.finalEntryFee ?? s.proposedEntryFee ?? 2,
-      minimumPrice: opts.finalMinimumPrice ?? s.proposedMinimumPrice ?? s.offer.suggestedMinimum,
-      deadlineDays: opts.finalDeadlineDays ?? s.proposedDeadlineDays ?? 30,
-      gameId: s.proposedGameId ?? DEFAULT_GAME_ID,
-    });
-    set({ records: [listing, ...state.records] });
+    const amount = opts.finalCashAmount ?? s.offer.cashHigh;
+    const deal = buildCashDeal(s.item, s.offer, amount);
+    set({ records: [deal, ...state.records] });
     updateSubmission(submissionId, {
-      status: "visit_completed_consignment",
-      resultRecordId: listing.id,
-      history: [...s.history, { at: now(), label: "Consigned — collected into the vault for inspection" }],
-    });
-  },
-
-  /** Admin: publishes the in-person inspection writeup — this is what puts a vaulted item live on the marketplace. */
-  adminPublishAnalysisReport(
-    listingId: string,
-    report: { inspectorName: string; summary: string; findings: AnalysisReport["findings"] },
-  ) {
-    const c = state.records.find((r) => r.id === listingId && r.kind === "competition") as
-      | CompetitionListing
-      | undefined;
-    if (!c || c.status !== "authenticating") return;
-    const analysisReport: AnalysisReport = {
-      certificateId: certId(),
-      generatedAt: now(),
-      inspectorName: report.inspectorName,
-      summary: report.summary,
-      findings: report.findings,
-    };
-    set({
-      records: state.records.map((r) =>
-        r.id === listingId && r.kind === "competition"
-          ? {
-              ...r,
-              status: "live",
-              certificateId: analysisReport.certificateId,
-              analysisReport,
-              history: [...r.history, { at: now(), label: "Certificate published — live on the marketplace" }],
-            }
-          : r,
-      ),
-    });
-  },
-
-  toggleWatchlist(listingId: string) {
-    const on = state.watchlist.includes(listingId);
-    set({
-      watchlist: on ? state.watchlist.filter((id_) => id_ !== listingId) : [...state.watchlist, listingId],
+      status: "visit_completed_cash",
+      resultRecordId: deal.id,
+      history: [...s.history, { at: now(), label: `Took the instant cash offer — ${amount.toLocaleString("en-GB")}` }],
     });
   },
 

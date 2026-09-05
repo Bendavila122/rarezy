@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import { BadgeCheck, Heart, ShoppingBag, Ticket, X } from "lucide-react";
+import { BadgeCheck, ShoppingBag, Ticket, X } from "lucide-react";
 import { formatDate, money, titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy } from "@/lib/store";
 import { gameById } from "@/lib/games";
@@ -46,7 +46,7 @@ const SPEC_ROWS: { key: string; label: string }[] = [
 
 export function ItemDetail() {
   const { itemId } = useParams<{ itemId: string }>();
-  const { records, watchlist, currentUser } = useRarezy();
+  const { records, currentUser } = useRarezy();
   const navigate = useNavigate();
   const [activePhoto, setActivePhoto] = useState(0);
   const [qty, setQty] = useState(1);
@@ -72,7 +72,6 @@ export function ItemDetail() {
 
   const dealer = dealerById(c.dealerId);
   const photos = c.item.photos ?? [];
-  const watched = watchlist.includes(c.id);
   const raised = c.entriesSold * c.entryFee;
   const fundedPct = Math.max(4, Math.min(100, Math.round((raised / c.targetMax) * 100)));
   const minimumPct = Math.max(0, Math.min(100, Math.round((c.minimumPrice / c.targetMax) * 100)));
@@ -83,14 +82,6 @@ export function ItemDetail() {
       return;
     }
     rarezy.addToBasket(c.id, qty);
-  };
-
-  const toggleSave = () => {
-    if (!currentUser) {
-      authGate.request("Create a free account to save watches you're keeping an eye on.");
-      return;
-    }
-    rarezy.toggleWatchlist(c.id);
   };
 
   const UNIT_SUFFIX: Record<string, string> = {
@@ -223,25 +214,14 @@ export function ItemDetail() {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={buyTicket}
-              className="flex flex-1 items-center justify-center gap-2 rounded-none bg-brand py-3.5 text-[0.88rem] font-medium tracking-tight text-background"
-            >
-              <ShoppingBag className="h-4 w-4" strokeWidth={2} />
-              Add {qty > 1 ? `${qty} ` : ""}to basket — {money(c.entryFee * qty)}
-            </button>
-            <button
-              type="button"
-              onClick={toggleSave}
-              aria-pressed={watched}
-              aria-label={watched ? "Remove from watchlist" : "Add to watchlist"}
-              className="flex h-[3.1rem] w-[3.1rem] shrink-0 items-center justify-center rounded-none border border-white/10"
-            >
-              <Heart className={watched ? "h-5 w-5 fill-brand text-brand" : "h-5 w-5 text-foreground"} strokeWidth={1.8} />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={buyTicket}
+            className="flex w-full items-center justify-center gap-2 rounded-none bg-brand py-3.5 text-[0.88rem] font-medium tracking-tight text-background"
+          >
+            <ShoppingBag className="h-4 w-4" strokeWidth={2} />
+            Add {qty > 1 ? `${qty} ` : ""}to basket — {money(c.entryFee * qty)}
+          </button>
         </div>
       ) : null}
 

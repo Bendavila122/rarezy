@@ -15,7 +15,6 @@ import { Home } from "@/pages/Home";
 import { ForBusiness } from "@/pages/ForBusiness";
 import { Browse } from "@/pages/Browse";
 import { ItemDetail } from "@/pages/ItemDetail";
-import { Watchlist } from "@/pages/Watchlist";
 import { Basket } from "@/pages/Basket";
 import { Entries } from "@/pages/Entries";
 import { Login } from "@/pages/Login";
@@ -70,7 +69,6 @@ export function App() {
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/item/:itemId" element={<ItemDetail />} />
-          <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/basket" element={<Basket />} />
           <Route path="/entries" element={<Entries />} />
           <Route path="/login" element={<Login />} />
