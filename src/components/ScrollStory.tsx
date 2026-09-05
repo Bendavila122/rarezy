@@ -98,14 +98,14 @@ export function ScrollStory() {
                   type="button"
                   onClick={() => panelRefs.current[1]?.scrollIntoView({ behavior: "smooth" })}
                   aria-label="Scroll to see more"
-                  className="press mt-7 flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06]"
+                  className="press mt-7 flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-full bg-white/20"
                 >
                   <motion.span
                     animate={{ y: [0, 8, 0] }}
                     transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
                     className="flex"
                   >
-                    <ChevronDown className="h-4 w-4 text-white/40" strokeWidth={2} />
+                    <ChevronDown className="h-4 w-4 text-white/80" strokeWidth={2} />
                   </motion.span>
                 </button>
               )}

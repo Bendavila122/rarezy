@@ -14,7 +14,6 @@ import { HowToWinSection } from "@/components/HowToWinSection";
 import { LiveStatsBand } from "@/components/LiveStatsBand";
 import { ReviewsSection } from "@/components/ReviewsSection";
 import { TravelAdsSection } from "@/components/TravelAdsSection";
-import { ScrollHint } from "@/components/ScrollHint";
 
 export function Home() {
   const { currentUser } = useRarezy();
@@ -59,7 +58,6 @@ export function Home() {
       <ReviewsSection />
       <FaqSection />
       <TravelAdsSection />
-      <ScrollHint />
 
       {playingGame &&
         createPortal(
