@@ -30,6 +30,7 @@ import { Certificate } from "@/pages/Certificate";
 import { SellerDashboard } from "@/pages/SellerDashboard";
 import { SellerNewCompetition } from "@/pages/SellerNewCompetition";
 import { SellerStorefront } from "@/pages/SellerStorefront";
+import { DealerStorefront } from "@/pages/DealerStorefront";
 import { CompetitionDetail } from "@/pages/CompetitionDetail";
 import { MyWins } from "@/pages/MyWins";
 import { MarketingCentre } from "@/pages/MarketingCentre";
@@ -83,6 +84,7 @@ export function App() {
           <Route path="/seller" element={<SellerDashboard />} />
           <Route path="/seller/new" element={<SellerNewCompetition />} />
           <Route path="/seller/:sellerId" element={<SellerStorefront />} />
+          <Route path="/dealer/:dealerId" element={<DealerStorefront />} />
           <Route path="/c/:competitionId" element={<CompetitionDetail />} />
           <Route path="/wins" element={<MyWins />} />
           <Route path="/seller/marketing/:competitionId" element={<MarketingCentre />} />

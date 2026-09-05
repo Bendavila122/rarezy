@@ -4,11 +4,13 @@ import { BadgeCheck, Heart, ShoppingBag, Ticket, X } from "lucide-react";
 import { formatDate, money, titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy } from "@/lib/store";
 import { gameById } from "@/lib/games";
+import { dealerById } from "@/lib/dealers";
 import { authGate } from "@/lib/authGate";
 import { LeaderboardView } from "@/components/LeaderboardView";
 import { CountdownBar } from "@/components/Countdown";
 import { FreeTrial } from "@/components/FreeTrial";
 import { CertificateOfAuthenticity } from "@/components/CertificateOfAuthenticity";
+import { DealerCard, HouseStockCard } from "@/components/DealerCard";
 
 const labelCls = "text-[0.62rem] uppercase tracking-[0.24em] text-muted";
 
@@ -67,6 +69,7 @@ export function ItemDetail() {
     );
   }
 
+  const dealer = dealerById(c.dealerId);
   const photos = c.item.photos ?? [];
   const watched = watchlist.includes(c.id);
   const raised = c.entriesSold * c.entryFee;
@@ -248,6 +251,11 @@ export function ItemDetail() {
           You have {c.attemptsRemaining} attempt{c.attemptsRemaining > 1 ? "s" : ""} to play — go to your entries
         </Link>
       )}
+
+      <div className="mt-9">
+        <p className={labelCls}>Sold by</p>
+        <div className="mt-3">{dealer ? <DealerCard dealer={dealer} /> : <HouseStockCard />}</div>
+      </div>
 
       {c.item.description && (
         <>

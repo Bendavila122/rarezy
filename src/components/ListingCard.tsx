@@ -1,16 +1,23 @@
 import { Link } from "react-router-dom";
-import { Flame, Heart, ShoppingBag } from "lucide-react";
+import { Flame, Heart, Sparkles, ShoppingBag, TimerReset } from "lucide-react";
 import { formatDate, money, titleOf } from "@/lib/marketplace";
 import { rarezy, useRarezy, type CompetitionListing } from "@/lib/store";
 import { authGate } from "@/lib/authGate";
 import { browseState } from "@/lib/browseState";
 import { CountdownBadge } from "@/components/Countdown";
 import { TiltCard } from "@/components/TiltCard";
+import { gameById } from "@/lib/games";
+import { gameIcon } from "@/components/GameRegistry";
+
+const DAY_MS = 86_400_000;
 
 export function ListingCard({ listing: c }: { listing: CompetitionListing }) {
   const { watchlist, currentUser } = useRarezy();
   const watched = watchlist.includes(c.id);
   const popular = c.entriesTotal > 0 && c.entriesSold / c.entriesTotal >= 0.6;
+  const listedToday = Date.now() - new Date(c.createdAt).getTime() < DAY_MS;
+  const endingToday = c.status === "live" && new Date(c.deadlineAt).getTime() - Date.now() < DAY_MS;
+  const GameIcon = gameIcon(c.gameId);
 
   return (
     <TiltCard max={8} className="h-full">
@@ -28,14 +35,34 @@ export function ListingCard({ listing: c }: { listing: CompetitionListing }) {
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
-            {popular && (
-              <span className="glass-dark absolute left-2.5 top-2.5 flex items-center gap-1 rounded-none px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide">
-                <Flame className="h-3 w-3 text-amber-400" strokeWidth={2.4} />
-                Popular
-              </span>
+            {(endingToday || listedToday || popular) && (
+              <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
+                {endingToday && (
+                  <span className="flex items-center gap-1 rounded-none bg-red-500 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide text-white">
+                    <TimerReset className="h-3 w-3" strokeWidth={2.4} />
+                    Ending today
+                  </span>
+                )}
+                {listedToday && (
+                  <span className="glass-dark flex items-center gap-1 rounded-none px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide">
+                    <Sparkles className="h-3 w-3 text-mint" strokeWidth={2.4} />
+                    Listed today
+                  </span>
+                )}
+                {popular && (
+                  <span className="glass-dark flex items-center gap-1 rounded-none px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wide">
+                    <Flame className="h-3 w-3 text-amber-400" strokeWidth={2.4} />
+                    Popular
+                  </span>
+                )}
+              </div>
             )}
             <span className="glass-dark absolute bottom-2.5 left-2.5 rounded-none px-2.5 py-1 text-[0.78rem] font-semibold tracking-tight">
               {money(c.entryFee)}
+            </span>
+            <span className="glass-dark absolute bottom-2.5 right-2.5 flex items-center gap-1 rounded-none px-2.5 py-1 text-[0.64rem] font-medium tracking-tight">
+              <GameIcon className="h-3 w-3" strokeWidth={2.2} />
+              {gameById(c.gameId).name.replace("Rarezy ", "")}
             </span>
           </div>
         )}

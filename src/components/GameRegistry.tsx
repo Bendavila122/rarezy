@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import { Brain, Layers3, Search, Target, Zap } from "lucide-react";
 import { type GameId, gameById } from "@/lib/games";
 import { SkillGame } from "@/components/SkillGame";
 import { GamePreview } from "@/components/GamePreview";
@@ -27,4 +28,17 @@ const GAME_COMPONENTS: Record<GameId, GameModule> = {
 
 export function gameModule(id: GameId | string | undefined): GameModule {
   return GAME_COMPONENTS[gameById(id).id];
+}
+
+/** One icon per game, for compact badges on listing cards and elsewhere — kept here since `lib/games.ts` stays JSX-free. */
+export const GAME_ICONS: Record<GameId, ComponentType<{ className?: string; strokeWidth?: number }>> = {
+  merge: Layers3,
+  reflex: Zap,
+  precision: Target,
+  memory: Brain,
+  hunt: Search,
+};
+
+export function gameIcon(id: GameId | string | undefined) {
+  return GAME_ICONS[gameById(id).id];
 }

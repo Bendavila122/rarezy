@@ -9,6 +9,7 @@ import {
   type Valuation,
 } from "./marketplace";
 import { GAMES, DEFAULT_GAME_ID, type GameId } from "./games";
+import { DEALERS } from "./dealers";
 
 export type { GameId };
 
@@ -60,8 +61,10 @@ export type CompetitionListing = {
   /** Top of the leaderboard — not every entrant, just who's in contention. */
   leaderboard: LeaderboardEntry[];
   winnerName?: string | undefined;
-  /** Seeded stock Rarezy already owns — bought back and re-listed for the house. */
+  /** Seeded stock Rarezy already owns — bought back and re-listed for the house. Mutually exclusive with `dealerId` in practice: house stock has no dealer, dealer stock isn't house stock. */
   isHouseStock?: boolean | undefined;
+  /** The verified dealer whose stock this is — see `@/lib/dealers`. Undefined means this is Rarezy's own house stock. */
+  dealerId?: string | undefined;
   history: HistoryEntry[];
 };
 
@@ -135,6 +138,12 @@ function nextSeedGameId(): GameId {
   return GAMES[seedGameCounter++ % GAMES.length]!.id;
 }
 
+/** Gives seed listings a real spread of dealers rather than attributing every one to the same shop. */
+let seedDealerCounter = 0;
+function nextSeedDealerId(): string {
+  return DEALERS[seedDealerCounter++ % DEALERS.length]!.id;
+}
+
 function seedListing(
   item: LuxuryItem,
   config: {
@@ -145,7 +154,8 @@ function seedListing(
     entriesSold: number;
     daysElapsed: number;
     leaderboard: LeaderboardEntry[];
-    isHouseStock?: boolean;
+    isHouseStock?: boolean | undefined;
+    dealerId?: string | undefined;
     gameId?: GameId;
   },
 ): CompetitionListing {
@@ -174,6 +184,7 @@ function seedListing(
     attemptsRemaining: 0,
     leaderboard: config.leaderboard,
     isHouseStock: config.isHouseStock,
+    dealerId: config.dealerId,
     history: [{ at: createdAt, label: "Authenticated by our partner watch specialist and listed" }],
   };
 }
@@ -217,10 +228,22 @@ function board(count: number, top: number): LeaderboardEntry[] {
   return entries;
 }
 
-/** Wires up a house-stock listing from a watch and a few tuning knobs, deriving ticket price and minimum the same way the Sell flow would. */
+/**
+ * Wires up a listing from a watch and a few tuning knobs, deriving ticket
+ * price and minimum the same way the Sell flow would. Attributed to a
+ * rotating verified dealer by default (`@/lib/dealers`) — pass
+ * `houseStock: true` for the handful of pieces that are genuinely Rarezy's
+ * own vault stock instead of a third party's.
+ */
 function autoListing(
   item: LuxuryItem,
-  opts: { deadlineDays: number; daysElapsed: number; soldRatio: number; leaderboard: LeaderboardEntry[] },
+  opts: {
+    deadlineDays: number;
+    daysElapsed: number;
+    soldRatio: number;
+    leaderboard: LeaderboardEntry[];
+    houseStock?: boolean;
+  },
 ): CompetitionListing {
   const offer = estimateValue(item);
   const entryFee = tierEntryFee(item.purchasePrice);
@@ -233,7 +256,8 @@ function autoListing(
     entriesSold: Math.round(entriesTotal * opts.soldRatio),
     daysElapsed: opts.daysElapsed,
     leaderboard: opts.leaderboard,
-    isHouseStock: true,
+    isHouseStock: opts.houseStock ? true : undefined,
+    dealerId: opts.houseStock ? undefined : nextSeedDealerId(),
   });
 }
 
@@ -312,7 +336,7 @@ function seedRecords(): SellRecord[] {
         lugWidthMm: 20,
         accessories: "Original box, original papers",
       },
-      { deadlineDays: 30, daysElapsed: 21, soldRatio: 0.7, leaderboard: board(24, 986) },
+      { deadlineDays: 30, daysElapsed: 21, soldRatio: 0.7, leaderboard: board(24, 986), houseStock: true },
     ),
     autoListing(
       {
@@ -335,7 +359,7 @@ function seedRecords(): SellRecord[] {
         lugWidthMm: 20,
         accessories: "Original box, original papers",
       },
-      { deadlineDays: 21, daysElapsed: 6, soldRatio: 0.35, leaderboard: board(14, 940) },
+      { deadlineDays: 21, daysElapsed: 6, soldRatio: 0.35, leaderboard: board(14, 940), houseStock: true },
     ),
     autoListing(
       {
@@ -1553,7 +1577,7 @@ function seedRecords(): SellRecord[] {
   return [...listings, ...otherCategoryListings, ...wonListings];
 }
 
-const STORAGE_KEY = "rarezy.state.v16";
+const STORAGE_KEY = "rarezy.state.v17";
 
 function load(): State {
   try {
