@@ -3,10 +3,15 @@ import { Star } from "lucide-react";
 
 const headingCls = "text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white/40";
 
-/** Genuinely useful destinations for a player/guest — the only audience this footer ever renders for (admin/seller get their own nav entirely). Nothing corporate or repeated from elsewhere in the header. */
+/**
+ * This footer only ever renders for a signed-out guest (see App.tsx) —
+ * player accounts are app-like and nav-driven, with no footer at all, and
+ * admin/seller get their own header entirely. So every link here has to
+ * actually work without an account: Browse and Sell both sit behind a
+ * sign-up wall, so they're deliberately left out.
+ */
 const QUICK_LINKS = [
-  { label: "Browse competitions", to: "/browse" },
-  { label: "Sell to Rarezy", to: "/sell" },
+  { label: "Rarezy for Businesses", to: "/for-business" },
   { label: "How it works", to: "/how-it-works" },
   { label: "Help centre", to: "/help" },
 ];
@@ -57,9 +62,25 @@ export function Footer() {
               <span className="font-bold text-white">4.8</span> · Trustpilot
             </p>
           </div>
+
+          <div className="mt-5 flex items-center gap-2">
+            <Link
+              to="/login"
+              className="press rounded-full border border-white/15 px-4 py-2 text-[0.8rem] font-medium tracking-tight text-white/85 hover:border-white/30"
+            >
+              Log in
+            </Link>
+            <Link
+              to="/signup"
+              state={{ accountType: "competitor" }}
+              className="press rounded-full bg-mint px-4 py-2 text-[0.8rem] font-semibold tracking-tight text-brand-deep"
+            >
+              Sign up
+            </Link>
+          </div>
         </div>
 
-        {/* Quick links — player-relevant navigation only */}
+        {/* Quick links — only ever pages that actually work without an account */}
         <div className="flex flex-col items-center gap-3.5 sm:items-start">
           <p className={headingCls}>Quick links</p>
           {QUICK_LINKS.map((l) => (

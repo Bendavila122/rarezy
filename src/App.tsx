@@ -96,7 +96,8 @@ export function App() {
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </div>
-      {!currentUser?.isAdmin && !currentUser?.isSeller && <Footer />}
+      {/* Player accounts are app-like (nav-driven, no footer needed) — this only ever shows for a signed-out guest. */}
+      {!currentUser && <Footer />}
       <AuthGateRedirect />
       <CookieBanner />
       <Analytics />
